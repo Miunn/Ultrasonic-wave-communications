@@ -1,5 +1,6 @@
 from typing import List
 import numpy as np
+import sys
 
 def psk_modulation(bits: List[int]):
     len_bits = len(bits)
@@ -17,3 +18,12 @@ def psk_modulation(bits: List[int]):
             assert bits[i] == 1
             modulated[i * pts_bit:(i + 1) * pts_bit] = 1
     return modulated * c_t
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        bits = [int(i) for i in sys.argv[1]]
+        
+        import matplotlib.pyplot as plt
+        linspace = np.linspace(0, len(bits), len(bits) * 1000)
+        plt.plot(linspace, psk_modulation(bits))
+        plt.show()
