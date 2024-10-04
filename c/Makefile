@@ -23,11 +23,11 @@ OBJECTS := $(patsubst $(SDIR)/%.c, $(BUILDDIR)/$(BINARY)/%.o, $(SOURCES))
 all: $(BINARY) 
 
 $(BINARY): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -L$(CUSTOMLIBDIR) -o $@ $(LIB) -D$(MAINFILE)
+	$(CC) $(CFLAGS) $(OBJECTS) -L$(CUSTOMLIBDIR) -o $@ $(LIB) -D$(MAINFILE) -lm
 
 $(BUILDDIR)/$(BINARY)/%.o: $(SDIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -I$(HDIR) -c $< -o $@ -D$(MAINFILE)
+	$(CC) $(CFLAGS) -I$(HDIR) -c $< -o $@ -D$(MAINFILE) -lm
 
 full-clean: clean
 	rm -rf $(foreach dir,$(wildcard $(BUILDDIR)/*), $(dir)) $(BINARY)
