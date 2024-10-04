@@ -22,8 +22,9 @@ def psk_modulation(bits: List[int]):
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         bits = [int(i) for i in sys.argv[1]]
-        
+        mod = psk_modulation(bits)
+
         import matplotlib.pyplot as plt
         linspace = np.linspace(0, len(bits), len(bits) * 1000)
-        plt.plot(linspace, psk_modulation(bits))
+        plt.plot(linspace, mod)
         plt.show()
