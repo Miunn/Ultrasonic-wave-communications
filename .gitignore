@@ -1,5 +1,6 @@
 .vscode
 
+
 lib64
 share
 pyvenv.cfg
@@ -8,3 +9,4 @@ c/bin/
 c/.clangd
 c/project
 
+venv
