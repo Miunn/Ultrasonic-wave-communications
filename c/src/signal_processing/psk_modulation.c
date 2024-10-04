@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-#include "pbPlots.h"
-#include "supportLib.h"
-#include "psk_modulation.h"
+#include "signal_processing/pbPlots.h"
+#include "signal_processing/supportLib.h"
+#include "signal_processing/psk_modulation.h"
 
 #define BUFF_SIZE 16384
 
@@ -23,6 +23,7 @@ double* psk_modulation(int* bits, int n)
     return signal;
 }
 
+#ifdef MAIN_TEST_MODULATION
 int main()
 {
     int bits[8] = {1, 0, 1, 1, 0, 1, 0, 0};
@@ -49,3 +50,4 @@ int main()
     free(signal);
     return 0;
 }
+#endif
