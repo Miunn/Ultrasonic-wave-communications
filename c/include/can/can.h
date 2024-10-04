@@ -10,7 +10,7 @@
  * @return _frame the resulting can frame
  * @return the length of the resulting frame  (-1 on error)
  */
-int createCanMessage(int can_id, char *data, int data_len, char *_frame);
+int createCanMessage(int can_id, short *data, int data_len, short **_frame);
 
 /**
  * Decode the can passed by refernce
@@ -23,7 +23,7 @@ int createCanMessage(int can_id, char *data, int data_len, char *_frame);
  * @return _can_id the IDENT of the message
  * @returns 0 on success, 1 on error
  */
-int decodeCanMessage(char *frame_buffer, int f_buff_len, char *_data,
+int decodeCanMessage(short *frame_buffer, int f_buff_len, short **_data,
                      int *_data_len, int *_can_id);
 
 #endif
