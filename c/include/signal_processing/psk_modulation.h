@@ -11,5 +11,6 @@
 #define BUFF_SIZE 16384
 
 double* psk_modulation(int* bits, int n);
+int test_modulation();
 
 #endif
