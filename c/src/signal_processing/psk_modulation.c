@@ -23,8 +23,7 @@ double* psk_modulation(int* bits, int n)
     return signal;
 }
 
-#ifdef MAIN_TEST_MODULATION
-int main()
+int test_modulation()
 {
     int bits[8] = {1, 0, 1, 1, 0, 1, 0, 0};
     
@@ -48,6 +47,13 @@ int main()
     free(pngData);
     free(t);
     free(signal);
+    return 0;
+}
+
+#ifdef MAIN_TEST_MODULATION
+int main()
+{
+    test_modulation();
     return 0;
 }
 #endif

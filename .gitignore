@@ -9,4 +9,4 @@ c/bin/
 c/.clangd
 c/project
 
-venv
+venv/
