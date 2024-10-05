@@ -2,6 +2,7 @@ from typing import List
 import numpy as np
 from scipy.signal import butter, lfilter
 import sys
+import matplotlib.pyplot as plt
 
 PTS_BITS = 1000
 
@@ -32,6 +33,17 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     y = lfilter(b, a, data)
     return y
 
+def decision(demodulated: np.ndarray):
+    bits: List[int] = []
+    
+    for i in range(1, len(demodulated)//PTS_BITS+1):
+        if demodulated[i * PTS_BITS - 1] < 0:
+            bits.append(0)
+        else:
+            bits.append(1)
+
+    return bits
+
 def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
     len_modulated = len(modulated)
     linspace = np.linspace(0, len_modulated, len_modulated)
@@ -43,17 +55,22 @@ def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         bits = [int(i) for i in sys.argv[1]]
+        linspace = np.linspace(0, len(bits), len(bits) * 1000)
         mod = psk_modulation(bits)
         
-        demod = bpsk_demodulation(mod, 5 * 5)
+        #plt.plot(linspace, mod)
+        
+        demod = bpsk_demodulation(mod, len(bits) * 5)
         #demod = butter_lowpass_filter(demod, 0.1, 1000)
         
-        import matplotlib.pyplot as plt
-        linspace = np.linspace(0, len(bits), len(bits) * 1000)
         
         plt.plot(linspace, demod)
         
-        bin_ = butter_lowpass_filter(demod, 1, 1000)
+        lpf = butter_lowpass_filter(demod, 3, 1000, order=3)
         
-        plt.plot(linspace, bin_)
+        bits = decision(lpf)
+        print(''.join([str(i) for i in bits]))
+        print(''.join([str(i) for i in bits]) == sys.argv[1])
+        
+        plt.plot(linspace, lpf)
         plt.show()
