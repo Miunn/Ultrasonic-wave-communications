@@ -14,5 +14,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: make-all
-      working-directory: ./app
+      working-directory: ./c
       run: make all MAINFILE=MAIN_ALL
