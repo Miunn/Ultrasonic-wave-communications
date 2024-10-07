@@ -5,12 +5,13 @@ import sys
 import matplotlib.pyplot as plt
 
 PTS_BITS = 1000
+FREQ = 5
 
 def psk_modulation(bits: List[int]):
     len_bits = len(bits)
     linspace = np.linspace(0, len_bits, len_bits * PTS_BITS)
 
-    c_t = np.cos(5 * 2 * np.pi * linspace + np.pi/2)
+    c_t = np.cos(FREQ * 2 * np.pi * linspace + np.pi/2)
 
     # PSK Modulation
     modulated = np.zeros(len_bits * PTS_BITS)
@@ -48,19 +49,20 @@ def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
     len_modulated = len(modulated)
     linspace = np.linspace(0, len_modulated, len_modulated)
 
-    c = np.cos(freq * 2 * np.pi * linspace + np.pi/2)
+    c = np.cos(len_modulated / PTS_BITS * freq * 2 * np.pi * linspace + np.pi/2)
     
     return modulated * c
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         bits = [int(i) for i in sys.argv[1]]
+        print(len(bits))
         linspace = np.linspace(0, len(bits), len(bits) * 1000)
         mod = psk_modulation(bits)
         
         #plt.plot(linspace, mod)
         
-        demod = bpsk_demodulation(mod, len(bits) * 5)
+        demod = bpsk_demodulation(mod, FREQ)
         #demod = butter_lowpass_filter(demod, 0.1, 1000)
         
         
