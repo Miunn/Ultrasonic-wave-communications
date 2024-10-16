@@ -17,7 +17,7 @@ int createCanMessage(int can_id, short *data, int data_len,
     return -1;
   }
   // allocations ------------------------------
-  canMessage preframe = (canMessage)calloc(sizeof(short), (43 + data_len));
+  short *preframe = (short *)calloc(sizeof(short), (43 + data_len));
   *_frame = (canMessage)calloc(sizeof(short), (43 + data_len + data_len / 3));
   if (*_frame == NULL || preframe == NULL) {
     return -2;
@@ -71,6 +71,22 @@ int createCanMessage(int can_id, short *data, int data_len,
 
 int decodeCanMessage(canMessage frame_buffer, int f_buff_len, short **_data,
                      int *_data_len, int *_can_id) {
+  // Allocations
+  short *after_buff = (short *)calloc(sizeof(short), f_buff_len);
+  int r_length = f_buff_len;
+  // TODO seeking end of frame
+
+  // TODO Frame Integrity (removal of bit stuffing)
+  for (int i = 0; i < f_buff_len;) {
+  }
+  // TODO Frame Verification
+
+  // TODO getting IDENT
+
+  // TODO getting DATA
+  *_data = (short *)calloc(sizeof(short), f_buff_len - 43);
+
+  free(after_buff);
   return 1;
 }
 
