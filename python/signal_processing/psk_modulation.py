@@ -49,7 +49,7 @@ def decision(demodulated: np.ndarray):
 def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
     len_modulated = len(modulated)
     print("Modulated len:", len_modulated)
-    f = 2 * 41 * np.pi
+    f = 2 * (0.002402) * np.pi
     linspace = np.linspace(0, len_modulated, len_modulated)
     c = np.linspace(0, len_modulated, len_modulated)
     for i in range(len_modulated):
@@ -64,43 +64,36 @@ def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
     #c = np.cos((len_modulated / (PTS_BITS) * freq * 2 * np.pi * linspace + np.pi/2))
     #c = np.cos(len_modulated * 15 * freq * 2 * np.pi * linspace + np.pi/2)
     #c = np.cos(linspace)
-    plt.plot(c)
+    
 
     #plt.plot(c)
     
     return modulated * c
-
-def get_regenerating(modulated: np.ndarray):
-    min_ = min(modulated)
-    max_ = max(modulated)
-
-
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         bits = [int(i) for i in sys.argv[1]]
         print(len(bits))
         mod = psk_modulation(bits)
-        
+    else:
         with open("../pitayareadings.bin", "r") as f:
             mod = [float(s) for s in f.readline().split()]
+    plt.plot(mod)
+        
+    #plt.plot(linspace, mod)
+        
+        
+    demod = bpsk_demodulation(mod)
+    #demod = butter_lowpass_filter(demod, 0.1, 1000)
+    plt.plot(demod)
 
-        plt.plot(mod)
-        
-        #plt.plot(linspace, mod)
-        
-        
-        demod = bpsk_demodulation(mod)
-        #demod = butter_lowpass_filter(demod, 0.1, 1000)
-        
-        plt.show()
-        plt.plot(demod)
-        
-        lpf = butter_lowpass_filter(demod, 1, 1000, order=5)
-        
-        bits = decision(lpf)
-        print(''.join([str(i) for i in bits]))
-        print(''.join([str(i) for i in bits]) == sys.argv[1])
-        
-        plt.plot(lpf)
-        plt.show()
+    plt.show()
+
+    lpf = butter_lowpass_filter(demod, 1, 1000, order=5)
+
+    bits = decision(lpf)
+    print(''.join([str(i) for i in bits]))
+    #print(''.join([str(i) for i in bits]) == sys.argv[1])
+
+    plt.plot(lpf)
+    plt.show()

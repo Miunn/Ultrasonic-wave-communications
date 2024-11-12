@@ -13,7 +13,7 @@ rp_s = scpi.scpi(IP)
 rp_s.tx_txt('ACQ:RST')
 
 dec = 1
-trig_lvl = -0.2
+trig_lvl = 0.4
 
 # Function for configuring Acquisition
 rp_s.acq_set(dec, trig_lvl, units='volts', sample_format='bin', trig_delay=8000)
@@ -36,7 +36,7 @@ while 1:
 # function for Data Acquisition
 buff = rp_s.acq_data(1, binary=True, convert=True)
 
-#with open('pitayareadings.bin', 'w') as f:
+#with open('pitayareadings-burst.bin', 'w') as f:
 #    f.write(' '.join([str(f) for f in buff]))
 
 print(buff)
@@ -44,14 +44,14 @@ import numpy as np
 plot.plot(buff)
 
 demodulated = bpsk_demodulation(buff, freq=5)
-plot.show()
 plot.plot(demodulated)
-#lpf = butter_lowpass_filter(demodulated, 3, 1000, order=3)
 
-#bits = decision(lpf)
-#print(''.join([str(i) for i in bits]))
+lpf = butter_lowpass_filter(demodulated, 3, 1000, order=3)
+
+bits = decision(lpf)
+print(''.join([str(i) for i in bits]))
         
-#plot.plot(lpf)
+plot.plot(lpf)
 
 rp_s.close()
 
