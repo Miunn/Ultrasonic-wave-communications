@@ -9,19 +9,29 @@ IP = '10.42.0.125'
 rp_s = scpi.scpi(IP)
 
 if len(sys.argv) >= 2:
+    if sys.argv[1] == 'stop':
+        rp_s.tx_txt('OUTPUT1:STATE OFF')
+        rp_s.close()
+        sys.exit(0)
+
+    if sys.argv[1] != 'sine':
         bits = [int(i) for i in sys.argv[1]]
         print(len(bits))
         mod = psk_modulation(bits, freq=5)
         print(len(mod))
+        plt.plot(mod)
+
 else:
     print("Provide a bit sequence as argument")
     sys.exit(1)
 
-plt.plot(mod)
 
 rp_s.tx_txt('GEN:RST')
 
-rp_s.sour_set(1, 'arbitrary', 1, 300000/(len(bits)*5), data=mod, burst=True)
+if sys.argv[1] == 'sine':
+    rp_s.sour_set(1, 'sine', 1, 300000, nor=2)
+else:
+    rp_s.sour_set(1, 'arbitrary', 1, 300000/(len(bits)*5), data=mod, burst=True)
 
 rp_s.tx_txt('OUTPUT1:STATE ON')
 rp_s.tx_txt('SOUR1:TRig:INT')
@@ -29,7 +39,7 @@ rp_s.tx_txt('SOUR1:TRig:INT')
 
 rp_s.close()
 
-plt.show()
+#plt.show()
 
 
 """
