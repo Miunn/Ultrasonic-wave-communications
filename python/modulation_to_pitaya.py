@@ -18,9 +18,7 @@ if len(sys.argv) >= 2:
         bits = [int(i) for i in sys.argv[1]]
         print(len(bits))
         mod = psk_modulation(bits, freq=5)
-        print(len(mod))
-        plt.plot(mod)
-
+        
 else:
     print("Provide a bit sequence as argument")
     sys.exit(1)
@@ -29,9 +27,11 @@ else:
 rp_s.tx_txt('GEN:RST')
 
 if sys.argv[1] == 'sine':
-    rp_s.sour_set(1, 'sine', 1, 300000, nor=2)
+    rp_s.sour_set(1, 'sine', 1, 250000, nor=2)
 else:
-    rp_s.sour_set(1, 'arbitrary', 1, 300000/(len(bits)*5), data=mod, burst=True)
+    print(len(mod))
+    rp_s.sour_set(1, 'arbitrary', 1, 250000/(len(bits)*5), data=mod, burst=True)
+    plt.plot(mod)
 
 rp_s.tx_txt('OUTPUT1:STATE ON')
 rp_s.tx_txt('SOUR1:TRig:INT')
@@ -39,7 +39,7 @@ rp_s.tx_txt('SOUR1:TRig:INT')
 
 rp_s.close()
 
-#plt.show()
+plt.show()
 
 
 """

@@ -49,7 +49,8 @@ def decision(demodulated: np.ndarray):
 def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
     len_modulated = len(modulated)
     print("Modulated len:", len_modulated)
-    f = 2 * (0.002402) * np.pi
+    #f = 2 * (0.002402) * np.pi
+    f = 2 * (0.1275) * np.pi
     linspace = np.linspace(0, len_modulated, len_modulated)
     c = np.linspace(0, len_modulated, len_modulated)
     for i in range(len_modulated):
@@ -57,10 +58,10 @@ def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
         c[i] = math.cos(f * x + np.pi/2)
     #plt.plot(linspace)
     #linspace = f * linspace + np.pi/2
-    print(linspace)
     #plt.title("Linspace")
     #plt.show()
 
+    
     #c = np.cos((len_modulated / (PTS_BITS) * freq * 2 * np.pi * linspace + np.pi/2))
     #c = np.cos(len_modulated * 15 * freq * 2 * np.pi * linspace + np.pi/2)
     #c = np.cos(linspace)
