@@ -10,3 +10,7 @@ c/.clangd
 c/project
 
 venv/
+.venv
+python/frames/__pycache__
+python/pitaya
+python/signal_processing
