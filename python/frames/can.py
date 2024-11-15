@@ -1,8 +1,6 @@
 import numpy as np
 from math import ceil
 
-from numpy.core.multiarray import concatenate
-
 
 class CanFrame:
     ident: int
@@ -18,10 +16,13 @@ class CanFrame:
         self.request = request
         self.ack = ack
 
-    def toIntArray(self) -> np.ndarray:
+    def ToIntArray(self) -> np.ndarray:
         if len(self.data) > 64:
             raise ValueError("data len cannot be more than 64 bits")
-        tmp = np.zeros(108, int)
+        return self.UNSAFE_ToIntArray()
+
+    def UNSAFE_ToIntArray(self) -> np.ndarray:
+        tmp = np.zeros(58 + len(self.data), int)
         # arbitration field
         id = self.ident
         for i in range(0, 11):
@@ -35,6 +36,7 @@ class CanFrame:
         tmp[15] = 0
         # DLC quad
         dlc = ceil(len(self.data) / 8)
+        # print(dlc)
         for i in range(0, 4):
             tmp[16 + i] = dlc % 2
             dlc = dlc // 2
@@ -68,7 +70,7 @@ class CanFrame:
         # Bit Stuffing
         out = self.BitStuff(tmp[: cursor - 13])
 
-        return concatenate((out, tmp[cursor - 13 : cursor]))
+        return np.concatenate((out, tmp[cursor - 13 : cursor]))
 
     @staticmethod
     def FromIntArray(array: np.ndarray) -> "CanFrame":
@@ -100,6 +102,8 @@ class CanFrame:
         data_len = 0
         for i in range(19, 15, -1):
             data_len = data_len * 2 + unstuffed[i]
+
+        # print(data_len)
 
         # DATA
         data = np.zeros(data_len * 8, int)
@@ -198,5 +202,5 @@ class CanFrame:
 if __name__ == "__main__":
     c = CanFrame(0x123, np.array([0, 0, 0, 0, 1, 0, 1, 0], int))
     print("Generating :", c)
-    unc = CanFrame.FromIntArray(c.toIntArray())
+    unc = CanFrame.FromIntArray(c.ToIntArray())
     print("Decrypting :", c)

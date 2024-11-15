@@ -12,7 +12,14 @@ class AESEncryption:
 
     @staticmethod
     def IntArrayToBytes(array: np.ndarray) -> bytes:
-        padded_array = np.concatenate((array, np.array([0] * (8 - (len(array) % 8)))))
+        # print("array :", array)
+        if len(array) % 8 == 0:
+            padded_array = array
+        else:
+            padded_array = np.concatenate(
+                (array, np.array([0] * (8 - (len(array) % 8))))
+            )
+        # print("padded_array :", padded_array)
         result: bytes = b""
         for i in range(0, len(array), 8):
             byte: int = 0x00
@@ -32,19 +39,18 @@ class AESEncryption:
                 one_byte >>= 1
         return result
 
-    def Encrypt(self, data: bytes) -> tuple[bytes, bytes, bytes]:
-        cipher = AES.new(self.key, AES.MODE_EAX)
+    def Encrypt(self, data: bytes) -> tuple[bytes, bytes]:
+        cipher = AES.new(self.key, AES.MODE_OFB)
 
-        nonce = cipher.nonce
+        iv = cipher.iv
 
-        ciphertext, tag = cipher.encrypt_and_digest(data)
+        ciphertext = cipher.encrypt(data)
 
-        return ciphertext, tag, nonce
+        return ciphertext, bytes(iv)
 
-    def Decrypt(self, data: bytes, tag: bytes, nonce: bytes) -> bytes:
-        cipher = AES.new(self.key, AES.MODE_EAX, nonce=nonce)
+    def Decrypt(self, data: bytes, iv: bytes) -> bytes:
+        cipher = AES.new(self.key, AES.MODE_OFB, iv=iv)
         plaintext = cipher.decrypt(data)
-        cipher.verify(tag)
         return plaintext
 
     @staticmethod
@@ -58,7 +64,7 @@ class AESEncryption:
 if __name__ == "__main__":
     stage0 = can.CanFrame(
         0x123, np.array([0, 1, 1, 1, 0, 1, 0, 1, 0, 1], int)
-    ).toIntArray()
+    ).ToIntArray()
     print(stage0)
     encoded_frame = AESEncryption.IntArrayToBytes(stage0)
     print(encoded_frame)
@@ -71,9 +77,11 @@ if __name__ == "__main__":
 
     crypter = AESEncryption(b"#cauhet#saucisses#onestpaschezlesbobos"[:16])
 
-    encrypted_frame, tag, nonce = crypter.Encrypt(encoded_frame)
+    encrypted_frame, iv = crypter.Encrypt(encoded_frame)
 
-    decrypted_frame = crypter.Decrypt(encrypted_frame, tag, nonce)
+    print(len(iv))
+
+    decrypted_frame = crypter.Decrypt(encrypted_frame, iv)
 
     stage2 = AESEncryption.CleanTrailingZeros(
         AESEncryption.BytesToIntArray(encoded_frame)
