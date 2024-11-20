@@ -28,11 +28,14 @@ class Write_Pitaya:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def write(self, data, channel=1, wave_form='arbitrary', freq=2000, volt=1, burst=True):
+    def write(self, data, len_data, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
         self.rp_s.tx_txt('GEN:RST')
-        self.rp_s.sour_set(channel, wave_form, volt, freq/(len(bits)*5), data=data, burst=burst)
-        self.rp_s.tx_txt('OUTPUT1:STATE ON')
-        self.rp_s.tx_txt('SOUR1:TRig:INT')
+        if wave_form != 'arbitrary':
+            self.rp_s.sour_set(channel, wave_form, volt, freq, burst=burst)
+        else:
+            self.rp_s.sour_set(channel, wave_form, volt, freq/(len_data*5), data=data, burst=burst)
+        self.rp_s.tx_txt(f'OUTPUT{channel}:STATE ON')
+        self.rp_s.tx_txt(f'SOUR{channel}:TRig:INT')
         
         self.close()
 
@@ -42,14 +45,14 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if sys.argv[1] == 'sine':
-        wp = Write_Pitaya()
-        wp.write([], channel=1, wave_form='sine', freq=250000, burst=False)
+        wp = Write_Pitaya(ip='10.42.0.125')
+        wp.write([], 1, channel=1, wave_form='sine', freq=250000, burst=False)
         sys.exit(0)
     
     bits = [int(i) for i in sys.argv[1]]
     mod = psk_modulation(bits, freq=5)
-    wp = Write_Pitaya()
-    wp.write(mod, channel=1, wave_form='arbitrary', freq=250000, burst=True)
+    wp = Write_Pitaya(ip='10.42.0.125')
+    wp.write(mod, len(bits), channel=1, wave_form='arbitrary', freq=250000, burst=True)
 
     plt.plot(mod)
     plt.show()

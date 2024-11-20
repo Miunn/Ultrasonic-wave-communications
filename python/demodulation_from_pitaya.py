@@ -3,8 +3,9 @@
 import sys
 import pitaya.redpitaya_scpi as scpi
 import matplotlib.pyplot as plot
+import numpy as np
 from scipy.signal import butter, filtfilt, lfilter
-from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter, decision
+from signal_processing.psk_modulation import psk_modulation, bpsk_demodulation, butter_lowpass_filter, decision
 
 class Read_Pitaya:
     IP = '169.254.67.34'
@@ -71,24 +72,62 @@ def butter_highpass_filter(data, cutoff, fs, order=5):
     return y
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
+    """with open("signal-dec-64-work-voltage.bin", "r") as f:
+        voltage = [float(n) for n in f.readline().split()]
+
+    with open("signal-dec-64-work-demod.bin", "r") as f:
+        demod = [float(n) for n in f.readline().split()]
+
+    
+    plot.plot(voltage)
+    plot.plot(demod)
+    plot.show()
+    sys.exit(0)"""
+
+    if len(sys.argv) >= 3:
         with open(sys.argv[1], 'r') as f:
+            probing = [float(s) for s in f.readline().split()][75:140]
+
+        with open(sys.argv[2], 'r') as f:
             buff = [float(s) for s in f.readline().split()]
         
+        import scipy.signal
+        len_buff = len(buff)
+        
+        ref_signal = np.cos(2 * (0.1275) * np.pi * np.linspace(0, 16384, 16384) + np.pi/2)
+
+
+        corr = scipy.signal.correlate(buff, probing, mode="full")
+
         data_lpf = lfilter([1.0 / 15] * 15, 1, buff)
         demodulated = bpsk_demodulation(buff, freq=5)
-        lpf = butter_lowpass_filter(demodulated, 3, 1000, order=3)
+        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
         bits = decision(lpf)
         print(''.join([str(i) for i in bits]))
 
-        plot.plot(buff)
-        plot.plot(demodulated)
-        plot.plot(lpf)
+        fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
+        
+        probing_ax.plot(probing)
+        signal_ax.plot(buff)
+        cross_ax.plot(corr)
+
+        #plot.plot(corr)
+        #plot.plot(demodulated)
+        #plot.plot(lpf)
+
+        with open("signal-dec-64-work-voltage-max.bin", "w") as f:
+            f.write(' '.join([str(f) for f in buff]))
+
+        with open("signal-dec-64-work-demod-max.bin", "w") as f:
+            f.write(' '.join([str(f) for f in demodulated]))
+
+        with open("signal-dec-64-work-lpf-max.bin", "w") as f:
+            f.write(' '.join([str(f) for f in lpf]))
 
     else:
         rp = Read_Pitaya(ip='10.42.0.125', dec=64)
         signal_acquired = False
-        buff = rp.read(out='signal-dec-64-work.bin')
+        buff = rp.read(out='signal-dec-64-probing-message-work.bin')
 
         data_lpf = butter_lowpass_filter(buff, 2, 1000, order=3)
         demodulated = bpsk_demodulation(buff, freq=5)
