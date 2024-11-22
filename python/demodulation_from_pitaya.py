@@ -92,6 +92,7 @@ if __name__ == "__main__":
             buff = [float(s) for s in f.readline().split()]
         
         import scipy.signal
+        import scipy.integrate
         len_buff = len(buff)
         
         ref_signal = np.cos(2 * (0.1275) * np.pi * np.linspace(0, 16384, 16384) + np.pi/2)
@@ -99,8 +100,9 @@ if __name__ == "__main__":
 
         corr = scipy.signal.correlate(buff, probing, mode="full")
 
-        data_lpf = lfilter([1.0 / 15] * 15, 1, buff)
-        demodulated = bpsk_demodulation(buff, freq=5)
+        corr = corr / max(corr)
+
+        demodulated = bpsk_demodulation(corr, freq=5)
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
         bits = decision(lpf)
         print(''.join([str(i) for i in bits]))
@@ -110,10 +112,19 @@ if __name__ == "__main__":
         probing_ax.plot(probing)
         signal_ax.plot(buff)
         cross_ax.plot(corr)
+        cross_ax.plot(demodulated)
+        cross_ax.plot(lpf)
 
-        #plot.plot(corr)
-        #plot.plot(demodulated)
-        #plot.plot(lpf)
+        #integrate = scipy.integrate.simpson(lpf, dx=1)
+
+        for x in range(len(lpf)):
+            if abs(lpf[x]) < 0.05:
+                lpf[x] = 0
+            elif lpf[x] < 0:
+                lpf[x] = -1
+            else:
+                lpf[x] = 1
+        cross_ax.plot(lpf)
 
         with open("signal-dec-64-work-voltage-max.bin", "w") as f:
             f.write(' '.join([str(f) for f in buff]))
