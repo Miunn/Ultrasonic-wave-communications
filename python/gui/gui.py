@@ -1,92 +1,58 @@
 import tkinter as tk
-import types
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg,
-    NavigationToolbar2Tk,
-)
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
-from matplotlib.projections import register_projection
-from matplotlib.axes import Axes
-
-
-class MyAxes(Axes):
-    name = "Ratio_le_y"
-
-    def drag_pan(self, button, key, x, y):
-        return super().drag_pan(button, "x", x, y)
-
-
-register_projection(MyAxes)
+import threading
+from guiGraph import GuiGraph
+from ctxMenu import CtxMenu
+import interactive.hub as ihub
 
 
 class Gui:
     root: tk.Tk
-    graph: FigureCanvasTkAgg
-    toolbar: NavigationToolbar2Tk
-    frame: tk.Frame
+    graph: GuiGraph
     text: tk.Label
     errorRate: tk.DoubleVar
+    menu: CtxMenu
     cid: int = 0
+    interact: ihub.Hub
 
     def __init__(self):
         self.root = tk.Tk()
 
+        self.menu = CtxMenu(self.root)
+
+        self.root.config(menu=self.menu)
+
+        self.root.rowconfigure(1, weight=1)
+
         self.errorRate = tk.DoubleVar()
 
-        self.root.title("IOron - Visualizer")
+        self.root.title("IOron visualizer")
         self.root.geometry("800x480")
 
-        fig = Figure(figsize=(9, 1.7), dpi=88.9)
+        self.graph = GuiGraph(parent=self.root)
+        self.graph.getTkWidget().grid(column=0, row=0)
 
-        self.sp = fig.add_subplot(111, projection="Ratio_le_y")
+        self.interact = ihub.Hub(self.root)
+        self.interact.grid(column=0, row=1, sticky="nswe")
 
-        self.frame = tk.Frame(self.root)
-        self.frame.grid(column=0, row=0, columnspan=2)
+        self.root.bind("<Configure>", self.onResize)
+        self.menu.bind("<<toggleEvent>>", self.onToggle)
 
-        self.graph = FigureCanvasTkAgg(fig, master=self.frame)
-        self.graph.draw()
-        self.graph.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-        self.toolbar = NavigationToolbar2Tk(self.graph, self.frame, pack_toolbar=False)
-        self.toolbar.update()
-        self.toolbar.pack(side=tk.BOTTOM, fill=tk.X)
+    def onToggle(self, event):
+        print(event)
+        self.graph.toggleGraph(event.x)
 
-        self.toolbar.release_zoom = types.MethodType(self.release_zoom, self.toolbar)
+    def onResize(self, event):
+        if event.widget != self.root:
+            return
+        self.graph.onResize(event.width)
 
-        self.text = tk.Label(
-            self.root,
-            text="Statistics\n\n\nMessages Envoyés : 53\nMessages recus : 53\n\nFaux positif : 1 (1.89%)\n\nFaux négatifs : 1 (1.89%)\n\nMessages corrompus : 1 (1.89%)\n\nMessages non-corrompus et non-valide : 0 (0.00%)\n\nMessages valide : 51 (96.22%)",
-        )
-        self.text.grid(column=1, row=1)
+    def setPlot(self, curves: list[tuple[list[float], str, str]]) -> None:
+        self.graph.setPlot([it[0:2] for it in curves])
 
-    def onKeyPress(self, event) -> None:
-        # print("you pressed {}".format(event.key))
-        key_press_handler(event, self.graph, self.toolbar)
-
-    def release_zoom(self, s, event):
-        # print(s, event, event.__dict__)
-        event.key = "x"
-        # print(s, event, event.key)
-        NavigationToolbar2Tk.release_zoom(s, event)
+        self.menu.setGraphLayer([item[2] for item in curves])
 
     def mainloop(self) -> None:
         self.root.mainloop()
-
-    def setPlot(self, plot_array: list[tuple[list[float], str]]):
-        self.sp.clear()
-
-        for item in plot_array:
-            self.sp.plot(item[0], color=item[1])
-            self.sp.set(ylim=(-1.1, 1.1), xlim=(0, len(item[0])))
-            self.sp.set_yticks([-1, 0, 1])
-            self.sp.grid(axis="y")
-
-        self.graph.figure.subplots_adjust(left=0.04, right=1, top=1, bottom=0)
-        self.graph.draw()
-        self.toolbar.update()
-        if self.cid != 0:
-            self.graph.mpl_disconnect(self.cid)
-        self.cid = self.graph.mpl_connect("key_press_event", self.onKeyPress)
 
 
 if __name__ == "__main__":
@@ -101,6 +67,13 @@ if __name__ == "__main__":
 
     g = Gui()
     g.setPlot(
-        [(voltage[:10800], "#BBBBFF"), (demod[:10800], "#FFBB99"), (lpf[:10800], "red")]
+        [
+            (voltage, "#BBBBFF", "Voltage"),
+            (demod, "#FFBB99", "Demodulation"),
+            (lpf, "red", "Low-pass filter"),
+        ]
     )
+
+    threading.Thread(target=lambda: print("ok")).start()
+
     g.mainloop()
