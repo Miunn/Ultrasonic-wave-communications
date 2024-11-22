@@ -4,8 +4,10 @@ import sys
 import pitaya.redpitaya_scpi as scpi
 import matplotlib.pyplot as plot
 import numpy as np
-from scipy.signal import butter, filtfilt, lfilter
-from signal_processing.psk_modulation import psk_modulation, bpsk_demodulation, butter_lowpass_filter, decision
+from scipy.signal import butter, filtfilt
+from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter, decision
+
+LPF_TRIGGER_LEVEL = 0.2
 
 class Read_Pitaya:
     IP = '169.254.67.34'
@@ -104,8 +106,8 @@ if __name__ == "__main__":
 
         demodulated = bpsk_demodulation(corr, freq=5)
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-        bits = decision(lpf)
-        print(''.join([str(i) for i in bits]))
+        #bits = decision(lpf)
+        #print(''.join([str(i) for i in bits]))
 
         fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
         
@@ -115,16 +117,34 @@ if __name__ == "__main__":
         cross_ax.plot(demodulated)
         cross_ax.plot(lpf)
 
-        #integrate = scipy.integrate.simpson(lpf, dx=1)
-
+        integrals = []
+        trig_x = 0
         for x in range(len(lpf)):
-            if abs(lpf[x]) < 0.05:
-                lpf[x] = 0
-            elif lpf[x] < 0:
-                lpf[x] = -1
-            else:
-                lpf[x] = 1
-        cross_ax.plot(lpf)
+            if lpf[x] > LPF_TRIGGER_LEVEL:
+                trig_x = x
+                break
+        
+        prev_x = 0
+        for x in range(trig_x, len(lpf))[::39]:
+            cross_ax.axvline(x, color='r')
+
+            if prev_x != 0:
+                integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
+            
+            prev_x = x
+
+        print(integrals)
+
+        received_bits = []
+        for integral in integrals:
+            if integral > 0.3 * 19.5:
+                received_bits.append(1)
+            elif integral < -0.3 * 19.5:
+                received_bits.append(0)
+
+        print(len(integrals))
+        print(len(received_bits))
+        print(''.join([str(i) for i in received_bits]))
 
         with open("signal-dec-64-work-voltage-max.bin", "w") as f:
             f.write(' '.join([str(f) for f in buff]))

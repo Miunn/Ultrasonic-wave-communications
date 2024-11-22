@@ -1,0 +1,6 @@
+{
+    "ip": "10.42.0.125",
+    "cyc": 5,
+    "decimation": 64,
+    "decison-device-threshold-percentage": 0.2
+}
