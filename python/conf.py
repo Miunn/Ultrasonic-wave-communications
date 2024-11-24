@@ -10,7 +10,13 @@ class Configuration:
     def load(self):
         with open(self.filename, 'r') as f:
             self.config = json.load(f)
-        
+    
+    def check(self, key):
+        return key in self.config
+    
+    def check_all(self, keys):
+        return all([self.check(key) for key in keys])
+
     def get(self, key):
         return self.config[key]
     
