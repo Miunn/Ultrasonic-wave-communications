@@ -5,5 +5,5 @@
     "decimation": 64,
     "signal-trigger": 0.6,
     "decison-device-trigger": 0.2,
-    "decision-device-threshold": 0.3,
+    "decision-device-threshold": 0.3
 }

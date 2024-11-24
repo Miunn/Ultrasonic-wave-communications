@@ -20,8 +20,12 @@ class Read_Api:
             trig_lvl=self.configuration.get('decison-device-threshold-percentage'),
         )
 
-    def read_signal(self) -> List[np.ndarray]:
-        data = self.pitayaReader.read()
+    def read_signal(self, from_file: str=None) -> List[np.ndarray]:
+        if from_file:
+            with open(from_file, 'r') as f:
+                data = [float(i) for i in f.read().split(' ')]
+        else:
+            data = self.pitayaReader.read()
 
         # Correlate the signal with the first sine as probing signal
         correlated = self.correlate_signal(data[75:140], data)
