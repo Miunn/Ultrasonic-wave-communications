@@ -3,6 +3,10 @@ import threading
 from guiGraph import GuiGraph
 from ctxMenu import CtxMenu
 import interactive.hub as ihub
+import time
+from numpy import ndarray
+
+from communication_interface import CommunicationInterface
 
 
 class Gui:
@@ -14,7 +18,7 @@ class Gui:
     cid: int = 0
     interact: ihub.Hub
 
-    def __init__(self):
+    def __init__(self, comm: CommunicationInterface):
         self.root = tk.Tk()
 
         self.menu = CtxMenu(self.root)
@@ -31,7 +35,7 @@ class Gui:
         self.graph = GuiGraph(parent=self.root)
         self.graph.getTkWidget().grid(column=0, row=0)
 
-        self.interact = ihub.Hub(self.root)
+        self.interact = ihub.Hub(self.root, comm)
         self.interact.grid(column=0, row=1, sticky="nswe")
 
         self.root.bind("<Configure>", self.onResize)
@@ -51,6 +55,9 @@ class Gui:
 
         self.menu.setGraphLayer([item[2] for item in curves])
 
+    def setResult(self, value: ndarray):
+        self.interact.setResult(value)
+
     def mainloop(self) -> None:
         self.root.mainloop()
 
@@ -65,15 +72,15 @@ if __name__ == "__main__":
     with open("gui/signal-dec-64-work-lpf.bin", "r") as f:
         lpf = [float(n) for n in f.readline().split()]
 
-    g = Gui()
-    g.setPlot(
-        [
-            (voltage, "#BBBBFF", "Voltage"),
-            (demod, "#FFBB99", "Demodulation"),
-            (lpf, "red", "Low-pass filter"),
-        ]
-    )
+    g = Gui(comm=CommunicationInterface())
 
-    threading.Thread(target=lambda: print("ok")).start()
-
+    threading.Thread(
+        target=lambda: g.setPlot(
+            [
+                (voltage, "#BBBBFF", "Voltage"),
+                (demod, "#FFBB99", "Demodulation"),
+                (lpf, "red", "Low-pass filter"),
+            ]
+        )
+    ).start()
     g.mainloop()

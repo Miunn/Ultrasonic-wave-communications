@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 
-from numpy import where
+import numpy as np
+
+import threading
+
+from communication_interface import CommunicationInterface
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
@@ -14,7 +18,7 @@ frequency = []
 status: list[tuple[str, str]] = [
     ("Error", "red"),
     ("Ready", "green"),
-    ("Running...", "yellow"),
+    ("Running...", "orange"),
 ]
 
 decim_opt = ["1", "8", "64", "1024", "8192", "65536"]
@@ -40,9 +44,16 @@ class TestingMode(tk.Frame):
     EmitterStatusLabel: tk.Label
     RecepterStatusLabel: tk.Label
 
-    def __init__(self, master):
-        super().__init__(master=master)
+    te: threading.Thread | None
+    tr: threading.Thread | None
 
+    comm: CommunicationInterface
+
+    def __init__(self, master, comm):
+        super().__init__(master=master)
+        self.te = None
+        self.tr = None
+        self.comm = comm
         self.freq = tk.StringVar(self, value="250")
         self.cyc = tk.StringVar(self, value="5")
         self.entry_t = tk.StringVar(self, value="Bits")
@@ -71,6 +82,55 @@ class TestingMode(tk.Frame):
         self.columnconfigure(4, weight=1)
         self.rowconfigure(0, weight=1)
 
+    def emit(self):
+        if self.te == None or not self.te.is_alive():
+            if self.te != None:
+                self.te.join()
+            self.te = threading.Thread(target=self.t_emit)
+            self.te.start()
+            print("ok")
+
+    def listen(self):
+        if self.tr == None or not self.tr.is_alive():
+            if self.tr != None:
+                self.tr.join()
+            self.tr = threading.Thread(target=self.t_listen)
+            self.tr.start()
+            print("ok")
+
+    def t_emit(self):
+        self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
+        result = self.comm.emit(
+            np.zeros(2, int), int(float(self.freq.get()) * 1000), int(self.cyc.get())
+        )
+        if result == 0:
+            self.EmitterStatusLabel.configure(
+                text=status[1][0], foreground=status[1][1]
+            )
+        else:
+            self.EmitterStatusLabel.configure(
+                text=status[0][0], foreground=status[0][1]
+            )
+
+    def t_listen(self):
+        self.RecepterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
+        result = self.comm.startListening(
+            int(float(self.freq.get()) * 1000),
+            int(self.cyc.get()),
+            int(self.deim_t.get()),
+            float(self.trigger.get()),
+            float(self.trigg_dd.get()),
+            float(self.threshold.get()),
+        )
+        if result[0] == 0:
+            self.RecepterStatusLabel.configure(
+                text=status[1][0], foreground=status[1][1]
+            )
+        else:
+            self.RecepterStatusLabel.configure(
+                text=status[0][0], foreground=status[0][1]
+            )
+
     def generateEmitter(self):
         emiter_title = tk.Label(self.emmiter, text="Signal generation")
         emiter_title.grid(row=0, column=0)
@@ -78,7 +138,7 @@ class TestingMode(tk.Frame):
         emiter_entry = tk.Text(self.emmiter, height=4, width=30)
         emiter_entry.grid(column=0, row=3)
 
-        emiter_btn1 = tk.Button(self.emmiter, text="Emit signal")
+        emiter_btn1 = tk.Button(self.emmiter, text="Emit signal", command=self.emit)
         emiter_btn1.grid(row=5, column=0)
 
         self.EmitterStatusLabel = tk.Label(
@@ -179,7 +239,7 @@ class TestingMode(tk.Frame):
         )
         tk.Label(self.reciever, text="%").grid(column=2, row=6, sticky="w")
 
-        tk.Button(self.reciever, text="Start listening").grid(
+        tk.Button(self.reciever, text="Start listening", command=self.listen).grid(
             column=0, row=8, columnspan=3
         )
 
