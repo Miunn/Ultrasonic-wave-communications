@@ -34,7 +34,7 @@ class GuiGraph:
 
         self.sp = fig.add_subplot(111, projection="Ratio_le_y")
 
-        self.frame = tk.Frame(parent)
+        self.frame = tk.Frame(parent, background="white")
         self.graph = FigureCanvasTkAgg(fig, master=self.frame)
         self.graph.draw()
         self.graph.get_tk_widget().pack(fill=tk.BOTH, expand=True)
