@@ -21,7 +21,7 @@ status: list[tuple[str, str]] = [
     ("Running...", "orange"),
 ]
 
-decim_opt = ["1", "8", "64", "1024", "8192", "65536"]
+decim_opt = ["1", "8", "64", "1024"]
 
 
 class TestingMode(tk.Frame):
@@ -48,6 +48,8 @@ class TestingMode(tk.Frame):
     tr: threading.Thread | None
 
     comm: CommunicationInterface
+
+    result_label: tk.Label
 
     def __init__(self, master, comm):
         super().__init__(master=master)
@@ -126,6 +128,9 @@ class TestingMode(tk.Frame):
             self.RecepterStatusLabel.configure(
                 text=status[1][0], foreground=status[1][1]
             )
+            self.result_label.configure(
+                text="RESULT :\n" + "".join([str(r) for r in result[1]])
+            )
         else:
             self.RecepterStatusLabel.configure(
                 text=status[0][0], foreground=status[0][1]
@@ -202,7 +207,7 @@ class TestingMode(tk.Frame):
             from_=0,
             to=1,
             increment=0.1,
-            width=7,
+            width=6,
             textvariable=self.trigger,
         )
         trigg.grid(column=1, row=4, sticky="w")
@@ -216,7 +221,7 @@ class TestingMode(tk.Frame):
             from_=0,
             to=1,
             increment=0.1,
-            width=7,
+            width=6,
             textvariable=self.trigg_dd,
         )
         trigg_dd.grid(column=1, row=5, sticky="w")
@@ -230,7 +235,7 @@ class TestingMode(tk.Frame):
             from_=0,
             to=100,
             increment=5,
-            width=7,
+            width=6,
             textvariable=self.threshold,
         )
         thre.grid(column=1, row=6, sticky="w")
@@ -243,14 +248,17 @@ class TestingMode(tk.Frame):
             column=0, row=8, columnspan=3
         )
 
+        self.result_label = tk.Label(self.reciever, text="RESULT :\n")
+        self.result_label.grid(column=0, row=9, columnspan=4)
+
         self.RecepterStatusLabel = tk.Label(
             self.reciever, text=status[0][0], foreground=status[0][1]
         )
-        self.RecepterStatusLabel.grid(column=0, row=9, columnspan=3)
+        self.RecepterStatusLabel.grid(column=0, row=10, columnspan=3)
 
         self.reciever.columnconfigure(0, weight=1)
         self.reciever.columnconfigure(2, weight=1)
         self.reciever.rowconfigure(0, weight=3)
         self.reciever.rowconfigure(2, weight=6)
-        self.reciever.rowconfigure(10, weight=6)
+        self.reciever.rowconfigure(11, weight=6)
         self.reciever.rowconfigure(7, weight=6)
