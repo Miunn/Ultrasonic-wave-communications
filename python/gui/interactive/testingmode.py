@@ -5,7 +5,7 @@ import numpy as np
 
 import threading
 
-from communication_interface import CommunicationInterface
+from gui.communication_interface import CommunicationInterface
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
@@ -50,6 +50,8 @@ class TestingMode(tk.Frame):
     comm: CommunicationInterface
 
     result_label: tk.Label
+
+    graphToUpdate: list[tuple[list[float], str, str]]
 
     def __init__(self, master, comm):
         super().__init__(master=master)
@@ -128,6 +130,8 @@ class TestingMode(tk.Frame):
             self.RecepterStatusLabel.configure(
                 text=status[1][0], foreground=status[1][1]
             )
+            self.graphToUpdate = result[2]
+            self.event_generate("<<ChangeGraph>>")
             self.result_label.configure(
                 text="RESULT :\n" + "".join([str(r) for r in result[1]])
             )
@@ -147,7 +151,7 @@ class TestingMode(tk.Frame):
         emiter_btn1.grid(row=5, column=0)
 
         self.EmitterStatusLabel = tk.Label(
-            self.emmiter, text=status[0][0], foreground=status[0][1]
+            self.emmiter, text=status[1][0], foreground=status[1][1]
         )
         self.EmitterStatusLabel.grid(column=0, row=6)
 
@@ -252,7 +256,7 @@ class TestingMode(tk.Frame):
         self.result_label.grid(column=0, row=9, columnspan=4)
 
         self.RecepterStatusLabel = tk.Label(
-            self.reciever, text=status[0][0], foreground=status[0][1]
+            self.reciever, text=status[1][0], foreground=status[1][1]
         )
         self.RecepterStatusLabel.grid(column=0, row=10, columnspan=3)
 

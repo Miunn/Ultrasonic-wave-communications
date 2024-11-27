@@ -18,7 +18,7 @@ class CommunicationInterface:
         dec_thesh: float,
     ) -> tuple[int, ndarray, list[tuple[list[float], str, str]]]:
         time.sleep(5)
-        return (0, zeros(2, int), [])
+        return (0, zeros(2, int), [([], "red", "Name")])
 
     def emergencyStop(self):
         return

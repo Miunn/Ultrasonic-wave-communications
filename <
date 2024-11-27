@@ -1,12 +1,12 @@
 import tkinter as tk
 import threading
-from gui.guiGraph import GuiGraph
-from gui.ctxMenu import CtxMenu
-import gui.interactive.hub as ihub
+from guiGraph import GuiGraph
+from ctxMenu import CtxMenu
+import interactive.hub as ihub
 import time
 from numpy import ndarray
 
-from gui.communication_interface import CommunicationInterface
+from communication_interface import CommunicationInterface
 
 
 class Gui:
@@ -40,10 +40,6 @@ class Gui:
 
         self.root.bind("<Configure>", self.onResize)
         self.menu.bind("<<toggleEvent>>", self.onToggle)
-        self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
-
-    def updateGraphFromResultF2(self, event):
-        self.setPlot(self.interact.f2.graphToUpdate)
 
     def onToggle(self, event):
         print(event)
