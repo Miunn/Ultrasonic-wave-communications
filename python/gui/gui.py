@@ -18,7 +18,9 @@ class Gui:
     cid: int = 0
     interact: ihub.Hub
 
-    def __init__(self, comm: CommunicationInterface = CommunicationInterface()):
+    def __init__(
+        self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
+    ):
         self.root = tk.Tk()
 
         self.menu = CtxMenu(self.root)
