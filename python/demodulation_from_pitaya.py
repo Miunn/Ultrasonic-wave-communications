@@ -7,15 +7,17 @@ import numpy as np
 from scipy.signal import butter, filtfilt
 from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter, decision
 
-LPF_TRIGGER_LEVEL = 0.2
-
 class Read_Pitaya:
     IP = '169.254.67.34'
 
     def __init__(self, ip='169.254.67.34'):
         self.IP = ip
 
-        self.rp_s = scpi.scpi(self.IP)
+        try:
+            self.rp_s = scpi.scpi(self.IP, timeout=10)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
     def close(self):
         self.rp_s.close()
@@ -112,7 +114,7 @@ if __name__ == "__main__":
         integrals = []
         trig_x = 0
         for x in range(len(lpf)):
-            if lpf[x] > LPF_TRIGGER_LEVEL:
+            if lpf[x] > 0.2:
                 trig_x = x
                 break
         

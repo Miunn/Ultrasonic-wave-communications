@@ -11,8 +11,7 @@ c/project
 
 venv/
 .venv
+python/pitaya/__pycache__
 python/frames/__pycache__
-python/pitaya
-python/signal_processing
 python/gui/__pycache__
 python/gui/interactive/__pycache__
