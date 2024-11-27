@@ -1,4 +1,3 @@
-from _typeshed import structseq
 from numpy import ndarray, zeros
 import time
 

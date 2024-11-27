@@ -1,6 +1,6 @@
 import threading
 from gui.gui import Gui
-from python.gui.communication_interface import CommunicationInterface
+from gui.communication_interface import CommunicationInterface
 
 
 if __name__ == "__main__":
