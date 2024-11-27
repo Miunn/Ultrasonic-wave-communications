@@ -101,9 +101,12 @@ class TestingMode(tk.Frame):
             self.tr.start()
 
     def t_emit(self):
+        convtype = self.entry_t.get()
+        text = self.entry_v.get()
+        to_send = self.comm.convertToArray(text, convtype)
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.emit(
-            np.zeros(2, int), int(float(self.freq.get()) * 1000), int(self.cyc.get())
+            to_send, int(float(self.freq.get()) * 1000), int(self.cyc.get())
         )
         if result == 0:
             self.EmitterStatusLabel.configure(
@@ -115,6 +118,7 @@ class TestingMode(tk.Frame):
             )
 
     def t_listen(self):
+        convtype = self.entry_t.get()
         self.RecepterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.startListening(
             int(float(self.freq.get()) * 1000),
@@ -131,7 +135,7 @@ class TestingMode(tk.Frame):
             self.graphToUpdate = result[2]
             self.event_generate("<<ChangeGraph>>")
             self.result_label.configure(
-                text="RESULT :\n" + "".join([str(r) for r in result[1]])
+                text="RESULT :\n" + self.comm.convertToStringM(result[1], convtype)
             )
         else:
             self.RecepterStatusLabel.configure(
