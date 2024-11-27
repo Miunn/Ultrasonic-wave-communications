@@ -43,7 +43,7 @@ class CommunicationInterface:
             result[i] = int_san % 2
             int_san //= 2
             i += 1
-        return result[::-1]
+        return result
 
     @staticmethod
     def convertString(value: str) -> ndarray:
