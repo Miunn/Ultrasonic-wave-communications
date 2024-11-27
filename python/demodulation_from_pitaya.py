@@ -13,7 +13,11 @@ class Read_Pitaya:
     def __init__(self, ip='169.254.67.34'):
         self.IP = ip
 
-        self.rp_s = scpi.scpi(self.IP)
+        try:
+            self.rp_s = scpi.scpi(self.IP, timeout=10)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
     def close(self):
         self.rp_s.close()
