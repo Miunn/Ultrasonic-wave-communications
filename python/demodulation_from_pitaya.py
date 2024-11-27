@@ -7,8 +7,6 @@ import numpy as np
 from scipy.signal import butter, filtfilt
 from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter, decision
 
-LPF_TRIGGER_LEVEL = 0.2
-
 class Read_Pitaya:
     IP = '169.254.67.34'
 
@@ -112,7 +110,7 @@ if __name__ == "__main__":
         integrals = []
         trig_x = 0
         for x in range(len(lpf)):
-            if lpf[x] > LPF_TRIGGER_LEVEL:
+            if lpf[x] > 0.2:
                 trig_x = x
                 break
         
