@@ -36,7 +36,7 @@ class Read_Pitaya:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def read(self, out='signal.bin'):
+    def read(self, dec, trig_lvl):
         self.tx_txt('ACQ:RST')
         self.acq_set(self.DEC, self.TRIG_LVL, units='volts', sample_format='bin', trig_delay=8100)
         self.tx_txt('ACQ:START')
@@ -55,9 +55,6 @@ class Read_Pitaya:
 
         print("[*] Triggered, acquire buffer")
         buff = self.acq_data(1, binary=True, convert=True)
-
-        with open(out, 'w') as f:
-            f.write(' '.join([str(f) for f in buff]))
 
         return buff
 
