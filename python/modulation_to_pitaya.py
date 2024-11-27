@@ -4,6 +4,7 @@ import sys
 import pitaya.redpitaya_scpi as scpi
 from signal_processing.psk_modulation import psk_modulation
 import matplotlib.pyplot as plt
+from utils import get_signal_frequency_from_sampling
 
 class Write_Pitaya:
     IP = '169.254.67.34'
@@ -32,17 +33,15 @@ class Write_Pitaya:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def write(self, data, len_data, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
+    def write(self, data, len_data, cyc, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
         self.rp_s.tx_txt('GEN:RST')
         if wave_form != 'arbitrary':
             self.rp_s.sour_set(channel, wave_form, volt, freq, burst=burst)
         else:
-            self.rp_s.sour_set(channel, wave_form, volt, freq/(len_data*5), data=data, burst=burst)
+            self.rp_s.sour_set(channel, wave_form, volt, get_signal_frequency_from_sampling(freq, cyc, len_data), data=data, burst=burst)
         self.rp_s.tx_txt(f'OUTPUT{channel}:STATE ON')
         self.rp_s.tx_txt(f'SOUR{channel}:TRig:INT')
         
-        self.close()
-
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Provide a bit sequence as argument or sine to generate a sine wave")
@@ -50,13 +49,13 @@ if __name__ == '__main__':
 
     if sys.argv[1] == 'sine':
         wp = Write_Pitaya(ip='10.42.0.125')
-        wp.write([], 1, channel=1, wave_form='sine', freq=250000, burst=False)
+        wp.write([], 1, 0, channel=1, wave_form='sine', freq=250000, burst=False)
         sys.exit(0)
     
     bits = [int(i) for i in sys.argv[1]]
-    mod = psk_modulation(bits, freq=5)
+    mod = psk_modulation(bits, cyc=1)
     wp = Write_Pitaya(ip='10.42.0.125')
-    wp.write(mod, len(bits), channel=1, wave_form='arbitrary', freq=250000, burst=True)
+    wp.write(mod, len(bits), 1, channel=1, wave_form='arbitrary', freq=250000, burst=True)
 
     plt.plot(mod)
     plt.show()

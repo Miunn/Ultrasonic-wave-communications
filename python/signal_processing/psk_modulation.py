@@ -9,11 +9,11 @@ from utils import get_sampling_signal_frequency
 PTS_BITS = 1000
 FREQ = 5
 
-def psk_modulation(bits: List[int], freq: int = 5):
+def psk_modulation(bits: List[int], cyc: int = 5):
     len_bits = len(bits)
     pts_bits = 16384//len(bits)
     linspace = np.linspace(0, len_bits, len_bits * pts_bits)
-    c_t = np.cos(freq * 2 * np.pi * linspace + np.pi/2)
+    c_t = np.cos(cyc * 2 * np.pi * linspace + np.pi/2)
 
     # PSK Modulation
     modulated = np.zeros(len_bits * pts_bits)
@@ -49,9 +49,8 @@ def decision(demodulated: np.ndarray):
 
 def bpsk_demodulation(modulated: np.ndarray, freq, decimation):
     len_modulated = len(modulated)
-    print("Modulated len:", len_modulated)
     #f = 2 * (0.002402) * np.pi
-    signal_frequency = 0.995*get_sampling_signal_frequency(freq, decimation)
+    signal_frequency = get_sampling_signal_frequency(freq, decimation)
     f = 2 * signal_frequency * np.pi
     linspace = np.linspace(0, len_modulated, len_modulated)
     c = np.linspace(0, len_modulated, len_modulated)

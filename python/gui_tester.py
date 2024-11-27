@@ -19,6 +19,7 @@ class CommunicationPitaya(CommunicationInterface):
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
         voltage, demod, lpf, bits = self.read_api.startListening(freq, cyc, decimation, sig_trig, dec_trig, dec_thesh)
 
+        print(f"[*] Read : {bits}")
         return [
             0,
             bits,
