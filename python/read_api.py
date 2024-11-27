@@ -8,19 +8,9 @@ from utils import get_one_block_step
 
 from typing import List
 
-class Read_Api(CommunicationInterface):
-    def __init__(self, conf_file: str):
-        self.configuration = Configuration(conf_file)
-        self.configuration.load()
-
-        if not self.configuration.check_all(['ip', 'channel', 'frequency', 'cyc', 'decimation', 'decison-device-threshold-percentage']):
-            raise ValueError("Configuration file must contain 'ip', 'channel', 'frequency', 'cyc', 'decimation' and 'decison-device-threshold-percentage' keys")
-
-        self.pitayaReader = Read_Pitaya(
-            ip=self.configuration.get('ip'),
-            dec=self.configuration.get('decimation'),
-            trig_lvl=self.configuration.get('decison-device-threshold-percentage'),
-        )
+class Read_Api:
+    def __init__(self, ip):
+        self.pitayaReader = Read_Pitaya(ip)
 
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
         normalized_correlated, demodulated, lpf = self.listenSignal(freq, decimation, sig_trig)
