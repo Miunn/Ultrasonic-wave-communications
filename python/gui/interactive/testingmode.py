@@ -6,6 +6,7 @@ import numpy as np
 import threading
 
 from gui.communication_interface import CommunicationInterface
+from gui.ErrorTopLevel import ErrorTopLevel
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
@@ -116,6 +117,7 @@ class TestingMode(tk.Frame):
             self.EmitterStatusLabel.configure(
                 text=status[0][0], foreground=status[0][1]
             )
+            ErrorTopLevel(str(result)).mainloop()
 
     def t_listen(self):
         convtype = self.entry_t.get()
@@ -138,6 +140,7 @@ class TestingMode(tk.Frame):
                 text="RESULT :\n" + self.comm.convertToStringM(result[1], convtype)
             )
         else:
+            self.result_label.configure(text="RESULT :\n")
             self.RecepterStatusLabel.configure(
                 text=status[0][0], foreground=status[0][1]
             )

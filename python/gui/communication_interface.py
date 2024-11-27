@@ -94,7 +94,7 @@ class CommunicationInterface:
                 raise ValueError()
 
     @staticmethod
-    def convertToStringM(value: ndarray, conv_type: str) -> string:
+    def convertToStringM(value: ndarray, conv_type: str) -> str:
         match conv_type:
             case "Bits":
                 return CommunicationInterface.convertToBitString(value)
