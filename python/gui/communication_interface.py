@@ -1,8 +1,14 @@
+from _typeshed import structseq
 from numpy import ndarray, zeros
 import time
 
 
 class CommunicationInterface:
+    addr: str
+
+    def __init__(self, addr: str) -> None:
+        self.addr = addr
+
     def emit(self, message: ndarray, freq: float, cyc: int) -> int:
         print(message, freq, cyc)
         time.sleep(2)

@@ -92,7 +92,6 @@ class TestingMode(tk.Frame):
                 self.te.join()
             self.te = threading.Thread(target=self.t_emit)
             self.te.start()
-            print("ok")
 
     def listen(self):
         if self.tr == None or not self.tr.is_alive():
@@ -100,7 +99,6 @@ class TestingMode(tk.Frame):
                 self.tr.join()
             self.tr = threading.Thread(target=self.t_listen)
             self.tr.start()
-            print("ok")
 
     def t_emit(self):
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
