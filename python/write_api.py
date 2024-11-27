@@ -8,4 +8,4 @@ class Write_Api:
     def write(self, message, freq, cyc):
         bits = [int(i) for i in message]
         mod = psk_modulation(bits, cyc)
-        self.pitayaWriter.write(mod, len(bits), channel=self.config.get('channel'), wave_form='arbitrary', freq=freq, burst=True)
+        self.pitayaWriter.write(mod, len(bits), channel=1, wave_form='arbitrary', freq=freq, burst=True)

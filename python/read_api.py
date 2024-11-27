@@ -59,7 +59,7 @@ class Read_Api:
                 break
         
         prev_x = 0
-        step = get_one_block_step(freq, cyc, decimation)
+        step = int(get_one_block_step(freq, cyc, decimation))
         for x in range(trig_x, len(lpf))[::step]:
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))

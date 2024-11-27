@@ -33,5 +33,5 @@ class CommunicationPitaya(CommunicationInterface):
         return super().emergencyStop()
 
 if __name__ == "__main__":
-    g = Gui(CommunicationPitaya("10.5.0.0"))
+    g = Gui(CommunicationPitaya("10.42.0.125"))
     g.mainloop()
