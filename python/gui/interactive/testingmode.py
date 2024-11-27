@@ -54,6 +54,8 @@ class TestingMode(tk.Frame):
 
     graphToUpdate: list[tuple[list[float], str, str]]
 
+    emiter_entry: tk.Text
+
     def __init__(self, master, comm):
         super().__init__(master=master)
         self.te = None
@@ -103,8 +105,10 @@ class TestingMode(tk.Frame):
 
     def t_emit(self):
         convtype = self.entry_t.get()
-        text = self.entry_v.get()
+        text = self.emiter_entry.get("1.0", tk.END)
+        print(text)
         to_send = self.comm.convertToArray(text, convtype)
+        print(to_send)
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.emit(
             to_send, int(float(self.freq.get()) * 1000), int(self.cyc.get())
@@ -149,8 +153,8 @@ class TestingMode(tk.Frame):
         emiter_title = tk.Label(self.emmiter, text="Signal generation")
         emiter_title.grid(row=0, column=0)
 
-        emiter_entry = tk.Text(self.emmiter, height=4, width=30)
-        emiter_entry.grid(column=0, row=3)
+        self.emiter_entry = tk.Text(self.emmiter, height=4, width=30)
+        self.emiter_entry.grid(column=0, row=3)
 
         emiter_btn1 = tk.Button(self.emmiter, text="Emit signal", command=self.emit)
         emiter_btn1.grid(row=5, column=0)
