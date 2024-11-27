@@ -86,21 +86,20 @@ if __name__ == "__main__":
     plot.show()
     sys.exit(0)"""
 
-    if len(sys.argv) >= 3:
-        with open(sys.argv[1], 'r') as f:
-            probing = [float(s) for s in f.readline().split()][75:140]
+    if len(sys.argv) >= 2:
+        #with open(sys.argv[1], 'r') as f:
+        #    probing = [float(s) for s in f.readline().split()][75:140]
 
-        with open(sys.argv[2], 'r') as f:
+        with open(sys.argv[1], 'r') as f:
             buff = [float(s) for s in f.readline().split()]
         
         import scipy.signal
         import scipy.integrate
         len_buff = len(buff)
-        
+
         ref_signal = np.cos(2 * (0.1275) * np.pi * np.linspace(0, 16384, 16384) + np.pi/2)
 
-
-        corr = scipy.signal.correlate(buff, probing, mode="full")
+        corr = scipy.signal.correlate(buff, buff[75:140], mode="full")
 
         corr = corr / max(corr)
 
@@ -111,7 +110,7 @@ if __name__ == "__main__":
 
         fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
         
-        probing_ax.plot(probing)
+        probing_ax.plot(buff[75:140])
         signal_ax.plot(buff)
         cross_ax.plot(corr)
         cross_ax.plot(demodulated)
