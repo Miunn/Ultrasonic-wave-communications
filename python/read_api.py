@@ -1,31 +1,26 @@
 from conf import Configuration
 from demodulation_from_pitaya import Read_Pitaya
+from gui.communication_interface import CommunicationInterface
 import numpy as np
 import scipy.signal
 from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter
+from utils import get_one_block_step
 
 from typing import List
 
 class Read_Api:
-    def __init__(self, conf_file: str):
-        self.configuration = Configuration(conf_file)
-        self.configuration.load()
+    def __init__(self, ip):
+        self.pitayaReader = Read_Pitaya(ip)
 
-        if not self.configuration.check_all(['ip', 'channel', 'frequency', 'cyc', 'decimation', 'decison-device-threshold-percentage']):
-            raise ValueError("Configuration file must contain 'ip', 'channel', 'frequency', 'cyc', 'decimation' and 'decison-device-threshold-percentage' keys")
+    def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
+        normalized_correlated, demodulated, lpf = self.listenSignal(freq, decimation, sig_trig)
 
-        self.pitayaReader = Read_Pitaya(
-            ip=self.configuration.get('ip'),
-            dec=self.configuration.get('decimation'),
-            trig_lvl=self.configuration.get('decison-device-threshold-percentage'),
-        )
+        bits = self.decision_making_device(lpf, freq, cyc, decimation, dec_trig, dec_thesh)
+        
+        return normalized_correlated, demodulated, lpf, bits
 
-    def read_signal(self, from_file: str=None) -> List[np.ndarray]:
-        if from_file:
-            with open(from_file, 'r') as f:
-                data = [float(i) for i in f.read().split(' ')]
-        else:
-            data = self.pitayaReader.read()
+    def listenSignal(self, freq, decimation, sig_trig):
+        data = self.pitayaReader.read(decimation, sig_trig)
 
         # Correlate the signal with the first sine as probing signal
         correlated = self.correlate_signal(data[75:140], data)
@@ -33,17 +28,17 @@ class Read_Api:
         # Normalize the signal
         normalized_correlated = correlated / np.max(correlated)
 
-        demodulated = bpsk_demodulation(normalized_correlated, freq=self.configuration.get('cyc'))
+        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
 
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
 
         return normalized_correlated, demodulated, lpf
     
-    def decision_making_device(self, lpf: np.ndarray) -> List[int]:
-        integrals = self.compute_integrals(lpf)
+    def decision_making_device(self, lpf: np.ndarray, freq, cyc, decimation, dec_trig, dec_thresh) -> List[int]:
+        integrals = self.compute_integrals(lpf, freq, cyc, decimation, dec_trig)
 
         bits = []
-        threshold = self.configuration.get('decison-device-threshold-percentage') * 19.5
+        threshold = dec_thresh * 19.5
         for integral in integrals:
             if integral > threshold:
                 bits.append(1)
@@ -55,16 +50,17 @@ class Read_Api:
     def correlate_signal(self, probing: np.ndarray, signal: np.ndarray) -> np.ndarray:
         return scipy.signal.correlate(signal, probing, mode="full")
     
-    def compute_integrals(self, lpf: np.ndarray) -> List[float]:
+    def compute_integrals(self, lpf: np.ndarray, freq, cyc, decimation, dec_trig) -> List[float]:
         integrals = []
         trig_x = 0
         for x in range(len(lpf)):
-            if lpf[x] > self.configuration.get('decison-device-trigger'):
+            if lpf[x] > dec_trig:
                 trig_x = x
                 break
         
         prev_x = 0
-        for x in range(trig_x, len(lpf))[::39]:
+        step = get_one_block_step(freq, cyc, decimation)
+        for x in range(trig_x, len(lpf))[::step]:
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
             

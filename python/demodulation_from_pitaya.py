@@ -11,13 +11,9 @@ LPF_TRIGGER_LEVEL = 0.2
 
 class Read_Pitaya:
     IP = '169.254.67.34'
-    DEC = 1
-    TRIG_LVL = 0.6
 
-    def __init__(self, ip='169.254.67.34', dec=1, trig_lvl=0.6):
+    def __init__(self, ip='169.254.67.34'):
         self.IP = ip
-        self.DEC = dec
-        self.TRIG_LVL = trig_lvl
 
         self.rp_s = scpi.scpi(self.IP)
 
@@ -36,9 +32,9 @@ class Read_Pitaya:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def read(self, out='signal.bin'):
+    def read(self, dec, trig_lvl):
         self.tx_txt('ACQ:RST')
-        self.acq_set(self.DEC, self.TRIG_LVL, units='volts', sample_format='bin', trig_delay=8100)
+        self.acq_set(dec, trig_lvl, units='volts', sample_format='bin', trig_delay=8100)
         self.tx_txt('ACQ:START')
         self.tx_txt('ACQ:TRig CH1_PE')
         print("[*] Acquisition params set, ready to acquire")
@@ -55,9 +51,6 @@ class Read_Pitaya:
 
         print("[*] Triggered, acquire buffer")
         buff = self.acq_data(1, binary=True, convert=True)
-
-        with open(out, 'w') as f:
-            f.write(' '.join([str(f) for f in buff]))
 
         return buff
 

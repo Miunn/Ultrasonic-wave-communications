@@ -1,9 +1,7 @@
 import tkinter as tk
-import threading
 from gui.guiGraph import GuiGraph
 from gui.ctxMenu import CtxMenu
 import gui.interactive.hub as ihub
-import time
 from numpy import ndarray
 
 from gui.communication_interface import CommunicationInterface

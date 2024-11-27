@@ -4,6 +4,7 @@ from scipy.signal import butter, lfilter
 import sys
 import matplotlib.pyplot as plt
 import math
+from utils import get_sampling_signal_frequency
 
 PTS_BITS = 1000
 FREQ = 5
@@ -46,11 +47,12 @@ def decision(demodulated: np.ndarray):
 
     return bits
 
-def bpsk_demodulation(modulated: np.ndarray, freq: int = 5):
+def bpsk_demodulation(modulated: np.ndarray, freq, decimation):
     len_modulated = len(modulated)
     print("Modulated len:", len_modulated)
     #f = 2 * (0.002402) * np.pi
-    f = 2 * (0.1275) * np.pi
+    signal_frequency = 0.995*get_sampling_signal_frequency(freq, decimation)
+    f = 2 * signal_frequency * np.pi
     linspace = np.linspace(0, len_modulated, len_modulated)
     c = np.linspace(0, len_modulated, len_modulated)
     for i in range(len_modulated):

@@ -7,7 +7,19 @@ DECIMATION_TIME_SCALE = {
     65536: 8590
 }
 
+DECIMATION_SAMPLING_RATE = {
+    1: 125000000,
+    8: 15600000,
+    64: 1953000,
+    1024: 122070,
+    8192: 15258,
+    65536: 1907
+}
+
+def get_sampling_signal_frequency(freq, decimation):
+    return freq / DECIMATION_SAMPLING_RATE[decimation]
+
 def get_one_block_step(freq, cyc, dec):
-    bloc_timing = cyc / freq
+    bloc_timing = cyc / (freq/1000)
     decimation_time = DECIMATION_TIME_SCALE[dec]
-    return decimation_time * 16384 / bloc_timing
+    return 16384 * bloc_timing / decimation_time
