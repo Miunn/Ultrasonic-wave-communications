@@ -132,7 +132,7 @@ class TestingMode(tk.Frame):
             int(self.deim_t.get()),
             float(self.trigger.get()),
             float(self.trigg_dd.get()),
-            float(self.threshold.get()),
+            float(self.threshold.get()) / 100,
         )
         if result[0] == 0:
             self.RecepterStatusLabel.configure(
