@@ -66,7 +66,7 @@ class CommunicationInterface:
     def convertToHexString(value: ndarray) -> str:
         string = "".join(str(i) for i in value)
         string = string[: len(string) - len(string) % 8]
-        return str(hex(int("".join(str(i) for i in value), 2))).lstrip("0x").upper()
+        return str(hex(int(string, 2))).lstrip("0x").upper()
 
     @staticmethod
     def convertToString(value: ndarray) -> str:
