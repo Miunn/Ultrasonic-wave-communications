@@ -43,7 +43,7 @@ class CommunicationInterface:
             result[i] = int_san % 2
             int_san //= 2
             i += 1
-        return result
+        return result[::-1]
 
     @staticmethod
     def convertString(value: str) -> ndarray:
@@ -64,9 +64,7 @@ class CommunicationInterface:
 
     @staticmethod
     def convertToHexString(value: ndarray) -> str:
-        return (
-            str(hex(int("".join(str(i) for i in value)[::-1], 2))).lstrip("0x").upper()
-        )
+        return str(hex(int("".join(str(i) for i in value), 2))).lstrip("0x").upper()
 
     @staticmethod
     def convertToString(value: ndarray) -> str:
