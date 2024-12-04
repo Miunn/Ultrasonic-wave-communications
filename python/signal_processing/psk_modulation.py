@@ -1,7 +1,6 @@
 from typing import List
 import numpy as np
 from scipy.signal import butter, lfilter
-import sys
 import matplotlib.pyplot as plt
 import math
 from utils import get_sampling_signal_frequency
@@ -73,29 +72,6 @@ def bpsk_demodulation(modulated: np.ndarray, freq, decimation):
     return modulated * c
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        bits = [int(i) for i in sys.argv[1]]
-        print(len(bits))
-        mod = psk_modulation(bits)
-    else:
-        with open("../pitayareadings.bin", "r") as f:
-            mod = [float(s) for s in f.readline().split()]
+    mod = psk_modulation([1, 0, 1, 0, 1, 1], cyc=1)
     plt.plot(mod)
-        
-    #plt.plot(linspace, mod)
-        
-        
-    demod = bpsk_demodulation(mod)
-    #demod = butter_lowpass_filter(demod, 0.1, 1000)
-    plt.plot(demod)
-
-    plt.show()
-
-    lpf = butter_lowpass_filter(demod, 1, 1000, order=5)
-
-    bits = decision(lpf)
-    print(''.join([str(i) for i in bits]))
-    #print(''.join([str(i) for i in bits]) == sys.argv[1])
-
-    plt.plot(lpf)
     plt.show()

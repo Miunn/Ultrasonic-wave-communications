@@ -14,9 +14,6 @@ class Read_Api:
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
         normalized_correlated, demodulated, lpf = self.listenSignal(freq, decimation, sig_trig)
 
-        #step = int(get_one_block_step(freq, cyc, decimation))
-        #integralSignal = scipy.signal.square(np.linspace(0, 1, 16384))
-
         bits = self.decision_making_device(lpf, freq, cyc, decimation, dec_trig, dec_thesh)
         
         return normalized_correlated, demodulated, lpf, bits
@@ -33,15 +30,6 @@ class Read_Api:
         demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
 
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-
-        with open("sig-dec-64-voltage.txt", "w") as f:
-            f.write(' '.join([str(i) for i in normalized_correlated]))
-
-        with open("sig-dec-64-demod.txt", "w") as f:
-            f.write(' '.join([str(i) for i in demodulated]))
-
-        with open("sig-dec-64-lpf.txt", "w") as f:
-            f.write(' '.join([str(i) for i in lpf]))
 
         return normalized_correlated, demodulated, lpf
     
