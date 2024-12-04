@@ -11,8 +11,7 @@ class Write_Api:
             print("[*] Skip empty message")
             return 1
         mod = psk_modulation(bits, cyc)
-        plt.plot(mod)
-        plt.show()
+
         
         self.pitayaWriter.write(mod, len(bits), cyc, channel=1, wave_form='arbitrary', freq=freq, burst=True)
         return 0
