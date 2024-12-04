@@ -72,35 +72,56 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         #with open(sys.argv[1], 'r') as f:
         #    probing = [float(s) for s in f.readline().split()][75:140]
-
+        freq=250000
+        decimation=64
+        cyc=5
+        sig_trig=0.6
         with open(sys.argv[1], 'r') as f:
             buff = [float(s) for s in f.readline().split()]
         
         import scipy.signal
         import scipy.integrate
-        len_buff = len(buff)
 
-        ref_signal = np.cos(2 * (0.1275) * np.pi * np.linspace(0, 16384, 16384) + np.pi/2)
+        from utils import get_one_block_step, get_sampling_signal_frequency
+        from read_api import Read_Api
+        import math
 
-        corr = scipy.signal.correlate(buff, buff[75:140], mode="full")
+        # Correlate the signal with the first sine as probing signal
+        probing_sine = buff[90:90+int(get_one_block_step(freq, 5, decimation))]
+        correlated = Read_Api.correlate_signal(probing_sine, buff)
 
-        corr = corr / max(corr)
+        # Normalize the signal
+        normalized_correlated = correlated / np.max(correlated)
 
-        demodulated = bpsk_demodulation(corr, 250000, 64)
+        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
+
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-        #bits = decision(lpf)
-        #print(''.join([str(i) for i in bits]))
 
         fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
-        
-        probing_ax.plot(buff[75:140])
+        #probing_ax.plot(probing_sine)
         signal_ax.plot(buff)
+
+        signal_frequency = get_sampling_signal_frequency(freq, decimation)
+        f = 2 * signal_frequency * np.pi
+        linspace = np.linspace(0, len(buff), len(buff))
+        c = np.linspace(0, len(buff), len(buff))
+        for i in range(len(buff)):
+            x = float(linspace[i])
+            c[i] = math.cos(f * x + np.pi/2)
+        
+        probing_ax.plot(c)
+        align_correlation = np.correlate(buff, buff, "same")
+        align_correlation = align_correlation / np.max(align_correlation)
+        cross_ax.plot(align_correlation)
         #cross_ax.plot(corr)
         #cross_ax.plot(demodulated)
-        cross_ax.plot(lpf, 'g')
-        cross_ax.plot([0]*len(lpf))
-        cross_ax.plot([0.5]*len(lpf), 'purple')
-        cross_ax.plot([-0.5]*len(lpf), 'purple')
+        #cross_ax.plot(normalized_correlated)
+        #cross_ax.plot(demodulated)
+        #cross_ax.plot(lpf, 'g')
+        #cross_ax.plot([0]*len(lpf))
+        #cross_ax.plot([0.5]*len(lpf), 'purple')
+        #cross_ax.plot([-0.5]*len(lpf), 'purple')
+        len_buff = len(buff)
 
         integrals = []
         trig_x = 0
@@ -110,8 +131,8 @@ if __name__ == "__main__":
                 break
         
         prev_x = 0
-        for x in range(trig_x, len(lpf))[::39]:
-            cross_ax.axvline(x, color='r')
+        for x in range(trig_x, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
+            #cross_ax.axvline(x, color='r')
 
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
@@ -141,8 +162,11 @@ if __name__ == "__main__":
             f.write(' '.join([str(f) for f in lpf]))
 
     else:
+
+        from utils import get_one_block_step
         freq=250000
         decimation=64
+        cyc=5
         sig_trig=0.6
         rp = Read_Pitaya(ip='10.42.0.125')
         signal_acquired = False
@@ -151,7 +175,8 @@ if __name__ == "__main__":
         data = rp.read(decimation, sig_trig)
 
         # Correlate the signal with the first sine as probing signal
-        correlated = rp.correlate_signal(data[75:140], data)
+        probing_sine = data[75:75+get_one_block_step(freq, 5, decimation)]
+        correlated = rp.correlate_signal(probing_sine, data)
 
         # Normalize the signal
         normalized_correlated = correlated / np.max(correlated)
@@ -160,9 +185,11 @@ if __name__ == "__main__":
 
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
 
-        
-        plot.plot(buff)
-        plot.plot(demodulated)
+        fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
+        probing_ax.plot(probing_sine)
+        signal_ax.plot(data)
+        cross_ax.plot(correlated)
+
         #plot.plot(lpf)
         plot.ylabel('Voltage')
         plot.title('Signal')

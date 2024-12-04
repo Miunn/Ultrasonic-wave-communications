@@ -51,7 +51,8 @@ class Read_Api:
         
         return bits
     
-    def correlate_signal(self, probing: np.ndarray, signal: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def correlate_signal(probing: np.ndarray, signal: np.ndarray) -> np.ndarray:
         return scipy.signal.correlate(signal, probing, mode="full")
     
     def compute_integrals(self, lpf: np.ndarray, freq, cyc, decimation, dec_trig) -> List[float]:
