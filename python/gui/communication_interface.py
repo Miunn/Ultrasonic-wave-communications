@@ -64,6 +64,8 @@ class CommunicationInterface:
 
     @staticmethod
     def convertToHexString(value: ndarray) -> str:
+        string = "".join(str(i) for i in value)
+        string = string[: len(string) - len(string) % 8]
         return str(hex(int("".join(str(i) for i in value), 2))).lstrip("0x").upper()
 
     @staticmethod
@@ -115,10 +117,10 @@ if __name__ == "__main__":
     print(a, a == b, b)
 
     a = "DEADBEEF"
-    b = CommunicationInterface.convertToHexString(
-        CommunicationInterface.convertHexString(a)
-    )
-    print(a, a == b, b)
+
+    h = CommunicationInterface.convertHexString(a)
+    b = CommunicationInterface.convertToHexString(h)
+    print(a, h, a == b, b)
 
     a = "bonjoir"
     b = CommunicationInterface.convertToString(CommunicationInterface.convertString(a))
