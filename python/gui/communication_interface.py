@@ -116,7 +116,7 @@ if __name__ == "__main__":
     )
     print(a, a == b, b)
 
-    a = "DEADBEEF"
+    a = "1234DEADBEEF"
 
     h = CommunicationInterface.convertHexString(a)
     b = CommunicationInterface.convertToHexString(h)

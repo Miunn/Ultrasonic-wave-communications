@@ -7,6 +7,7 @@ import threading
 
 from gui.communication_interface import CommunicationInterface
 from gui.ErrorTopLevel import ErrorTopLevel
+from gui import decToFreq
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
@@ -22,7 +23,15 @@ status: list[tuple[str, str]] = [
     ("Running...", "orange"),
 ]
 
-decim_opt = ["1", "8", "64", "1024"]
+
+def generate_deim_text(v):
+    if decToFreq.dectofreq[v] < 1000000:
+        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)} KHz)"
+    else:
+        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)*0.001} MHz)"
+
+
+decim_opt = [generate_deim_text(i) for i in [1, 8, 64, 1024]]
 
 
 class TestingMode(tk.Frame):
@@ -66,7 +75,7 @@ class TestingMode(tk.Frame):
         self.entry_t = tk.StringVar(self, value="Bits")
         self.entry_v = tk.StringVar(self, value="")
         self.common_t = tk.StringVar(self, value="Plain")
-        self.deim_t = tk.StringVar(self, value="64")
+        self.deim_t = tk.StringVar(self, value=generate_deim_text(64))
         self.trigger = tk.StringVar(self, "0.6")
         self.trigg_dd = tk.StringVar(self, "0.2")
         self.threshold = tk.StringVar(self, "30")
@@ -88,6 +97,9 @@ class TestingMode(tk.Frame):
         self.columnconfigure(2, weight=1)
         self.columnconfigure(4, weight=1)
         self.rowconfigure(0, weight=1)
+
+    def getDecim(self) -> int:
+        return int(self.deim_t.get().split(" ")[0])
 
     def emit(self):
         if self.te == None or not self.te.is_alive():
@@ -129,7 +141,7 @@ class TestingMode(tk.Frame):
         result = self.comm.startListening(
             int(float(self.freq.get()) * 1000),
             int(self.cyc.get()),
-            int(self.deim_t.get()),
+            self.getDecim(),
             float(self.trigger.get()),
             float(self.trigg_dd.get()),
             float(self.threshold.get()) / 100,
@@ -209,11 +221,11 @@ class TestingMode(tk.Frame):
 
     def generateReciever(self):
         reciever_title = tk.Label(self.reciever, text="Recieve signal")
-        reciever_title.grid(row=1, column=0, columnspan=4)
+        reciever_title.grid(row=1, column=0, columnspan=5)
 
         decimation = tk.OptionMenu(self.reciever, self.deim_t, *decim_opt)
-        decimation.grid(column=1, row=3, columnspan=2, sticky="w")
-        tk.Label(self.reciever, text="Decimation : ").grid(column=0, row=3, sticky="e")
+        decimation.grid(column=2, row=3, columnspan=3, sticky="e")
+        tk.Label(self.reciever, text="Decimation : ").grid(column=1, row=3, sticky="w")
 
         trigg = tk.Spinbox(
             self.reciever,
@@ -223,11 +235,11 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.trigger,
         )
-        trigg.grid(column=1, row=4, sticky="w")
+        trigg.grid(column=3, row=4, sticky="w")
         tk.Label(self.reciever, text="Trigger level : ").grid(
-            column=0, row=4, sticky="e"
+            column=1, row=4, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="V").grid(column=2, row=4, sticky="w")
+        tk.Label(self.reciever, text="V").grid(column=4, row=4, sticky="w")
 
         trigg_dd = tk.Spinbox(
             self.reciever,
@@ -237,11 +249,11 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.trigg_dd,
         )
-        trigg_dd.grid(column=1, row=5, sticky="w")
+        trigg_dd.grid(column=3, row=5, sticky="w")
         tk.Label(self.reciever, text="Decision trigger level : ").grid(
-            column=0, row=5, sticky="e"
+            column=1, row=5, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="V").grid(column=2, row=5, sticky="w")
+        tk.Label(self.reciever, text="V").grid(column=4, row=5, sticky="w")
 
         thre = tk.Spinbox(
             self.reciever,
@@ -251,26 +263,26 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.threshold,
         )
-        thre.grid(column=1, row=6, sticky="w")
+        thre.grid(column=3, row=6, sticky="w")
         tk.Label(self.reciever, text="Decision area threshold : ").grid(
-            column=0, row=6, sticky="e"
+            column=1, row=6, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="%").grid(column=2, row=6, sticky="w")
+        tk.Label(self.reciever, text="%").grid(column=4, row=6, sticky="w")
 
         tk.Button(self.reciever, text="Start listening", command=self.listen).grid(
-            column=0, row=8, columnspan=3
+            column=1, row=8, columnspan=4
         )
 
         self.result_label = tk.Label(self.reciever, text="RESULT :\n")
-        self.result_label.grid(column=0, row=9, columnspan=4)
+        self.result_label.grid(column=1, row=9, columnspan=4)
 
         self.RecepterStatusLabel = tk.Label(
             self.reciever, text=status[1][0], foreground=status[1][1]
         )
-        self.RecepterStatusLabel.grid(column=0, row=10, columnspan=3)
+        self.RecepterStatusLabel.grid(column=1, row=10, columnspan=4)
 
         self.reciever.columnconfigure(0, weight=1)
-        self.reciever.columnconfigure(2, weight=1)
+        self.reciever.columnconfigure(5, weight=1)
         self.reciever.rowconfigure(0, weight=3)
         self.reciever.rowconfigure(2, weight=6)
         self.reciever.rowconfigure(11, weight=6)

@@ -9,6 +9,9 @@ from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from matplotlib.projections import register_projection
 from matplotlib.axes import Axes
+import numpy as np
+
+from gui import decToFreq
 
 
 class MyAxes(Axes):
@@ -22,7 +25,7 @@ register_projection(MyAxes)
 
 
 class GuiGraph:
-    root: tk.Frame
+    root: tk.Widget | tk.Tk
     graph: FigureCanvasTkAgg
     toolbar: NavigationToolbar2Tk
     toggle: list[bool]
@@ -33,7 +36,7 @@ class GuiGraph:
         fig = Figure(figsize=(9, 1.7), dpi=88.9)
 
         self.sp = fig.add_subplot(111, projection="Ratio_le_y")
-
+        self.root = parent
         self.frame = tk.Frame(parent, background="white")
         self.graph = FigureCanvasTkAgg(fig, master=self.frame)
         self.graph.draw()
@@ -95,3 +98,54 @@ class GuiGraph:
         if self.cid != 0:
             self.graph.mpl_disconnect(self.cid)
         self.cid = self.graph.mpl_connect("key_press_event", self.onKeyPress)
+
+    def generateFourier(self, decimation) -> None:
+        tl: tk.Toplevel = tk.Toplevel(self.root)
+
+        tl.geometry("700x440")
+
+        fig = Figure(figsize=(7, 4), dpi=100)
+
+        sp = fig.add_subplot(111, projection="Ratio_le_y")
+
+        boundaries = self.sp.get_xlim()
+
+        print(boundaries)
+
+        item = self.plot_array[0][0][int(boundaries[0]) : int(boundaries[1])]
+
+        ft = np.fft.fft(item, 350)
+        freq = np.fft.fftfreq(350) * decToFreq.dectofreq[decimation] * 0.001
+        sp.bar(freq, ft.real**2 + ft.imag**2, width=2)
+        sp.set_xlim((-400, 400))
+
+        frame = tk.Frame(master=tl, background="white")
+        frame.pack()
+        graph = FigureCanvasTkAgg(fig, master=frame)
+        graph.draw()
+        graph.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        toolbar = NavigationToolbar2Tk(graph, frame, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(side=tk.BOTTOM, fill=tk.X)
+        graph.figure.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1)
+
+        toolbar.release_zoom = types.MethodType(self.release_zoom, toolbar)
+
+        print("ok")
+
+        def onresizetl(event):
+            if event.widget != tl:
+                return
+            graph.figure.set_size_inches(
+                4 * ((event.height - 40) / 400), 7 * (event.width / 700)
+            )
+
+            graph.get_tk_widget().config(
+                height=int(event.height) - 40,
+                width=int(event.width),
+            )
+
+            graph.draw()
+
+        tl.bind("<Configure>", onresizetl)
+        tl.mainloop()

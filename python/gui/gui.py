@@ -40,6 +40,7 @@ class Gui:
 
         self.root.bind("<Configure>", self.onResize)
         self.menu.bind("<<toggleEvent>>", self.onToggle)
+        self.menu.bind("<<FOURIER>>", self.onAskFourrier)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
 
     def updateGraphFromResultF2(self, event):
@@ -64,3 +65,12 @@ class Gui:
 
     def mainloop(self) -> None:
         self.root.mainloop()
+
+    def onAskFourrier(self, event) -> None:
+        index = self.interact.index(self.interact.select())
+        print(index)
+        if index == 1:
+            deci = self.interact.f2.getDecim()
+        else:
+            deci = 64
+        self.graph.generateFourier(deci)

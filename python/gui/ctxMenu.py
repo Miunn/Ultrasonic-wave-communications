@@ -16,6 +16,7 @@ class CtxMenu(tk.Menu):
 
         # Edit submenu
         edit = tk.Menu(master=master)
+        edit.add_command(label="Fourier transform", command=self.askFourier)
         self.add_cascade(label="Edit", menu=edit)
 
         # View submenu
@@ -68,3 +69,6 @@ class CtxMenu(tk.Menu):
         self.graph_toggle[idx][1] = not self.graph_toggle[idx][1]
         self.updateGraphMenu()
         self.event_generate("<<toggleEvent>>", when="now", x=idx)
+
+    def askFourier(self):
+        self.event_generate("<<FOURIER>>", when="now", x=64)
