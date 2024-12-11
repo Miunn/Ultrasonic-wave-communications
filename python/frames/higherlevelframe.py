@@ -1,7 +1,6 @@
-from sys import int_info
 import numpy as np
-from can import CanFrame
-from crypto import AESEncryption
+from frames.can import CanFrame
+from frames.crypto import AESEncryption
 from math import ceil
 
 

@@ -119,7 +119,9 @@ class TestingMode(tk.Frame):
         convtype = self.entry_t.get()
         text = self.emiter_entry.get("1.0", tk.END)
         print(text)
-        to_send = self.comm.convertToArray(text, convtype)
+        to_send = self.comm.encapsulate(
+            self.comm.convertToArray(text, convtype), self.common_t.get()
+        )
         print(to_send)
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.emit(

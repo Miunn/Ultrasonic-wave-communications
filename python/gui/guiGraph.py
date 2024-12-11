@@ -29,12 +29,12 @@ class GuiGraph:
     graph: FigureCanvasTkAgg
     toolbar: NavigationToolbar2Tk
     toggle: list[bool]
-    plot_array: list[tuple[list[float], str]]
+    plot_array: list[tuple[list[float], str, str]]
     cid: int = 0
 
     def __init__(self, parent: tk.Widget | tk.Tk):
         fig = Figure(figsize=(9, 1.7), dpi=88.9)
-
+        self.plot_array = []
         self.sp = fig.add_subplot(111, projection="Ratio_le_y")
         self.root = parent
         self.frame = tk.Frame(parent, background="white")
@@ -67,7 +67,7 @@ class GuiGraph:
         NavigationToolbar2Tk.release_zoom(s, event)
 
     # Clear and load a new plot. Can be called by another thread
-    def setPlot(self, plot_array: list[tuple[list[float], str]]):
+    def setPlot(self, plot_array: list[tuple[list[float], str, str]]):
         self.plot_array = plot_array
         self.toggle = [True for i in range(0, len(plot_array))]
         self.updatePlot(reset_lim=True)
@@ -100,6 +100,8 @@ class GuiGraph:
         self.cid = self.graph.mpl_connect("key_press_event", self.onKeyPress)
 
     def generateFourier(self, decimation) -> None:
+        if len(self.plot_array) == 0:
+            return
         tl: tk.Toplevel = tk.Toplevel(self.root)
 
         tl.geometry("700x440")
@@ -114,10 +116,12 @@ class GuiGraph:
 
         item = self.plot_array[0][0][int(boundaries[0]) : int(boundaries[1])]
 
-        ft = np.fft.fft(item, 350)
-        freq = np.fft.fftfreq(350) * decToFreq.dectofreq[decimation] * 0.001
-        sp.bar(freq, ft.real**2 + ft.imag**2, width=2)
-        sp.set_xlim((-400, 400))
+        length = len(item) if len(item) > 100 else 100
+
+        ft = np.fft.fft(item, length)
+        freq = np.fft.fftfreq(length) * decToFreq.dectofreq[decimation] * 0.001
+        sp.plot(freq, ft.real**2)
+        sp.set_xlim((0, 400))
 
         frame = tk.Frame(master=tl, background="white")
         frame.pack()

@@ -12,11 +12,12 @@ class CtxMenu(tk.Menu):
 
         # File submenu
         file = tk.Menu(master=master)
+        file.add_command(label="Save current graph as...", command=self.askSave)
+        file.add_command(label="Load graph from file...", command=self.askLoad)
         self.add_cascade(label="File", menu=file)
 
         # Edit submenu
         edit = tk.Menu(master=master)
-        edit.add_command(label="Fourier transform", command=self.askFourier)
         self.add_cascade(label="Edit", menu=edit)
 
         # View submenu
@@ -24,6 +25,7 @@ class CtxMenu(tk.Menu):
         self.view_graph = tk.Menu(master=master)
         self.view_graph.add_command(label="dummy")
         view.add_cascade(label="Graph", menu=self.view_graph)
+        view.add_command(label="Fourier transform", command=self.askFourier)
         self.add_cascade(label="View", menu=view)
 
         # Help submenu
@@ -72,3 +74,9 @@ class CtxMenu(tk.Menu):
 
     def askFourier(self):
         self.event_generate("<<FOURIER>>", when="now", x=64)
+
+    def askSave(self):
+        self.event_generate("<<SAVE>>", when="now")
+
+    def askLoad(self):
+        self.event_generate("<<LOAD>>", when="now")
