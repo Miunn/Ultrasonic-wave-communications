@@ -60,7 +60,7 @@ class Read_Api:
         integrals = self.compute_integrals(lpf, freq, cyc, decimation, dec_trig)
 
         bits = []
-        threshold = dec_thresh * 19.5
+        threshold = dec_thresh * get_one_block_step(freq, cyc, decimation) * 0.5
         print(f"Threshold: {threshold}")
         for integral in integrals:
             if integral > threshold:

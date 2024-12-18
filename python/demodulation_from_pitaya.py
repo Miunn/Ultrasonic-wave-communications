@@ -74,10 +74,12 @@ if __name__ == "__main__":
         #    probing = [float(s) for s in f.readline().split()][75:140]
         freq=250000
         decimation=64
-        cyc=5
+        cyc=2
         sig_trig=0.6
+
+        import classifiedjson
         with open(sys.argv[1], 'r') as f:
-            buff = [float(s) for s in f.readline().split()]
+            buff = classifiedjson.load(f)[0][0]
         
         import scipy.signal
         import scipy.integrate
@@ -127,7 +129,7 @@ if __name__ == "__main__":
         
         prev_x = 0
         for x in range(trig_x, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
-            #cross_ax.axvline(x, color='r')
+            signal_ax.axvline(x, color='r')
 
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
@@ -138,9 +140,9 @@ if __name__ == "__main__":
 
         received_bits = []
         for integral in integrals:
-            if integral > 0.3 * 19.5:
+            if integral > 0.3 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(1)
-            elif integral < -0.3 * 19.5:
+            elif integral < -0.3 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(0)
 
         print(len(integrals))
