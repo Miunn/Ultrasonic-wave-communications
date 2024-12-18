@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 from gui.guiGraph import GuiGraph
 from gui.ctxMenu import CtxMenu
 import gui.interactive.hub as ihub
-from numpy import ndarray
+from numpy import append, ndarray
 from classifiedjson import dumps, load
 from datetime import datetime
 
@@ -91,7 +91,10 @@ class Gui:
             filetypes=[("IOron saves", ".iro"), ("all files", "*")],
         )
         if f != "":
-            serial_data = dumps(self.graph.plot_array)
+            plt = []
+            for i in self.graph.plot_array:
+                plt.append((list(i[0]), i[1], i[2]))
+            serial_data = dumps(plt)
             with open(f, "w") as file:
                 file.write(serial_data)
 
