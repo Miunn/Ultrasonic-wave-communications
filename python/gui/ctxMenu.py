@@ -14,6 +14,9 @@ class CtxMenu(tk.Menu):
         file = tk.Menu(master=master)
         file.add_command(label="Save current graph as...", command=self.askSave)
         file.add_command(label="Load graph from file...", command=self.askLoad)
+        f_export = tk.Menu(master=file)
+        file.add_cascade(label="Export to...", menu=f_export)
+        f_export.add_command(label="Matlab", command=self.ask_export_matlab)
         self.add_cascade(label="File", menu=file)
 
         # Edit submenu
@@ -80,3 +83,6 @@ class CtxMenu(tk.Menu):
 
     def askLoad(self):
         self.event_generate("<<LOAD>>", when="now")
+
+    def ask_export_matlab(self):
+        self.event_generate("<<EXPORT_MATLAB>>", when="now")

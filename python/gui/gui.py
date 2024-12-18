@@ -9,6 +9,8 @@ import gui.interactive.hub as ihub
 from numpy import append, ndarray
 from classifiedjson import dumps, load
 from datetime import datetime
+import numpy as np
+import gui.decToFreq as decToFreq
 
 from gui.communication_interface import CommunicationInterface
 
@@ -49,6 +51,7 @@ class Gui:
         self.menu.bind("<<FOURIER>>", self.onAskFourrier)
         self.menu.bind("<<SAVE>>", self.onSave)
         self.menu.bind("<<LOAD>>", self.onLoad)
+        self.menu.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
 
     def updateGraphFromResultF2(self, event):
@@ -124,6 +127,37 @@ class Gui:
                     return
             self.setPlot(data)
             print("ok")
+
+    def onExportMatlab(self, evt):
+        t = datetime.today().__str__().replace(" ", "_").replace(":", "-").split(".")[0]
+        f = filedialog.asksaveasfilename(
+            defaultextension="txt",
+            initialfile="ioron_" + t + "_yaxis.txt",
+            filetypes=[("Text file", ".txt"), ("all files", "*")],
+        )
+        f2 = filedialog.asksaveasfilename(
+            defaultextension="txt",
+            initialfile="ioron_" + t + "_xaxis.txt",
+            filetypes=[("Text file", ".txt"), ("all files", "*")],
+        )
+        print(f, f2)
+        if f != "" and f2 != "":
+            print("export")
+            serial_data = " ".join([str(x) for x in self.graph.plot_array[0][0]])
+            with open(f, "w") as file:
+                file.write(serial_data)
+            serial_data = " ".join(
+                [
+                    str(x)
+                    for x in (
+                        np.arange(0, len(list(self.graph.plot_array[0][0])))
+                        / decToFreq.dectofreq[64]
+                    )
+                ]
+            )
+            with open(f2, "w") as file:
+                file.write(serial_data)
+            print("done")
 
     def tl_load_error(self):
         tl = tk.Toplevel(self.root)
