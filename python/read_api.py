@@ -22,10 +22,11 @@ class Read_Api:
         data = self.pitayaReader.read(decimation, sig_trig)
 
         # Correlate the signal with the first sine as probing signal
-        correlated = self.correlate_signal(data[75:140], data)
+        #correlated = self.correlate_signal(data[75:140], data)
 
         # Normalize the signal
-        normalized_correlated = correlated / np.max(correlated)
+        #normalized_correlated = correlated / np.max(correlated)
+        normalized_correlated = data / np.max(data)
 
         demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
 

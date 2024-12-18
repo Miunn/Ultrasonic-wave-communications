@@ -87,11 +87,11 @@ if __name__ == "__main__":
         import math
 
         # Correlate the signal with the first sine as probing signal
-        probing_sine = buff[90:90+int(get_one_block_step(freq, 5, decimation))]
-        correlated = Read_Api.correlate_signal(probing_sine, buff)
+        #probing_sine = buff[80:130]
+        #correlated = Read_Api.correlate_signal(probing_sine, buff)
 
         # Normalize the signal
-        normalized_correlated = correlated / np.max(correlated)
+        normalized_correlated = buff / np.max(buff)
 
         demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
 
@@ -109,15 +109,10 @@ if __name__ == "__main__":
             x = float(linspace[i])
             c[i] = math.cos(f * x + np.pi/2)
         
-        probing_ax.plot(c)
-        align_correlation = np.correlate(buff, buff, "same")
-        align_correlation = align_correlation / np.max(align_correlation)
-        cross_ax.plot(align_correlation)
-        #cross_ax.plot(corr)
-        #cross_ax.plot(demodulated)
-        #cross_ax.plot(normalized_correlated)
-        #cross_ax.plot(demodulated)
-        #cross_ax.plot(lpf, 'g')
+        #probing_ax.plot(probing_sine)
+        signal_ax.plot(buff)
+        signal_ax.plot(demodulated)
+        signal_ax.plot(lpf, 'g')
         #cross_ax.plot([0]*len(lpf))
         #cross_ax.plot([0.5]*len(lpf), 'purple')
         #cross_ax.plot([-0.5]*len(lpf), 'purple')
