@@ -1,7 +1,6 @@
-from sys import int_info
 import numpy as np
-from can import CanFrame
-from crypto import AESEncryption
+from frames.can import CanFrame
+from frames.crypto import AESEncryption
 from math import ceil
 
 
@@ -29,6 +28,7 @@ class IOronSTD1Frame(CanFrame):
             temp_data[i] = ctr % 2
             ctr //= 2
         self.data = np.concatenate((temp_data, arrr, arriv))
+        print(self.data)
 
         return self.UNSAFE_ToIntArray()
 
@@ -36,11 +36,13 @@ class IOronSTD1Frame(CanFrame):
     def FromIntArrayWKey(array: np.ndarray, key: bytes) -> "IOronSTD1Frame":
         ok = IOronSTD1Frame.FromIntArray(array)
 
+        print(ok)
+
         length = 0
         for i in range(0, 8):
             length = length * 2 + ok.data[i]
 
-        # print(length)
+        print(length)
 
         arrr = np.zeros(length * 8, int)
         for i in range(0, length * 8):
@@ -80,23 +82,23 @@ class IOronSTD1Frame(CanFrame):
             tmp[1 + i] = id % 2
             id = id // 2
         # RTR bit
-        tmp[13] = self.request
+        tmp[12] = self.request
         # IDE bit
-        tmp[14] = 0
+        tmp[13] = 0
         # r0 bit
-        tmp[15] = 0
+        tmp[14] = 0
         # DLC quad
         dlc = ceil(len(self.data) / 8)
 
         for i in range(0, 6):
-            tmp[16 + i] = dlc % 2
+            tmp[15 + i] = dlc % 2
             dlc = dlc // 2
 
         # data field
-        cursor = 22
+        cursor = 21
         if len(self.data) % 8 != 0:
             for i in range(0, 8 - (len(self.data) % 8)):
-                tmp[22 + len(self.data) + i]
+                tmp[21 + len(self.data) + i]
                 cursor += 1
         for i in range(0, len(self.data)):
             tmp[cursor + i] = self.data[i]
@@ -151,13 +153,13 @@ class IOronSTD1Frame(CanFrame):
         is_request = unstuffed[12]
         # DLC
         data_len = 0
-        for i in range(21, 15, -1):
+        for i in range(20, 14, -1):
             data_len = data_len * 2 + unstuffed[i]
 
         # DATA
         data = np.zeros(data_len * 8, int)
-        for i in range(22, 22 + (data_len * 8)):
-            data[i - 22] = unstuffed[i]
+        for i in range(21, 21 + (data_len * 8)):
+            data[i - 21] = unstuffed[i]
 
         return CanFrame(ident, data, request=is_request, ack=is_ack)
 

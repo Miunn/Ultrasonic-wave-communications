@@ -1,6 +1,9 @@
 from numpy import ndarray, zeros, array
 import time
 
+from frames.can import CanFrame
+from frames.higherlevelframe import IOronSTD1Frame
+
 
 class CommunicationInterface:
     addr: str
@@ -105,6 +108,49 @@ class CommunicationInterface:
             case _:
                 raise ValueError()
 
+    @staticmethod
+    def encapsulate(value: ndarray, cap_type) -> ndarray:
+        match cap_type:
+            case "Plain":
+                return value
+            case "CAN":
+                x = min(64, len(value))
+                return CanFrame(0x123, value[:x], False, False).ToIntArray()
+            case "ENCcan":
+                x = min(64, len(value))
+                c = CanFrame(0x123, value[:x], False, False)
+                return IOronSTD1Frame(0x456, c, False, False).ToIntArrayWKey(
+                    b"sau6ctrobon"
+                )
+            case _:
+                raise ValueError()
+
+    @staticmethod
+    def decapsulate(value: ndarray, cap_type) -> ndarray:
+        match cap_type:
+            case "Plain":
+                return value
+            case "CAN":
+                return CanFrame.FromIntArray(CommunicationInterface.trimCan(value)).data
+            case "ENCcan":
+                return IOronSTD1Frame.FromIntArrayWKey(
+                    CommunicationInterface.trimCan(value), b"sau6ctrobon"
+                ).data_.data
+            case _:
+                raise ValueError()
+
+    @staticmethod
+    def trimCan(value: ndarray) -> ndarray:
+        compteur = 0
+        for i in range(0, len(value)):
+            if value[i] == 0:
+                compteur = 0
+            else:
+                compteur += 1
+            if compteur == 11:
+                return value[0, i + 1]
+        return value
+
     def emergencyStop(self):
         pass
 
@@ -116,7 +162,7 @@ if __name__ == "__main__":
     )
     print(a, a == b, b)
 
-    a = "DEADBEEF"
+    a = "1234DEADBEEF"
 
     h = CommunicationInterface.convertHexString(a)
     b = CommunicationInterface.convertToHexString(h)
