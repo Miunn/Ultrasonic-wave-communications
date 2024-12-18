@@ -8,6 +8,7 @@ import threading
 from gui.communication_interface import CommunicationInterface
 from gui.ErrorTopLevel import ErrorTopLevel
 from gui import decToFreq
+from frames.can import CanFrame
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
