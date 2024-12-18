@@ -6,6 +6,9 @@ import numpy as np
 import threading
 
 from gui.communication_interface import CommunicationInterface
+from gui.ErrorTopLevel import ErrorTopLevel
+from gui import decToFreq
+from frames.can import CanFrame
 
 
 frame_opt = ["Plain", "CAN", "ENCcan"]
@@ -21,7 +24,15 @@ status: list[tuple[str, str]] = [
     ("Running...", "orange"),
 ]
 
-decim_opt = ["1", "8", "64", "1024"]
+
+def generate_deim_text(v):
+    if decToFreq.dectofreq[v] < 1000000:
+        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)} KHz)"
+    else:
+        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)*0.001} MHz)"
+
+
+decim_opt = [generate_deim_text(i) for i in [1, 8, 64, 1024]]
 
 
 class TestingMode(tk.Frame):
@@ -53,6 +64,8 @@ class TestingMode(tk.Frame):
 
     graphToUpdate: list[tuple[list[float], str, str]]
 
+    emiter_entry: tk.Text
+
     def __init__(self, master, comm):
         super().__init__(master=master)
         self.te = None
@@ -63,7 +76,7 @@ class TestingMode(tk.Frame):
         self.entry_t = tk.StringVar(self, value="Bits")
         self.entry_v = tk.StringVar(self, value="")
         self.common_t = tk.StringVar(self, value="Plain")
-        self.deim_t = tk.StringVar(self, value="64")
+        self.deim_t = tk.StringVar(self, value=generate_deim_text(64))
         self.trigger = tk.StringVar(self, "0.6")
         self.trigg_dd = tk.StringVar(self, "0.2")
         self.threshold = tk.StringVar(self, "30")
@@ -86,6 +99,9 @@ class TestingMode(tk.Frame):
         self.columnconfigure(4, weight=1)
         self.rowconfigure(0, weight=1)
 
+    def getDecim(self) -> int:
+        return int(self.deim_t.get().split(" ")[0])
+
     def emit(self):
         if self.te == None or not self.te.is_alive():
             if self.te != None:
@@ -101,9 +117,16 @@ class TestingMode(tk.Frame):
             self.tr.start()
 
     def t_emit(self):
+        convtype = self.entry_t.get()
+        text = self.emiter_entry.get("1.0", tk.END)
+        print(text)
+        to_send = self.comm.encapsulate(
+            self.comm.convertToArray(text, convtype), self.common_t.get()
+        )
+        print(to_send)
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.emit(
-            np.zeros(2, int), int(float(self.freq.get()) * 1000), int(self.cyc.get())
+            to_send, int(float(self.freq.get()) * 1000), int(self.cyc.get())
         )
         if result == 0:
             self.EmitterStatusLabel.configure(
@@ -113,16 +136,18 @@ class TestingMode(tk.Frame):
             self.EmitterStatusLabel.configure(
                 text=status[0][0], foreground=status[0][1]
             )
+            ErrorTopLevel(str(result)).mainloop()
 
     def t_listen(self):
+        convtype = self.entry_t.get()
         self.RecepterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.startListening(
             int(float(self.freq.get()) * 1000),
             int(self.cyc.get()),
-            int(self.deim_t.get()),
+            self.getDecim(),
             float(self.trigger.get()),
             float(self.trigg_dd.get()),
-            float(self.threshold.get()),
+            float(self.threshold.get()) / 100,
         )
         if result[0] == 0:
             self.RecepterStatusLabel.configure(
@@ -131,9 +156,13 @@ class TestingMode(tk.Frame):
             self.graphToUpdate = result[2]
             self.event_generate("<<ChangeGraph>>")
             self.result_label.configure(
-                text="RESULT :\n" + "".join([str(r) for r in result[1]])
+                text="RESULT :\n"
+                + self.comm.convertToStringM(
+                    self.comm.decapsulate(result[1], self.common_t.get()), convtype
+                )
             )
         else:
+            self.result_label.configure(text="RESULT :\n")
             self.RecepterStatusLabel.configure(
                 text=status[0][0], foreground=status[0][1]
             )
@@ -142,8 +171,8 @@ class TestingMode(tk.Frame):
         emiter_title = tk.Label(self.emmiter, text="Signal generation")
         emiter_title.grid(row=0, column=0)
 
-        emiter_entry = tk.Text(self.emmiter, height=4, width=30)
-        emiter_entry.grid(column=0, row=3)
+        self.emiter_entry = tk.Text(self.emmiter, height=4, width=30)
+        self.emiter_entry.grid(column=0, row=3)
 
         emiter_btn1 = tk.Button(self.emmiter, text="Emit signal", command=self.emit)
         emiter_btn1.grid(row=5, column=0)
@@ -198,11 +227,11 @@ class TestingMode(tk.Frame):
 
     def generateReciever(self):
         reciever_title = tk.Label(self.reciever, text="Recieve signal")
-        reciever_title.grid(row=1, column=0, columnspan=4)
+        reciever_title.grid(row=1, column=0, columnspan=5)
 
         decimation = tk.OptionMenu(self.reciever, self.deim_t, *decim_opt)
-        decimation.grid(column=1, row=3, columnspan=2, sticky="w")
-        tk.Label(self.reciever, text="Decimation : ").grid(column=0, row=3, sticky="e")
+        decimation.grid(column=2, row=3, columnspan=3, sticky="e")
+        tk.Label(self.reciever, text="Decimation : ").grid(column=1, row=3, sticky="w")
 
         trigg = tk.Spinbox(
             self.reciever,
@@ -212,11 +241,11 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.trigger,
         )
-        trigg.grid(column=1, row=4, sticky="w")
+        trigg.grid(column=3, row=4, sticky="w")
         tk.Label(self.reciever, text="Trigger level : ").grid(
-            column=0, row=4, sticky="e"
+            column=1, row=4, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="V").grid(column=2, row=4, sticky="w")
+        tk.Label(self.reciever, text="V").grid(column=4, row=4, sticky="w")
 
         trigg_dd = tk.Spinbox(
             self.reciever,
@@ -226,11 +255,11 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.trigg_dd,
         )
-        trigg_dd.grid(column=1, row=5, sticky="w")
+        trigg_dd.grid(column=3, row=5, sticky="w")
         tk.Label(self.reciever, text="Decision trigger level : ").grid(
-            column=0, row=5, sticky="e"
+            column=1, row=5, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="V").grid(column=2, row=5, sticky="w")
+        tk.Label(self.reciever, text="V").grid(column=4, row=5, sticky="w")
 
         thre = tk.Spinbox(
             self.reciever,
@@ -240,26 +269,26 @@ class TestingMode(tk.Frame):
             width=6,
             textvariable=self.threshold,
         )
-        thre.grid(column=1, row=6, sticky="w")
+        thre.grid(column=3, row=6, sticky="w")
         tk.Label(self.reciever, text="Decision area threshold : ").grid(
-            column=0, row=6, sticky="e"
+            column=1, row=6, sticky="w", columnspan=2
         )
-        tk.Label(self.reciever, text="%").grid(column=2, row=6, sticky="w")
+        tk.Label(self.reciever, text="%").grid(column=4, row=6, sticky="w")
 
         tk.Button(self.reciever, text="Start listening", command=self.listen).grid(
-            column=0, row=8, columnspan=3
+            column=1, row=8, columnspan=4
         )
 
         self.result_label = tk.Label(self.reciever, text="RESULT :\n")
-        self.result_label.grid(column=0, row=9, columnspan=4)
+        self.result_label.grid(column=1, row=9, columnspan=4)
 
         self.RecepterStatusLabel = tk.Label(
             self.reciever, text=status[1][0], foreground=status[1][1]
         )
-        self.RecepterStatusLabel.grid(column=0, row=10, columnspan=3)
+        self.RecepterStatusLabel.grid(column=1, row=10, columnspan=4)
 
         self.reciever.columnconfigure(0, weight=1)
-        self.reciever.columnconfigure(2, weight=1)
+        self.reciever.columnconfigure(5, weight=1)
         self.reciever.rowconfigure(0, weight=3)
         self.reciever.rowconfigure(2, weight=6)
         self.reciever.rowconfigure(11, weight=6)

@@ -4,8 +4,8 @@ from gui.communication_interface import CommunicationInterface
 from read_api import Read_Api
 from write_api import Write_Api
 
-class CommunicationPitaya(CommunicationInterface):
 
+class CommunicationPitaya(CommunicationInterface):
     def __init__(self, addr):
         super().__init__(addr)
 
@@ -17,21 +17,26 @@ class CommunicationPitaya(CommunicationInterface):
         return 0
 
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
-        voltage, demod, lpf, bits = self.read_api.startListening(freq, cyc, decimation, sig_trig, dec_trig, dec_thesh)
+        voltage, demod, lpf, bits = self.read_api.startListening(
+            freq, cyc, decimation, sig_trig, dec_trig, dec_thesh
+        )
 
+        print(f"[*] Read : {bits}")
         return [
             0,
             bits,
             [
                 (voltage, "#BBBBFF", "Voltage"),
                 (demod, "#FFBB99", "Demodulated"),
-                (lpf, "red", "Low-pass filtered")
-            ]
+                (lpf, "red", "Low-pass filtered"),
+            ],
         ]
 
     def emergencyStop(self):
         return super().emergencyStop()
 
+
 if __name__ == "__main__":
-    g = Gui(CommunicationPitaya("10.5.0.0"))
+    g = Gui(CommunicationPitaya("10.42.0.125"))
+    # g = Gui()
     g.mainloop()

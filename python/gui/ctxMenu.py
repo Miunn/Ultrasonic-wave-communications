@@ -12,6 +12,11 @@ class CtxMenu(tk.Menu):
 
         # File submenu
         file = tk.Menu(master=master)
+        file.add_command(label="Save current graph as...", command=self.askSave)
+        file.add_command(label="Load graph from file...", command=self.askLoad)
+        f_export = tk.Menu(master=file)
+        file.add_cascade(label="Export to...", menu=f_export)
+        f_export.add_command(label="Matlab", command=self.ask_export_matlab)
         self.add_cascade(label="File", menu=file)
 
         # Edit submenu
@@ -23,6 +28,7 @@ class CtxMenu(tk.Menu):
         self.view_graph = tk.Menu(master=master)
         self.view_graph.add_command(label="dummy")
         view.add_cascade(label="Graph", menu=self.view_graph)
+        view.add_command(label="Fourier transform", command=self.askFourier)
         self.add_cascade(label="View", menu=view)
 
         # Help submenu
@@ -68,3 +74,15 @@ class CtxMenu(tk.Menu):
         self.graph_toggle[idx][1] = not self.graph_toggle[idx][1]
         self.updateGraphMenu()
         self.event_generate("<<toggleEvent>>", when="now", x=idx)
+
+    def askFourier(self):
+        self.event_generate("<<FOURIER>>", when="now", x=64)
+
+    def askSave(self):
+        self.event_generate("<<SAVE>>", when="now")
+
+    def askLoad(self):
+        self.event_generate("<<LOAD>>", when="now")
+
+    def ask_export_matlab(self):
+        self.event_generate("<<EXPORT_MATLAB>>", when="now")

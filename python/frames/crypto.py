@@ -1,7 +1,7 @@
 from Crypto import Cipher
 import numpy as np
 from Crypto.Cipher import AES
-import can as can
+import frames.can as can
 
 
 class AESEncryption:

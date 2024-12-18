@@ -1,6 +1,8 @@
 import numpy as np
 from math import ceil
 
+from numpy.core.multiarray import concatenate
+
 
 class CanFrame:
     ident: int
@@ -19,33 +21,29 @@ class CanFrame:
     def ToIntArray(self) -> np.ndarray:
         if len(self.data) > 64:
             raise ValueError("data len cannot be more than 64 bits")
-        return self.UNSAFE_ToIntArray()
-
-    def UNSAFE_ToIntArray(self) -> np.ndarray:
-        tmp = np.zeros(58 + len(self.data), int)
+        tmp = np.zeros(108, int)
         # arbitration field
         id = self.ident
         for i in range(0, 11):
             tmp[1 + i] = id % 2
             id = id // 2
         # RTR bit
-        tmp[13] = self.request
+        tmp[12] = self.request
         # IDE bit
-        tmp[14] = 0
+        tmp[13] = 0
         # r0 bit
-        tmp[15] = 0
+        tmp[14] = 0
         # DLC quad
         dlc = ceil(len(self.data) / 8)
-        # print(dlc)
         for i in range(0, 4):
             tmp[16 + i] = dlc % 2
             dlc = dlc // 2
 
         # data field
-        cursor = 20
+        cursor = 19
         if len(self.data) % 8 != 0:
             for i in range(0, 8 - (len(self.data) % 8)):
-                tmp[20 + len(self.data) + i]
+                tmp[19 + len(self.data) + i]
                 cursor += 1
         for i in range(0, len(self.data)):
             tmp[cursor + i] = self.data[i]
@@ -70,7 +68,7 @@ class CanFrame:
         # Bit Stuffing
         out = self.BitStuff(tmp[: cursor - 13])
 
-        return np.concatenate((out, tmp[cursor - 13 : cursor]))
+        return concatenate((out, tmp[cursor - 13 : cursor]))
 
     @staticmethod
     def FromIntArray(array: np.ndarray) -> "CanFrame":
@@ -81,7 +79,7 @@ class CanFrame:
                 raise ValueError("the given frame has no EOF and IFS or it's invalid")
         if array[len(array) - 11] != 1:
             raise ValueError("ACK delimiter is not 1")
-        is_ack = array[len(array) - 12]
+        is_ack = array[len(array) - 12] == 1
 
         if array[len(array) - 13] != 1:
             raise ValueError("CRC delimiter is not 1")
@@ -97,18 +95,16 @@ class CanFrame:
         for i in range(11, 0, -1):
             ident = ident * 2 + unstuffed[i]
 
-        is_request = unstuffed[12]
+        is_request = unstuffed[12] == 1
         # DLC
         data_len = 0
-        for i in range(19, 15, -1):
+        for i in range(18, 15, -1):
             data_len = data_len * 2 + unstuffed[i]
-
-        # print(data_len)
 
         # DATA
         data = np.zeros(data_len * 8, int)
-        for i in range(20, 20 + (data_len * 8)):
-            data[i - 20] = unstuffed[i]
+        for i in range(19, 19 + (data_len * 8)):
+            data[i - 19] = unstuffed[i]
         return CanFrame(ident, data, request=is_request, ack=is_ack)
 
     @staticmethod
@@ -200,7 +196,7 @@ class CanFrame:
 
 
 if __name__ == "__main__":
-    c = CanFrame(0x123, np.array([0, 0, 0, 0, 1, 0, 1, 0], int))
+    c = CanFrame(0x123, np.array([0, 0, 0, 0, 1, 0, 1, 0], int), request=True)
     print("Generating :", c)
     unc = CanFrame.FromIntArray(c.ToIntArray())
-    print("Decrypting :", c)
+    print("Decrypting :", unc)
