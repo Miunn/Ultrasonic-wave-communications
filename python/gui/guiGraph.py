@@ -1,4 +1,3 @@
-from abc import update_abstractmethods
 import tkinter as tk
 import types
 from matplotlib.backends.backend_tkagg import (

@@ -74,7 +74,7 @@ if __name__ == "__main__":
         #    probing = [float(s) for s in f.readline().split()][75:140]
         freq=250000
         decimation=64
-        cyc=2
+        cyc=5
         sig_trig=0.6
 
         import classifiedjson
@@ -99,11 +99,11 @@ if __name__ == "__main__":
 
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
 
-        fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
+        fig, (signal_ax) = plot.subplots(1)
         #probing_ax.plot(probing_sine)
-        signal_ax.plot(buff)
 
         signal_frequency = get_sampling_signal_frequency(freq, decimation)
+        print(signal_frequency)
         f = 2 * signal_frequency * np.pi
         linspace = np.linspace(0, len(buff), len(buff))
         c = np.linspace(0, len(buff), len(buff))
@@ -113,12 +113,15 @@ if __name__ == "__main__":
         
         #probing_ax.plot(probing_sine)
         signal_ax.plot(buff)
-        signal_ax.plot(demodulated)
-        signal_ax.plot(lpf, 'g')
-        #cross_ax.plot([0]*len(lpf))
-        #cross_ax.plot([0.5]*len(lpf), 'purple')
-        #cross_ax.plot([-0.5]*len(lpf), 'purple')
+        #signal_ax.plot(demodulated)
+        #signal_ax.plot(lpf, 'g')
+        #signal_ax.plot([0]*len(lpf), 'purple')
+        #signal_ax.plot([0.5]*len(lpf), 'purple')
+        #signal_ax.plot([-0.5]*len(lpf), 'purple')
         len_buff = len(buff)
+
+        for x in range(119, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
+            signal_ax.axvline(x, color='r')
 
         integrals = []
         trig_x = 0
@@ -129,34 +132,32 @@ if __name__ == "__main__":
         
         prev_x = 0
         for x in range(trig_x, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
-            signal_ax.axvline(x, color='r')
+            #signal_ax.axvline(x, color='r')
 
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
             
             prev_x = x
 
-        print(integrals)
-
         received_bits = []
         for integral in integrals:
-            if integral > 0.3 * get_one_block_step(freq, cyc, decimation) * 0.5:
+            if integral > 0.1 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(1)
-            elif integral < -0.3 * get_one_block_step(freq, cyc, decimation) * 0.5:
+            elif integral < -0.1 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(0)
 
         print(len(integrals))
         print(len(received_bits))
         print(''.join([str(i) for i in received_bits]))
 
-        with open("signal-dec-64-work-voltage-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in buff]))
+        #with open("signal-dec-64-work-voltage-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in buff]))
 
-        with open("signal-dec-64-work-demod-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in demodulated]))
+        #with open("signal-dec-64-work-demod-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in demodulated]))
 
-        with open("signal-dec-64-work-lpf-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in lpf]))
+        #with open("signal-dec-64-work-lpf-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in lpf]))
 
     else:
 

@@ -53,9 +53,11 @@ if __name__ == '__main__':
         sys.exit(0)
     
     bits = [int(i) for i in sys.argv[1]]
-    mod = psk_modulation(bits, cyc=1)
-    wp = Write_Pitaya(ip='10.42.0.125')
-    wp.write(mod, len(bits), 1, channel=1, wave_form='arbitrary', freq=250000, burst=True)
+    mod = psk_modulation(bits, cyc=5)
+    plt.xlim(0, 16384)
+    plt.plot(mod)
+    #wp = Write_Pitaya(ip='10.42.0.125')
+    #wp.write(mod, len(bits), 1, channel=1, wave_form='arbitrary', freq=200000, burst=True)
 
     plt.plot(mod)
     plt.show()

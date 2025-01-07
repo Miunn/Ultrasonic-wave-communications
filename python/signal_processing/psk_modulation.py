@@ -10,7 +10,7 @@ FREQ = 5
 
 def psk_modulation(bits: List[int], cyc: int = 5):
     len_bits = len(bits)
-    pts_bits = 16384//len(bits)
+    pts_bits = 16384//(len(bits)+2)
     linspace = np.linspace(0, len_bits, len_bits * pts_bits)
     c_t = np.cos(cyc * 2 * np.pi * linspace + np.pi/2)
 
@@ -22,7 +22,11 @@ def psk_modulation(bits: List[int], cyc: int = 5):
         else:
             assert bits[i] == 1
             modulated[i * pts_bits:(i + 1) * pts_bits] = 1
-    return modulated * c_t
+    
+    first_positive = c_t[:pts_bits]
+    waiting =  np.zeros(pts_bits)
+    modulation = (modulated * c_t)[:len_bits * pts_bits]
+    return np.concatenate((first_positive, waiting, modulation))
 
 def butter_lowpass(cutoff, fs, order=5):
     nyq = 0.5 * fs
