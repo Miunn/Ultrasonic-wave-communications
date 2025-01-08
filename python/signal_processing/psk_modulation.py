@@ -27,6 +27,7 @@ def psk_modulation(bits: List[int], cyc: int = 5):
     waiting =  np.zeros(pts_bits)
     modulation = (modulated * c_t)[:len_bits * pts_bits]
     return np.concatenate((first_positive, waiting, modulation))
+    #return modulation
 
 def butter_lowpass(cutoff, fs, order=5):
     nyq = 0.5 * fs

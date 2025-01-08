@@ -53,7 +53,7 @@ if __name__ == '__main__':
         sys.exit(0)
     
     bits = [int(i) for i in sys.argv[1]]
-    mod = psk_modulation(bits, cyc=5)
+    mod = psk_modulation(bits, cyc=3)
     plt.xlim(0, 16384)
     plt.plot(mod)
     #wp = Write_Pitaya(ip='10.42.0.125')
