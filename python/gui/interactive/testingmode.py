@@ -156,7 +156,10 @@ class TestingMode(tk.Frame):
             self.graphToUpdate = result[2]
             self.event_generate("<<ChangeGraph>>")
             self.result_label.configure(
-                text="RESULT :\n" + self.comm.convertToStringM(result[1], convtype)
+                text="RESULT :\n"
+                + self.comm.convertToStringM(
+                    self.comm.decapsulate(result[1], self.common_t.get()), convtype
+                )
             )
         else:
             self.result_label.configure(text="RESULT :\n")

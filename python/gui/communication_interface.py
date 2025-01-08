@@ -120,7 +120,7 @@ class CommunicationInterface:
                 x = min(64, len(value))
                 c = CanFrame(0x123, value[:x], False, False)
                 return IOronSTD1Frame(0x456, c, False, False).ToIntArrayWKey(
-                    b"sau6ctrobon"
+                    b"sau6ctrobon88130zer"
                 )
             case _:
                 raise ValueError()
