@@ -12,11 +12,9 @@ class CtxMenu(tk.Menu):
 
         # File submenu
         file = tk.Menu(master=master)
+        file.add_command(label="Connect to RedPitaya", command=self.askConnect)
         file.add_command(label="Save current graph as...", command=self.askSave)
         file.add_command(label="Load graph from file...", command=self.askLoad)
-        f_export = tk.Menu(master=file)
-        file.add_cascade(label="Export to...", menu=f_export)
-        f_export.add_command(label="Matlab", command=self.ask_export_matlab)
         self.add_cascade(label="File", menu=file)
 
         # Edit submenu
@@ -73,16 +71,16 @@ class CtxMenu(tk.Menu):
         print("toggleEvent :", idx)
         self.graph_toggle[idx][1] = not self.graph_toggle[idx][1]
         self.updateGraphMenu()
-        self.event_generate("<<toggleEvent>>", when="now", x=idx)
+        self.master.event_generate("<<toggleEvent>>", when="now", x=idx)
+
+    def askConnect(self):
+        self.master.event_generate("<<CONNECT>>", when="now")
 
     def askFourier(self):
-        self.event_generate("<<FOURIER>>", when="now", x=64)
+        self.master.event_generate("<<FOURIER>>", when="now", x=64)
 
     def askSave(self):
-        self.event_generate("<<SAVE>>", when="now")
+        self.master.event_generate("<<SAVE>>", when="now")
 
     def askLoad(self):
-        self.event_generate("<<LOAD>>", when="now")
-
-    def ask_export_matlab(self):
-        self.event_generate("<<EXPORT_MATLAB>>", when="now")
+        self.master.event_generate("<<LOAD>>", when="now")

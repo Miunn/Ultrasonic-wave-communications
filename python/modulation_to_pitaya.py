@@ -7,16 +7,18 @@ import matplotlib.pyplot as plt
 from utils import get_signal_frequency_from_sampling
 
 class Write_Pitaya:
-    IP = '169.254.67.34'
+    IP = '10.42.0.125'
 
-    def __init__(self, ip='169.254.67.34'):
+    def __init__(self, ip='10.42.0.125'):
         self.IP = ip
 
+    def connect(self):
         try:
             self.rp_s = scpi.scpi(self.IP, timeout=10)
+            return True
         except Exception as e:
             print(f"Error: {e}")
-            sys.exit(1)
+            return False
 
     def close(self):
         self.rp_s.close()

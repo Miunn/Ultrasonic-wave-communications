@@ -6,6 +6,9 @@ class Write_Api:
     def __init__(self, ip):
         self.pitayaWriter = Write_Pitaya(ip)
 
+    def connect(self):
+        return self.pitayaWriter.connect()
+
     def write(self, bits, freq, cyc):
         if len(bits) == 0:
             print("[*] Skip empty message")

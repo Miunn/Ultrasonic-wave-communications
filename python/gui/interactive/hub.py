@@ -23,6 +23,9 @@ class Hub(ttk.Notebook):
         self.add(self.f2, text="Testing Mode")
         self.f2.bind("<<ChangeGraph>>", self.handleGraphModF2)
 
+    def connect(self) -> bool:
+        return self.comm.connect()
+
     def handleGraphModF2(self, event):
         self.event_generate("<<changeGraph_f2>>")
 

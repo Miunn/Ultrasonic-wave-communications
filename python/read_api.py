@@ -12,6 +12,9 @@ class Read_Api:
     def __init__(self, ip):
         self.pitayaReader = Read_Pitaya(ip)
 
+    def connect(self):
+        return self.pitayaReader.connect()
+
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
         normalized_correlated, demodulated, lpf = self.listenSignal(
             freq, decimation, sig_trig

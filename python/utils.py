@@ -17,7 +17,7 @@ DECIMATION_SAMPLING_RATE = {
 }
 
 def get_signal_frequency_from_sampling(freq, cyc, nb_bits):
-    return freq / cyc / nb_bits
+    return freq / cyc / (nb_bits + 2)
 
 def get_sampling_signal_frequency(freq, decimation):
     return freq / DECIMATION_SAMPLING_RATE[decimation]

@@ -11,6 +11,10 @@ class CommunicationInterface:
     def __init__(self, addr: str) -> None:
         self.addr = addr
 
+    def connect(self) -> bool:
+        time.sleep(2)
+        return True
+
     def emit(self, message: ndarray, freq: float, cyc: int) -> int:
         print(message, freq, cyc)
         time.sleep(2)

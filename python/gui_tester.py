@@ -12,6 +12,10 @@ class CommunicationPitaya(CommunicationInterface):
         self.read_api = Read_Api(addr)
         self.write_api = Write_Api(addr)
 
+    def connect(self):
+        print("Trying to connect apis to pitaya")
+        return self.read_api.connect() and self.write_api.connect()
+
     def emit(self, message, freq, cyc):
         self.write_api.write(message, freq, cyc)
         return 0

@@ -1,6 +1,9 @@
 from os import walk
 import tkinter as tk
+from tkinter import messagebox as tkmessagebox
 from tkinter import filedialog
+import time
+import threading
 
 from PIL import Image, ImageTk
 from gui.guiGraph import GuiGraph
@@ -20,13 +23,18 @@ class Gui:
     graph: GuiGraph
     text: tk.Label
     errorRate: tk.DoubleVar
+    connectedLabel: tk.Label
     menu: CtxMenu
     cid: int = 0
     interact: ihub.Hub
+    t_connect : threading.Thread | None
 
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
     ):
+        self.t_connect = None
+        self.connectedLabel = "Not connected"
+
         self.root = tk.Tk()
 
         self.menu = CtxMenu(self.root)
@@ -46,12 +54,16 @@ class Gui:
         self.interact = ihub.Hub(self.root, comm)
         self.interact.grid(column=0, row=1, sticky="nswe")
 
+        self.connectedLabel = tk.Label(self.root, text="Not connected", fg="red")
+        self.connectedLabel.grid(column=0, row=2, sticky="e")
+
+        self.root.bind("<<CONNECT>>", self.onConnect)
         self.root.bind("<Configure>", self.onResize)
-        self.menu.bind("<<toggleEvent>>", self.onToggle)
-        self.menu.bind("<<FOURIER>>", self.onAskFourrier)
-        self.menu.bind("<<SAVE>>", self.onSave)
-        self.menu.bind("<<LOAD>>", self.onLoad)
-        self.menu.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
+        self.root.bind("<<toggleEvent>>", self.onToggle)
+        self.root.bind("<<FOURIER>>", self.onAskFourrier)
+        self.root.bind("<<SAVE>>", self.onSave)
+        self.root.bind("<<LOAD>>", self.onLoad)
+        self.root.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
 
     def updateGraphFromResultF2(self, event):
@@ -76,6 +88,40 @@ class Gui:
 
     def mainloop(self) -> None:
         self.root.mainloop()
+
+    def toggleWait(self,value:bool) -> None:
+        if value:
+            self.root.configure(cursor="wait")
+            self.graph.getTkWidget().configure(cursor="wait")
+            self.root.update()
+        else :
+            self.root.config(cursor="")
+            self.graph.getTkWidget().configure(cursor="")
+            self.root.update()
+
+    def dummyCall(self) -> None:
+        pass
+
+    def onConnect(self, event) -> None:
+        if self.t_connect == None or not self.t_connect.is_alive():
+            if self.t_connect != None:
+                self.t_connect.join()
+            print("On connect")
+            self.connectedLabel.configure(text="Connecting...")
+            self.connectedLabel.configure(fg="orange")
+            self.toggleWait(True)
+            self.t_connect = threading.Thread(target=self.t_onConnect)
+            self.t_connect.start()
+    
+    def t_onConnect(self):
+        if self.interact.comm.connect():
+            self.connectedLabel.config(text="Connected")
+            self.connectedLabel.config(fg="green")
+        else:
+            self.connectedLabel.config(text="Not connected")
+            self.connectedLabel.config(fg="red")
+            tkmessagebox.showerror("Connection", "Failed to connect to the device.")
+        self.toggleWait(False)
 
     def onAskFourrier(self, event) -> None:
         index = self.interact.index(self.interact.select())
