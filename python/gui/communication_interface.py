@@ -11,7 +11,7 @@ class CommunicationInterface:
     def __init__(self, addr: str) -> None:
         self.addr = addr
 
-    def toggleMode(self) -> bool:
+    def toggleMode(self, current: int) -> bool:
         time.sleep(0.5)
         return True
 
@@ -37,7 +37,24 @@ class CommunicationInterface:
         time.sleep(5)
         return (0, zeros(2, int), [([], "red", "Name")])
 
-    @staticmethod
+    # -----------------------------------------------------------
+
+    # --------- AUTO MODE COMMAND -------------------------------
+    def fetchNewComparedData(self) -> list[tuple[ndarray, ndarray]]:
+        pass
+
+    def requestGraph(self) -> list[tuple[list[float], str, str]]:
+        pass
+
+    def changeParameter(self, parameters: any) -> bool:
+        pass
+
+    def applyOpt(self) -> bool:
+        pass
+
+    # -----------------------------------------------------------
+
+        @staticmethod
     def convertBitString(value: str) -> ndarray:
         sanitized_value = "".join(c for c in value if c in "01")
         result = zeros(len(sanitized_value), int)
@@ -160,22 +177,7 @@ class CommunicationInterface:
                 return value[0, i + 1]
         return value
 
-    # -----------------------------------------------------------
-
-    # --------- AUTO MODE COMMAND -------------------------------
-    def fetchNewComparedData() -> list[tuple[ndarray, ndarray]]:
-        pass
-
-    def requestGraph() -> list[tuple[list[float], str, str]]:
-        pass
-
-    def changeParameter(parameters: any) -> bool:
-        pass
-
-    def applyOpt() -> bool:
-        pass
-
-    # -----------------------------------------------------------
+    # Never used, do not need to implement it.
     def emergencyStop(self):
         pass
 
