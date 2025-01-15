@@ -11,6 +11,11 @@ class CommunicationInterface:
     def __init__(self, addr: str) -> None:
         self.addr = addr
 
+    def toggleMode(self) -> bool:
+        time.sleep(0.5)
+        return True
+
+    # ------------------------- Manual Mode commands --------------------------------
     def connect(self) -> bool:
         time.sleep(2)
         return True
@@ -155,6 +160,22 @@ class CommunicationInterface:
                 return value[0, i + 1]
         return value
 
+    # -----------------------------------------------------------
+
+    # --------- AUTO MODE COMMAND -------------------------------
+    def fetchNewComparedData() -> list[tuple[ndarray, ndarray]]:
+        pass
+
+    def requestGraph() -> list[tuple[list[float], str, str]]:
+        pass
+
+    def changeParameter(parameters: any) -> bool:
+        pass
+
+    def applyOpt() -> bool:
+        pass
+
+    # -----------------------------------------------------------
     def emergencyStop(self):
         pass
 
