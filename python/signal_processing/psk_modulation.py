@@ -76,6 +76,12 @@ def bpsk_demodulation(modulated: np.ndarray, freq, decimation):
     
     return modulated * c
 
+def correlation_demodulation(modulated: np.ndarray, freq, decimation):
+    len_modulated = len(modulated)
+    signal_frequency = get_sampling_signal_frequency(freq, decimation)
+
+    return
+
 if __name__ == "__main__":
     mod = psk_modulation([1, 0, 1, 0, 1, 1], cyc=1)
     plt.plot(mod)

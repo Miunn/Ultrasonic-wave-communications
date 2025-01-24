@@ -116,6 +116,17 @@ class TestingMode(tk.Frame):
             self.tr = threading.Thread(target=self.t_listen)
             self.tr.start()
 
+    def listenFromGraph(self):
+        return """self.comm.readFromSignal(
+            
+            int(float(self.freq.get()) * 1000),
+            int(self.cyc.get()),
+            self.getDecim(),
+            float(self.trigger.get()),
+            float(self.trigg_dd.get()),
+            float(self.threshold.get()) / 100,
+        )"""
+
     def t_emit(self):
         convtype = self.entry_t.get()
         text = self.emiter_entry.get("1.0", tk.END)
@@ -276,7 +287,11 @@ class TestingMode(tk.Frame):
         tk.Label(self.reciever, text="%").grid(column=4, row=6, sticky="w")
 
         tk.Button(self.reciever, text="Start listening", command=self.listen).grid(
-            column=1, row=8, columnspan=4
+            column=0, row=8, columnspan=4
+        )
+
+        tk.Button(self.reciever, text="Read from graph", command=self.listenFromGraph).grid(
+            column=3, row=8, columnspan=4
         )
 
         self.result_label = tk.Label(self.reciever, text="RESULT :\n")

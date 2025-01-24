@@ -9,6 +9,7 @@ from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_f
 
 class Read_Pitaya:
     IP = '10.42.0.125'
+    rp_s: scpi.scpi
 
     def __init__(self, ip='10.42.0.125'):
         self.IP = ip

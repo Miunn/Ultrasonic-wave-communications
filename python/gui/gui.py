@@ -172,6 +172,25 @@ class Gui:
                     self.tl_load_error()
                     return
             self.setPlot(data)
+            
+            result = self.interact.f2.comm.readFromSignal(
+                data[0][0],
+                float(self.interact.f2.freq.get()) * 1000,
+                int(self.interact.f2.cyc.get()),
+                self.interact.f2.getDecim(),
+            )
+            
+            """self.interact.f2.RecepterStatusLabel.configure(
+                text=status[1][0], foreground=status[1][1]
+            )"""
+            self.interact.f2.graphToUpdate = result[2]
+            self.interact.f2.event_generate("<<ChangeGraph>>")
+            self.interact.f2.result_label.configure(
+                text="RESULT :\n"
+                """+ self.interact.f2.comm.convertToStringM(
+                    self.interact.f2.comm.decapsulate(result[1], self.common_t.get()), convtype
+                )"""
+            )
             print("ok")
 
     def onExportMatlab(self, evt):

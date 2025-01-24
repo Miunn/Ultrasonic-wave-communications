@@ -8,6 +8,7 @@ from utils import get_signal_frequency_from_sampling
 
 class Write_Pitaya:
     IP = '10.42.0.125'
+    rp_s: scpi.scpi
 
     def __init__(self, ip='10.42.0.125'):
         self.IP = ip

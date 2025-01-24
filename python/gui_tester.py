@@ -21,7 +21,7 @@ class CommunicationPitaya(CommunicationInterface):
         return 0
 
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
-        voltage, demod, lpf, bits = self.read_api.startListening(
+        """voltage, demod, lpf, bits = self.read_api.startListening(
             freq, cyc, decimation, sig_trig, dec_trig, dec_thesh
         )
 
@@ -34,7 +34,27 @@ class CommunicationPitaya(CommunicationInterface):
                 (demod, "#FFBB99", "Demodulated"),
                 (lpf, "red", "Low-pass filtered"),
             ],
+        ]"""
+        signal, square_correlation, bits = self.read_api.startListening(freq, cyc, decimation, sig_trig, dec_trig, dec_thesh)
+        return [
+            0,
+            bits,
+            [
+                (
+                    signal,
+                    "#BBBBFF",
+                    "Signal"
+                ),
+                (
+                    square_correlation,
+                    "orange",
+                    "Correlation"
+                )
+            ]
         ]
+        
+    def readFromSignal(self, signal, freq: int, cyc: int, decimation: int, sig_trig=0.2):
+        return self.read_api.readFromSignal(signal, freq, cyc, decimation, sig_trig)
 
     def emergencyStop(self):
         return super().emergencyStop()

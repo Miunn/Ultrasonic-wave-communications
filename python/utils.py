@@ -23,6 +23,7 @@ def get_sampling_signal_frequency(freq, decimation):
     return freq / DECIMATION_SAMPLING_RATE[decimation]
 
 def get_one_block_step(freq, cyc, dec):
-    bloc_timing = cyc / (freq/1000)
+    print("Get bloc step for freq:", freq, "cyc:", cyc, "dec:", dec)
+    bloc_timing = (cyc / freq) * 1000
     decimation_time = DECIMATION_TIME_SCALE[dec]
     return int(16384 * bloc_timing / decimation_time)

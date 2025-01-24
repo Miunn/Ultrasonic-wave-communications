@@ -32,6 +32,16 @@ class CommunicationInterface:
         time.sleep(5)
         return (0, zeros(2, int), [([], "red", "Name")])
 
+    def readFromSignal(
+        self,
+        signal: ndarray,
+        freq: float,
+        cyc: int,
+        decimation: int,
+    ):
+        time.sleep(5)
+        return zeros(2, int)
+
     @staticmethod
     def convertBitString(value: str) -> ndarray:
         sanitized_value = "".join(c for c in value if c in "01")
