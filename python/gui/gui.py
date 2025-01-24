@@ -183,13 +183,20 @@ class Gui:
             """self.interact.f2.RecepterStatusLabel.configure(
                 text=status[1][0], foreground=status[1][1]
             )"""
+            
+            # Build the result string with '\n' separator every 35 cahracters from bits in result[1]
+            resultString = "\n".join(
+                [
+                    result[1][i : i + 35]
+                    for i in range(0, len(result[1]), 35)
+                ]
+            )
+            
             self.interact.f2.graphToUpdate = result[2]
             self.interact.f2.event_generate("<<ChangeGraph>>")
             self.interact.f2.result_label.configure(
                 text="RESULT :\n"
-                """+ self.interact.f2.comm.convertToStringM(
-                    self.interact.f2.comm.decapsulate(result[1], self.common_t.get()), convtype
-                )"""
+                + resultString
             )
             print("ok")
 

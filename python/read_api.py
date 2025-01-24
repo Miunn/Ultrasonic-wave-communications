@@ -35,7 +35,9 @@ class Read_Api:
 
     def listenSignal(self, freq, decimation, sig_trig, cyc, dec_thresh=0.5):
         data = self.pitayaReader.read(decimation, sig_trig)
+        return self.readData(data, freq, cyc, decimation, sig_trig, dec_thresh)
 
+    def readData(self, data, freq, cyc, decimation, sig_trig, dec_thresh=0.5) -> Tuple[np.ndarray, np.ndarray, List[int]]:
         (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
         
         
@@ -94,8 +96,8 @@ class Read_Api:
         #return normalized_correlated, demodulated, lpf
         return data, maxs_graph, bits
 
-    def readFromSignal(self, signal: np.ndarray, freq: int, cyc: int, decimation: int, sig_trig: float = 0.2) -> np.ndarray:
-        (probe_sine, start, end) = self.get_probing_sine_from_signal(signal, freq, cyc, decimation, sig_trig)
+    def readFromSignal(self, signal: np.ndarray, freq: int, cyc: int, decimation: int, sig_trig: float = 0.6) -> np.ndarray:
+        """(probe_sine, start, end) = self.get_probing_sine_from_signal(signal, freq, cyc, decimation, sig_trig)
 
 
 
@@ -118,7 +120,7 @@ class Read_Api:
         demod.plot(signal[end+get_one_block_step(freq, cyc, decimation):])
         demod.plot(demodulation/max(demodulation))
         
-        plt.show()
+        plt.show()"""
         
         """return [
             0,
@@ -128,7 +130,16 @@ class Read_Api:
                 (demodulation, "#FFBB99", "Demodulated"),
             ],
         ]"""
-        return []
+        data, maxs_graph, bits = self.readData(signal, freq, cyc, decimation, sig_trig)
+        print("Bits: ", bits)
+        return [
+            0,
+            "".join([str(i) for i in bits]),
+            [
+                (data, "#BBBBFF", "Voltage"),
+                (maxs_graph, "#FFBB99", "Correlation"),
+            ],
+        ]
 
     def correlate_in_new_graph(self, signal: np.ndarray, freq: int, cyc: int, decimation: int, sig_trig: float = 0.2) -> np.ndarray:
         (probe_sine, start, end) = self.get_probing_sine_from_signal(signal, freq, cyc, decimation, sig_trig)
