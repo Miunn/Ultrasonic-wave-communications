@@ -1,7 +1,6 @@
 from typing import List
 import numpy as np
 from scipy.signal import butter, lfilter
-import sys
 import matplotlib.pyplot as plt
 import math
 from utils import get_sampling_signal_frequency
@@ -11,7 +10,7 @@ FREQ = 5
 
 def psk_modulation(bits: List[int], cyc: int = 5):
     len_bits = len(bits)
-    pts_bits = 16384//len(bits)
+    pts_bits = 16384//(len(bits)+2)
     linspace = np.linspace(0, len_bits, len_bits * pts_bits)
     c_t = np.cos(cyc * 2 * np.pi * linspace + np.pi/2)
 
@@ -23,7 +22,12 @@ def psk_modulation(bits: List[int], cyc: int = 5):
         else:
             assert bits[i] == 1
             modulated[i * pts_bits:(i + 1) * pts_bits] = 1
-    return modulated * c_t
+    
+    first_positive = c_t[:pts_bits]
+    waiting =  np.zeros(pts_bits)
+    modulation = (modulated * c_t)[:len_bits * pts_bits]
+    return np.concatenate((first_positive, waiting, modulation))
+    #return modulation
 
 def butter_lowpass(cutoff, fs, order=5):
     nyq = 0.5 * fs
@@ -72,30 +76,13 @@ def bpsk_demodulation(modulated: np.ndarray, freq, decimation):
     
     return modulated * c
 
+def correlation_demodulation(modulated: np.ndarray, freq, decimation):
+    len_modulated = len(modulated)
+    signal_frequency = get_sampling_signal_frequency(freq, decimation)
+
+    return
+
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        bits = [int(i) for i in sys.argv[1]]
-        print(len(bits))
-        mod = psk_modulation(bits)
-    else:
-        with open("../pitayareadings.bin", "r") as f:
-            mod = [float(s) for s in f.readline().split()]
+    mod = psk_modulation([1, 0, 1, 0, 1, 1], cyc=1)
     plt.plot(mod)
-        
-    #plt.plot(linspace, mod)
-        
-        
-    demod = bpsk_demodulation(mod)
-    #demod = butter_lowpass_filter(demod, 0.1, 1000)
-    plt.plot(demod)
-
-    plt.show()
-
-    lpf = butter_lowpass_filter(demod, 1, 1000, order=5)
-
-    bits = decision(lpf)
-    print(''.join([str(i) for i in bits]))
-    #print(''.join([str(i) for i in bits]) == sys.argv[1])
-
-    plt.plot(lpf)
     plt.show()

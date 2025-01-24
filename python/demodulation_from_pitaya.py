@@ -8,16 +8,19 @@ from scipy.signal import butter, filtfilt
 from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter, decision
 
 class Read_Pitaya:
-    IP = '169.254.67.34'
+    IP = '10.42.0.125'
+    rp_s: scpi.scpi
 
-    def __init__(self, ip='169.254.67.34'):
+    def __init__(self, ip='10.42.0.125'):
         self.IP = ip
 
+    def connect(self):
         try:
             self.rp_s = scpi.scpi(self.IP, timeout=10)
+            return True
         except Exception as e:
             print(f"Error: {e}")
-            sys.exit(1)
+            return False
 
     def close(self):
         self.rp_s.close()
@@ -69,47 +72,59 @@ def butter_highpass_filter(data, cutoff, fs, order=5):
     return y
 
 if __name__ == "__main__":
-    """with open("signal-dec-64-work-voltage.bin", "r") as f:
-        voltage = [float(n) for n in f.readline().split()]
-
-    with open("signal-dec-64-work-demod.bin", "r") as f:
-        demod = [float(n) for n in f.readline().split()]
-
-    
-    plot.plot(voltage)
-    plot.plot(demod)
-    plot.show()
-    sys.exit(0)"""
-
     if len(sys.argv) >= 2:
         #with open(sys.argv[1], 'r') as f:
         #    probing = [float(s) for s in f.readline().split()][75:140]
+        freq=250000
+        decimation=64
+        cyc=5
+        sig_trig=0.6
 
+        import classifiedjson
         with open(sys.argv[1], 'r') as f:
-            buff = [float(s) for s in f.readline().split()]
+            buff = classifiedjson.load(f)[0][0]
         
         import scipy.signal
         import scipy.integrate
+
+        from utils import get_one_block_step, get_sampling_signal_frequency
+        from read_api import Read_Api
+        import math
+
+        # Correlate the signal with the first sine as probing signal
+        #probing_sine = buff[80:130]
+        #correlated = Read_Api.correlate_signal(probing_sine, buff)
+
+        # Normalize the signal
+        normalized_correlated = buff / np.max(buff)
+
+        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
+
+        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
+
+        fig, (signal_ax) = plot.subplots(1)
+        #probing_ax.plot(probing_sine)
+
+        signal_frequency = get_sampling_signal_frequency(freq, decimation)
+        print(signal_frequency)
+        f = 2 * signal_frequency * np.pi
+        linspace = np.linspace(0, len(buff), len(buff))
+        c = np.linspace(0, len(buff), len(buff))
+        for i in range(len(buff)):
+            x = float(linspace[i])
+            c[i] = math.cos(f * x + np.pi/2)
+        
+        #probing_ax.plot(probing_sine)
+        signal_ax.plot(buff)
+        #signal_ax.plot(demodulated)
+        #signal_ax.plot(lpf, 'g')
+        #signal_ax.plot([0]*len(lpf), 'purple')
+        #signal_ax.plot([0.5]*len(lpf), 'purple')
+        #signal_ax.plot([-0.5]*len(lpf), 'purple')
         len_buff = len(buff)
 
-        ref_signal = np.cos(2 * (0.1275) * np.pi * np.linspace(0, 16384, 16384) + np.pi/2)
-
-        corr = scipy.signal.correlate(buff, buff[75:140], mode="full")
-
-        corr = corr / max(corr)
-
-        demodulated = bpsk_demodulation(corr, freq=5)
-        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-        #bits = decision(lpf)
-        #print(''.join([str(i) for i in bits]))
-
-        fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
-        
-        probing_ax.plot(buff[75:140])
-        signal_ax.plot(buff)
-        cross_ax.plot(corr)
-        cross_ax.plot(demodulated)
-        cross_ax.plot(lpf)
+        for x in range(119, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
+            signal_ax.axvline(x, color='r')
 
         integrals = []
         trig_x = 0
@@ -119,49 +134,63 @@ if __name__ == "__main__":
                 break
         
         prev_x = 0
-        for x in range(trig_x, len(lpf))[::39]:
-            cross_ax.axvline(x, color='r')
+        for x in range(trig_x, len(lpf))[::get_one_block_step(freq, cyc, decimation)]:
+            #signal_ax.axvline(x, color='r')
 
             if prev_x != 0:
                 integrals.append(scipy.integrate.simpson(lpf[prev_x:x], dx=1))
             
             prev_x = x
 
-        print(integrals)
-
         received_bits = []
         for integral in integrals:
-            if integral > 0.3 * 19.5:
+            if integral > 0.1 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(1)
-            elif integral < -0.3 * 19.5:
+            elif integral < -0.1 * get_one_block_step(freq, cyc, decimation) * 0.5:
                 received_bits.append(0)
 
         print(len(integrals))
         print(len(received_bits))
         print(''.join([str(i) for i in received_bits]))
 
-        with open("signal-dec-64-work-voltage-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in buff]))
+        #with open("signal-dec-64-work-voltage-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in buff]))
 
-        with open("signal-dec-64-work-demod-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in demodulated]))
+        #with open("signal-dec-64-work-demod-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in demodulated]))
 
-        with open("signal-dec-64-work-lpf-max.bin", "w") as f:
-            f.write(' '.join([str(f) for f in lpf]))
+        #with open("signal-dec-64-work-lpf-max.bin", "w") as f:
+        #    f.write(' '.join([str(f) for f in lpf]))
 
     else:
-        rp = Read_Pitaya(ip='10.42.0.125', dec=64)
-        signal_acquired = False
-        buff = rp.read(out='signal-dec-64-probing-message-work.bin')
 
-        data_lpf = butter_lowpass_filter(buff, 2, 1000, order=3)
-        demodulated = bpsk_demodulation(buff, freq=5)
-        lpf = butter_lowpass_filter(demodulated, 3, 1000, order=3)
-        bits = decision(lpf)
-        print(''.join([str(i) for i in bits]))
-        
-        plot.plot(buff)
-        plot.plot(demodulated)
+        from utils import get_one_block_step
+        freq=250000
+        decimation=64
+        cyc=5
+        sig_trig=0.6
+        rp = Read_Pitaya(ip='10.42.0.125')
+        signal_acquired = False
+        buff = rp.read(64, 0.6)
+
+        data = rp.read(decimation, sig_trig)
+
+        # Correlate the signal with the first sine as probing signal
+        probing_sine = data[75:75+get_one_block_step(freq, 5, decimation)]
+        correlated = rp.correlate_signal(probing_sine, data)
+
+        # Normalize the signal
+        normalized_correlated = correlated / np.max(correlated)
+
+        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
+
+        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
+
+        fig, (probing_ax, signal_ax, cross_ax) = plot.subplots(3)
+        probing_ax.plot(probing_sine)
+        signal_ax.plot(data)
+        cross_ax.plot(correlated)
+
         #plot.plot(lpf)
         plot.ylabel('Voltage')
         plot.title('Signal')

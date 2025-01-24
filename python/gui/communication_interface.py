@@ -11,6 +11,10 @@ class CommunicationInterface:
     def __init__(self, addr: str) -> None:
         self.addr = addr
 
+    def connect(self) -> bool:
+        time.sleep(2)
+        return True
+
     def emit(self, message: ndarray, freq: float, cyc: int) -> int:
         print(message, freq, cyc)
         time.sleep(2)
@@ -27,6 +31,16 @@ class CommunicationInterface:
     ) -> tuple[int, ndarray, list[tuple[list[float], str, str]]]:
         time.sleep(5)
         return (0, zeros(2, int), [([], "red", "Name")])
+
+    def readFromSignal(
+        self,
+        signal: ndarray,
+        freq: float,
+        cyc: int,
+        decimation: int,
+    ):
+        time.sleep(5)
+        return zeros(2, int)
 
     @staticmethod
     def convertBitString(value: str) -> ndarray:

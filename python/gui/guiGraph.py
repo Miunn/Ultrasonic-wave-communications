@@ -1,4 +1,3 @@
-from abc import update_abstractmethods
 import tkinter as tk
 import types
 from matplotlib.backends.backend_tkagg import (
@@ -13,6 +12,7 @@ import numpy as np
 
 from gui import decToFreq
 
+from utils import get_one_block_step
 
 class MyAxes(Axes):
     name = "Ratio_le_y"
@@ -84,6 +84,9 @@ class GuiGraph:
             if not self.toggle[i]:
                 continue
             self.sp.plot(item[0], color=item[1])
+
+        #for x in range(102, 16384)[::get_one_block_step(250000, 5, 64)]:
+            #self.sp.axvline(x, color='r')
 
         if reset_lim:
             self.sp.set(ylim=(-1.1, 1.1), xlim=(0, len(self.plot_array[0][0])))
