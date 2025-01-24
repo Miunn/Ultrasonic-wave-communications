@@ -1,8 +1,7 @@
-from conf import Configuration
 from demodulation_from_pitaya import Read_Pitaya
 import numpy as np
 import scipy.signal
-from signal_processing.psk_modulation import bpsk_demodulation, butter_lowpass_filter
+from signal_processing.psk_modulation import bpsk_demodulation
 from utils import get_one_block_step
 
 from typing import List, Tuple
@@ -196,21 +195,6 @@ class Read_Api:
     @staticmethod
     def correlate_signal(probing: np.ndarray, signal: np.ndarray) -> np.ndarray:
         return scipy.signal.correlate(signal, probing, mode="full")
-
-    @staticmethod
-    def sliding_correlation(probing: np.ndarray, signal: np.ndarray, freq: float, cyc: int, dec: int) -> np.ndarray:
-        one_block_step = get_one_block_step(freq, cyc, dec)
-        
-        graph = np.empty(0)
-        """step = one_block_step
-        for i in range(len(signal))[::step]:
-            correlation = Read_Api.correlate_signal(probing, signal[i:i+len(probing)])
-            value = correlation[int(len(correlation)//2)]
-            graph = np.concatenate((graph, [value] * (step)))"""
-            
-            
-        
-        return graph
     
     @staticmethod
     def slide_correlate_through_one_block(probing: np.ndarray, signal: np.ndarray, start_block_index, end_block_index) -> np.ndarray:

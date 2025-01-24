@@ -1,15 +1,13 @@
-from os import walk
 import tkinter as tk
 from tkinter import messagebox as tkmessagebox
 from tkinter import filedialog
-import time
 import threading
 
 from PIL import Image, ImageTk
 from gui.guiGraph import GuiGraph
 from gui.ctxMenu import CtxMenu
 import gui.interactive.hub as ihub
-from numpy import append, ndarray
+from numpy import ndarray
 from classifiedjson import dumps, load
 from datetime import datetime
 import numpy as np
@@ -103,8 +101,8 @@ class Gui:
         pass
 
     def onConnect(self, event) -> None:
-        if self.t_connect == None or not self.t_connect.is_alive():
-            if self.t_connect != None:
+        if self.t_connect is None or not self.t_connect.is_alive():
+            if self.t_connect is not None:
                 self.t_connect.join()
             print("On connect")
             self.connectedLabel.configure(text="Connecting...")
@@ -153,7 +151,7 @@ class Gui:
             with open(f, "r") as file:
                 try:
                     data = load(file)
-                except:
+                except Exception as _:
                     self.tl_load_error()
                     return
 
