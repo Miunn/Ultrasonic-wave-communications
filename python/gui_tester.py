@@ -20,7 +20,7 @@ class CommunicationPitaya(CommunicationInterface):
         self.write_api.write(message, freq, cyc)
         return 0
 
-    def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
+    def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh, mode=1):
         """voltage, demod, lpf, bits = self.read_api.startListening(
             freq, cyc, decimation, sig_trig, dec_trig, dec_thesh
         )
@@ -35,7 +35,7 @@ class CommunicationPitaya(CommunicationInterface):
                 (lpf, "red", "Low-pass filtered"),
             ],
         ]"""
-        signal, square_correlation, bits = self.read_api.startListening(freq, cyc, decimation, sig_trig, dec_trig, dec_thesh)
+        signal, square_correlation, bits = self.read_api.startListening(freq, cyc, decimation, sig_trig, dec_trig, dec_thesh, mode=mode)
         return [
             0,
             bits,
