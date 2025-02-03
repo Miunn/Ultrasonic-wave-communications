@@ -89,8 +89,8 @@ class Gui:
 
     def toggleWait(self, value: bool) -> None:
         if value:
-            self.root.configure(cursor="wait")
-            self.graph.getTkWidget().configure(cursor="wait")
+            # self.root.configure(cursor="wait")
+            # self.graph.getTkWidget().configure(cursor="wait")
             self.root.update()
         else:
             self.root.config(cursor="")
@@ -170,32 +170,26 @@ class Gui:
                     self.tl_load_error()
                     return
             self.setPlot(data)
-            
+
             result = self.interact.f2.comm.readFromSignal(
                 data[0][0],
                 float(self.interact.f2.freq.get()) * 1000,
                 int(self.interact.f2.cyc.get()),
                 self.interact.f2.getDecim(),
             )
-            
+
             """self.interact.f2.RecepterStatusLabel.configure(
                 text=status[1][0], foreground=status[1][1]
             )"""
-            
+
             # Build the result string with '\n' separator every 35 cahracters from bits in result[1]
             resultString = "\n".join(
-                [
-                    result[1][i : i + 35]
-                    for i in range(0, len(result[1]), 35)
-                ]
+                [result[1][i : i + 35] for i in range(0, len(result[1]), 35)]
             )
-            
+
             self.interact.f2.graphToUpdate = result[2]
             self.interact.f2.event_generate("<<ChangeGraph>>")
-            self.interact.f2.result_label.configure(
-                text="RESULT :\n"
-                + resultString
-            )
+            self.interact.f2.result_label.configure(text="RESULT :\n" + resultString)
 
     def onExportMatlab(self, evt):
         t = datetime.today().__str__().replace(" ", "_").replace(":", "-").split(".")[0]

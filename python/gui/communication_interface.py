@@ -258,7 +258,8 @@ class CommunicationInterface:
             else:
                 compteur += 1
             if compteur == 11:
-                return value[0, i + 1]
+                print(value[0 : i + 1])
+                return value[0 : i + 1]
         return value
 
     def emergencyStop(self):
@@ -266,21 +267,3 @@ class CommunicationInterface:
         Never used, do not need to implement it.
         """
         pass
-
-
-if __name__ == "__main__":
-    a = "10100011101010101001010"
-    b = CommunicationInterface.convertToBitString(
-        CommunicationInterface.convertBitString(a)
-    )
-    print(a, a == b, b)
-
-    a = "1234DEADBEEF"
-
-    h = CommunicationInterface.convertHexString(a)
-    b = CommunicationInterface.convertToHexString(h)
-    print(a, h, a == b, b)
-
-    a = "bonjoir"
-    b = CommunicationInterface.convertToString(CommunicationInterface.convertString(a))
-    print(a, a == b, b)
