@@ -16,8 +16,8 @@ class CommunicationPitaya(CommunicationInterface):
         print("Trying to connect apis to pitaya")
         return self.read_api.connect() and self.write_api.connect()
 
-    def emit(self, message, freq, cyc):
-        self.write_api.write(message, freq, cyc)
+    def emit(self, message, freq, cyc, mode=1):
+        self.write_api.write(message, freq, cyc, mode=mode)
         return 0
 
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh, mode=1):
