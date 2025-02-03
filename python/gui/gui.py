@@ -196,7 +196,6 @@ class Gui:
                 text="RESULT :\n"
                 + resultString
             )
-            print("ok")
 
     def onExportMatlab(self, evt):
         t = datetime.today().__str__().replace(" ", "_").replace(":", "-").split(".")[0]

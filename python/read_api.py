@@ -45,13 +45,11 @@ class Read_Api:
         
         # Probing the probe (to tget the max)
         _, extremum_value_probe = self.correlate_through_one_block(probe_sine, data, start_probing, end_probing, 15, start_probing, end_probing, 0, plot=False)
-        print("Extremum probe:", extremum_value_probe)
         
         maxs_graph = np.concatenate((maxs_graph, [extremum_value_probe/extremum_value_probe] * (end_probing-start_probing)))
         
         for i in range(1, len(data)//get_one_block_step(freq, cyc, decimation)-2):
             block_start, block_end = self.get_block_indexes(data, sig_trig, freq, cyc, decimation, i)
-            print(f"[{i}] Block start: {block_start}, Block end: {block_end}")
             correlation_points, extremum_value = self.correlate_through_one_block(probe_sine, data, block_start, block_end, 15, start_probing, end_probing, extremum_value_probe, plot=False)
             #avg = np.mean(correlation_points)
             
@@ -247,8 +245,13 @@ class Read_Api:
             center_value = correlation[int(len(correlation)//2)]
             graph = np.concatenate((graph, [center_value]))
         
+        # +/- Max
         max_ = np.max(np.abs(graph))
+        
+        # Extremum value (max without abs)
         extremum_value = graph[np.where(np.abs(graph) == max_)[0][0]]
+        
+        print(f"[{start_block_index}, {end_block_index}] Extremum index: {np.where(np.abs(graph) == max_)[0][0]} Extremum: {extremum_value} Extremum probe: {extremum_probe}")
                 
         if plot:
             fig, (signal_plot, correlation_graph) = plt.subplots(2)
@@ -260,6 +263,10 @@ class Read_Api:
             correlation_graph.plot(graph)
             plt.show()
         return graph, extremum_value
+
+    @staticmethod
+    def realign_signal(signal: np.ndarray, correlation: np.ndarray, start: int, end: int):
+        return
 
     @staticmethod
     def get_block_indexes(signal, trigger, freq, cyc, decimation, index):
