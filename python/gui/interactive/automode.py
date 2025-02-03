@@ -11,6 +11,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 
+modes = ["BSPK   ", "CROSS."]
+
+
 class AutoMode(tk.Frame):
     comm: CommunicationInterface
     f1: tk.Frame
@@ -35,10 +38,15 @@ class AutoMode(tk.Frame):
         self.trigger = tk.StringVar(self, value="0.6")
         self.trigg_dd = tk.StringVar(self, value="0.2")
         self.threshold = tk.StringVar(self, "30")
+        self.mode = tk.StringVar(self, "CROSS.")
 
         tk.Label(f1, text="Options").grid(column=1, row=0, columnspan=3, sticky="ew")
 
-        tk.Label(f1, text="Frequency :").grid(column=1, row=1, sticky="w")
+        tk.Label(f1, text="Mode :").grid(column=1, row=1, sticky="w")
+        mode_selector = tk.OptionMenu(f1, self.mode, *modes)
+        mode_selector.grid(column=2, row=1, columnspan=2, sticky="w")
+
+        tk.Label(f1, text="Frequency :").grid(column=1, row=2, sticky="w")
         freq_selector = tk.Spinbox(
             f1,
             from_=100,
@@ -47,21 +55,21 @@ class AutoMode(tk.Frame):
             width=7,
             textvariable=self.freq,
         )
-        freq_selector.grid(row=1, column=2, sticky="e")
-        tk.Label(f1, text="KHz").grid(column=3, row=1, sticky="w")
+        freq_selector.grid(row=2, column=2, sticky="ew")
+        tk.Label(f1, text="KHz").grid(column=3, row=2, sticky="w")
 
-        tk.Label(f1, text="CYC :").grid(column=1, row=2, sticky="w")
+        tk.Label(f1, text="CYC :").grid(column=1, row=3, sticky="w")
         cyc_selector = tk.Spinbox(
             f1, from_=1, to=10, increment=1, width=7, textvariable=self.cyc
         )
-        cyc_selector.grid(column=2, row=2)
-        tk.Label(f1, text="sine/bit").grid(column=3, row=2, sticky="w")
+        cyc_selector.grid(column=2, row=3, sticky="ew")
+        tk.Label(f1, text="sine/bit").grid(column=3, row=3, sticky="w")
 
         ttk.Separator(f1, orient="horizontal").grid(
-            column=1, columnspan=3, row=3, sticky="ew"
+            column=1, columnspan=3, row=4, sticky="ew"
         )
 
-        tk.Label(f1, text="Trigger level : ").grid(column=1, row=4, sticky="w")
+        tk.Label(f1, text="Trigger level : ").grid(column=1, row=5, sticky="w")
         trigg = tk.Spinbox(
             f1,
             from_=0,
@@ -70,10 +78,10 @@ class AutoMode(tk.Frame):
             width=7,
             textvariable=self.trigger,
         )
-        trigg.grid(column=2, row=4, sticky="w")
-        tk.Label(f1, text="V").grid(column=3, row=4, sticky="w")
+        trigg.grid(column=2, row=5, sticky="w")
+        tk.Label(f1, text="V").grid(column=3, row=5, sticky="w")
 
-        tk.Label(f1, text="Decision trigger level : ").grid(column=1, row=5, sticky="w")
+        tk.Label(f1, text="Decision trigger level : ").grid(column=1, row=6, sticky="w")
         trigg_dd = tk.Spinbox(
             f1,
             from_=0,
@@ -82,11 +90,11 @@ class AutoMode(tk.Frame):
             width=7,
             textvariable=self.trigg_dd,
         )
-        trigg_dd.grid(column=2, row=5, sticky="w")
-        tk.Label(f1, text="V").grid(column=3, row=5, sticky="w")
+        trigg_dd.grid(column=2, row=6, sticky="w")
+        tk.Label(f1, text="V").grid(column=3, row=6, sticky="w")
 
         tk.Label(f1, text="Decision area threshold : ").grid(
-            column=1, row=6, sticky="w"
+            column=1, row=7, sticky="w"
         )
         thre = tk.Spinbox(
             f1,
@@ -96,18 +104,20 @@ class AutoMode(tk.Frame):
             width=7,
             textvariable=self.threshold,
         )
-        thre.grid(column=2, row=6, sticky="w")
+        thre.grid(column=2, row=7, sticky="w")
 
-        tk.Label(f1, text="%").grid(column=3, row=6, sticky="w")
+        tk.Label(f1, text="%").grid(column=3, row=7, sticky="w")
 
-        self.optionButton = tk.Button(f1, text="Apply Options", command=comm.applyOpt)
-        self.optionButton.grid(column=1, row=7, columnspan=3)
+        self.optionButton = tk.Button(
+            f1, text="Apply Options", command=comm.changeParameter
+        )
+        self.optionButton.grid(column=1, row=8, columnspan=3)
 
         f1.columnconfigure(0, weight=1)
         f1.columnconfigure(4, weight=2)
         f1.rowconfigure(3, weight=1)
         f1.rowconfigure(0, weight=2)
-        f1.rowconfigure(7, weight=2)
+        f1.rowconfigure(8, weight=2)
         # ------------------- f2 -----------------------------
         self.sp = fig.add_subplot(111)
         self.graph = FigureCanvasTkAgg(fig, master=f2)
@@ -139,3 +149,6 @@ class AutoMode(tk.Frame):
 
     def rqGraph(self):
         self.comm.requestGraph()
+
+    def getMode(self) -> int:
+        return modes.index(self.mode.get())
