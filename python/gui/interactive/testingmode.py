@@ -29,10 +29,12 @@ def generate_deim_text(v):
     if decToFreq.dectofreq[v] < 1000000:
         return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)} KHz)"
     else:
-        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001)*0.001} MHz)"
+        return f"{v} ({int(decToFreq.dectofreq[v] * 0.001) * 0.001} MHz)"
 
 
 decim_opt = [generate_deim_text(i) for i in [1, 8, 64, 1024]]
+
+modes = ["BSPK", "CROSS."]
 
 
 class TestingMode(tk.Frame):
@@ -80,6 +82,7 @@ class TestingMode(tk.Frame):
         self.trigger = tk.StringVar(self, "0.6")
         self.trigg_dd = tk.StringVar(self, "0.2")
         self.threshold = tk.StringVar(self, "30")
+        self.mode = tk.StringVar(self, "CROSS.")
 
         self.emmiter = tk.Frame(self)
         self.emmiter.grid(column=2, row=0, sticky="nsew")
@@ -98,6 +101,9 @@ class TestingMode(tk.Frame):
         self.columnconfigure(2, weight=1)
         self.columnconfigure(4, weight=1)
         self.rowconfigure(0, weight=1)
+
+    def getMode(self) -> int:
+        return modes.index(self.mode.get())
 
     def getDecim(self) -> int:
         return int(self.deim_t.get().split(" ")[0])
@@ -126,7 +132,10 @@ class TestingMode(tk.Frame):
         print(to_send)
         self.EmitterStatusLabel.configure(text=status[2][0], foreground=status[2][1])
         result = self.comm.emit(
-            to_send, int(float(self.freq.get()) * 1000), int(self.cyc.get())
+            to_send,
+            int(float(self.freq.get()) * 1000),
+            int(self.cyc.get()),
+            self.getMode(),
         )
         if result == 0:
             self.EmitterStatusLabel.configure(
@@ -148,6 +157,7 @@ class TestingMode(tk.Frame):
             float(self.trigger.get()),
             float(self.trigg_dd.get()),
             float(self.threshold.get()) / 100,
+            self.getMode(),
         )
         if result[0] == 0:
             self.RecepterStatusLabel.configure(
@@ -192,11 +202,14 @@ class TestingMode(tk.Frame):
         common_title = tk.Label(self.common, text="Common parameters")
         common_title.grid(row=1, column=0, columnspan=2)
 
+        mode_selector = tk.OptionMenu(self.common, self.mode, *modes)
+        mode_selector.grid(row=3, column=0, columnspan=2)
+
         emiter_selector = tk.OptionMenu(self.common, self.entry_t, *entry_opt)
-        emiter_selector.grid(row=3, column=0, columnspan=2)
+        emiter_selector.grid(row=4, column=0, columnspan=2)
 
         common_selector = tk.OptionMenu(self.common, self.common_t, *frame_opt)
-        common_selector.grid(row=4, column=0, columnspan=2)
+        common_selector.grid(row=5, column=0, columnspan=2)
 
         common_freq = tk.Spinbox(
             self.common,
@@ -206,14 +219,14 @@ class TestingMode(tk.Frame):
             width=7,
             textvariable=self.freq,
         )
-        common_freq.grid(row=5, column=0, sticky="e")
-        tk.Label(self.common, text="KHz").grid(column=1, row=5, sticky="w")
+        common_freq.grid(row=6, column=0, sticky="e")
+        tk.Label(self.common, text="KHz").grid(column=1, row=6, sticky="w")
 
         common_cyc = tk.Spinbox(
             self.common, from_=1, to=10, increment=1, width=5, textvariable=self.cyc
         )
-        common_cyc.grid(row=6, column=0, sticky="e")
-        tk.Label(self.common, text="sine/bit").grid(column=1, row=6, sticky="w")
+        common_cyc.grid(row=7, column=0, sticky="e")
+        tk.Label(self.common, text="sine/bit").grid(column=1, row=7, sticky="w")
 
         self.common.rowconfigure(0, weight=1)
         self.common.rowconfigure(2, weight=5)
@@ -221,7 +234,8 @@ class TestingMode(tk.Frame):
         self.common.rowconfigure(4, weight=1)
         self.common.rowconfigure(5, weight=1)
         self.common.rowconfigure(6, weight=1)
-        self.common.rowconfigure(7, weight=5)
+        self.common.rowconfigure(7, weight=1)
+        self.common.rowconfigure(8, weight=5)
         self.common.columnconfigure(1, weight=1)
         self.common.columnconfigure(0, weight=1)
 
