@@ -33,6 +33,7 @@ class Read_Api:
         return signal, square_correlate, bits
 
     def listenSignal(self, freq, decimation, sig_trig, cyc, dec_thresh=0.5):
+        print("Call listen signal with dec_thresh: ", dec_thresh)
         data = self.pitayaReader.read(decimation, sig_trig)
         return self.readData(data, freq, cyc, decimation, dec_thresh, sig_trig)
 
@@ -75,10 +76,11 @@ class Read_Api:
             maxs_graph = np.concatenate((maxs_graph, [extremum_value] * (block_end-block_start)))
             
             # Decision making device
-            if extremum_value > dec_thresh:
-                bits.append(1)
-            elif extremum_value < -dec_thresh:
-                bits.append(0)
+            if i != 1:
+                if extremum_value > dec_thresh:
+                    bits.append(1)
+                elif extremum_value < -dec_thresh:
+                    bits.append(0)
 
         
         #self.correlate_in_new_graph(data, freq, cyc, decimation, sig_trig)
