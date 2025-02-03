@@ -15,7 +15,7 @@ class Read_Api:
     def connect(self):
         return self.pitayaReader.connect()
 
-    def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh):
+    def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh, mode=1):
         #normalized_correlated, demodulated, lpf = self.listenSignal(
         #    freq, decimation, sig_trig, cyc
         #)
@@ -44,14 +44,21 @@ class Read_Api:
         bits = []
         
         # Probing the probe (to tget the max)
-        _, extremum_value_probe = self.correlate_through_one_block(probe_sine, data, start_probing, end_probing, 15, start_probing, end_probing, 0, plot=False)
+        _, extremum_value_probe, _ = self.correlate_through_one_block(probe_sine, data, start_probing, end_probing, 15, start_probing, end_probing, 0, plot=True)
         
         maxs_graph = np.concatenate((maxs_graph, [extremum_value_probe/extremum_value_probe] * (end_probing-start_probing)))
         
+        realign_offset = 0
+        correlation_samples = 15
+        
         for i in range(1, len(data)//get_one_block_step(freq, cyc, decimation)-2):
             block_start, block_end = self.get_block_indexes(data, sig_trig, freq, cyc, decimation, i)
-            correlation_points, extremum_value = self.correlate_through_one_block(probe_sine, data, block_start, block_end, 15, start_probing, end_probing, extremum_value_probe, plot=False)
+            correlation_points, extremum_value, extremum_index = self.correlate_through_one_block(probe_sine, data, block_start+realign_offset, block_end+realign_offset, correlation_samples, start_probing, end_probing, extremum_value_probe, plot=True)
             #avg = np.mean(correlation_points)
+            
+            if extremum_index != correlation_samples//2:
+                print(f"[{i} ({block_start}-{block_end})] Extremum found at index {extremum_index}, realign by {extremum_index - correlation_samples//2}")
+                realign_offset = extremum_index - correlation_samples//2
             
             extremum_value = extremum_value / extremum_value_probe
             
@@ -262,7 +269,7 @@ class Read_Api:
             signal_plot.axvline(end_block_index, color='r')
             correlation_graph.plot(graph)
             plt.show()
-        return graph, extremum_value
+        return graph, extremum_value, np.where(np.abs(graph) == max_)[0][0]
 
     @staticmethod
     def realign_signal(signal: np.ndarray, correlation: np.ndarray, start: int, end: int):
