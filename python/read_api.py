@@ -34,7 +34,7 @@ class Read_Api:
 
     def listenSignal(self, freq, decimation, sig_trig, cyc, dec_thresh=0.5):
         data = self.pitayaReader.read(decimation, sig_trig)
-        return self.readData(data, freq, cyc, decimation, sig_trig, dec_thresh)
+        return self.readData(data, freq, cyc, decimation, dec_thresh, sig_trig)
 
     def readData(self, data, freq, cyc, decimation, dec_thresh, sig_trig) -> Tuple[np.ndarray, np.ndarray, List[int]]:
         print("Reading data with decition threshold: ", dec_thresh)
