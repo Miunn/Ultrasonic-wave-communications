@@ -25,7 +25,7 @@ class Gui:
     menu: CtxMenu
     cid: int = 0
     interact: ihub.Hub
-    t_connect : threading.Thread | None
+    t_connect: threading.Thread | None
 
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
@@ -87,12 +87,12 @@ class Gui:
     def mainloop(self) -> None:
         self.root.mainloop()
 
-    def toggleWait(self,value:bool) -> None:
+    def toggleWait(self, value: bool) -> None:
         if value:
             self.root.configure(cursor="wait")
             self.graph.getTkWidget().configure(cursor="wait")
             self.root.update()
-        else :
+        else:
             self.root.config(cursor="")
             self.graph.getTkWidget().configure(cursor="")
             self.root.update()
@@ -110,7 +110,7 @@ class Gui:
             self.toggleWait(True)
             self.t_connect = threading.Thread(target=self.t_onConnect)
             self.t_connect.start()
-    
+
     def t_onConnect(self):
         if self.interact.comm.connect():
             self.connectedLabel.config(text="Connected")
