@@ -84,12 +84,7 @@ class CommunicationInterface:
 
     @staticmethod
     def readFromSignal(
-        self,
-        signal: ndarray,
-        freq: float,
-        cyc: int,
-        decimation: int,
-        dec_thresh: float
+        self, signal: ndarray, freq: float, cyc: int, decimation: int, dec_thresh: float
     ):
         time.sleep(5)
         return zeros(2, int)
@@ -234,11 +229,15 @@ class CommunicationInterface:
         the type of the frame is deterined by cap_type
         ("Plain" / "CAN" / "ENCcan")
         """
+        print(list(value))
         match cap_type:
             case "Plain":
                 return value
             case "CAN":
-                return CanFrame.FromIntArray(CommunicationInterface.trimCan(value)).data
+                v = CanFrame.FromIntArray(CommunicationInterface.trimCan(value))
+                print("decoded :", v)
+                return v.data
+
             case "ENCcan":
                 return IOronSTD1Frame.FromIntArrayWKey(
                     CommunicationInterface.trimCan(value), b"sau6ctrobon"
