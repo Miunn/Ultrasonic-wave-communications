@@ -9,12 +9,12 @@ class Write_Api:
     def connect(self):
         return self.pitayaWriter.connect()
 
-    def write(self, bits, freq, cyc):
+    def write(self, bits, freq, cyc, mode=1):
         if len(bits) == 0:
             print("[*] Skip empty message")
             return 1
         mod = psk_modulation(bits, cyc)
 
-        
+
         self.pitayaWriter.write(mod, len(bits), cyc, channel=1, wave_form='arbitrary', freq=freq, burst=True)
         return 0

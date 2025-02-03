@@ -1,15 +1,13 @@
-from os import walk
 import tkinter as tk
 from tkinter import messagebox as tkmessagebox
 from tkinter import filedialog
-import time
 import threading
 
 from PIL import Image, ImageTk
 from gui.guiGraph import GuiGraph
 from gui.ctxMenu import CtxMenu
 import gui.interactive.hub as ihub
-from numpy import append, ndarray
+from numpy import ndarray
 from classifiedjson import dumps, load
 from datetime import datetime
 import numpy as np
@@ -27,7 +25,7 @@ class Gui:
     menu: CtxMenu
     cid: int = 0
     interact: ihub.Hub
-    t_connect : threading.Thread | None
+    t_connect: threading.Thread | None
 
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
@@ -89,12 +87,12 @@ class Gui:
     def mainloop(self) -> None:
         self.root.mainloop()
 
-    def toggleWait(self,value:bool) -> None:
+    def toggleWait(self, value: bool) -> None:
         if value:
             self.root.configure(cursor="wait")
             self.graph.getTkWidget().configure(cursor="wait")
             self.root.update()
-        else :
+        else:
             self.root.config(cursor="")
             self.graph.getTkWidget().configure(cursor="")
             self.root.update()
@@ -103,8 +101,8 @@ class Gui:
         pass
 
     def onConnect(self, event) -> None:
-        if self.t_connect == None or not self.t_connect.is_alive():
-            if self.t_connect != None:
+        if self.t_connect is None or not self.t_connect.is_alive():
+            if self.t_connect is not None:
                 self.t_connect.join()
             print("On connect")
             self.connectedLabel.configure(text="Connecting...")
@@ -112,7 +110,7 @@ class Gui:
             self.toggleWait(True)
             self.t_connect = threading.Thread(target=self.t_onConnect)
             self.t_connect.start()
-    
+
     def t_onConnect(self):
         if self.interact.comm.connect():
             self.connectedLabel.config(text="Connected")
@@ -153,7 +151,7 @@ class Gui:
             with open(f, "r") as file:
                 try:
                     data = load(file)
-                except:
+                except Exception as _:
                     self.tl_load_error()
                     return
 
@@ -178,20 +176,27 @@ class Gui:
                 float(self.interact.f2.freq.get()) * 1000,
                 int(self.interact.f2.cyc.get()),
                 self.interact.f2.getDecim(),
+                float(self.interact.f2.threshold.get())/100
             )
             
             """self.interact.f2.RecepterStatusLabel.configure(
                 text=status[1][0], foreground=status[1][1]
             )"""
+            
+            # Build the result string with '\n' separator every 35 cahracters from bits in result[1]
+            resultString = "\n".join(
+                [
+                    result[1][i : i + 35]
+                    for i in range(0, len(result[1]), 35)
+                ]
+            )
+            
             self.interact.f2.graphToUpdate = result[2]
             self.interact.f2.event_generate("<<ChangeGraph>>")
             self.interact.f2.result_label.configure(
                 text="RESULT :\n"
-                """+ self.interact.f2.comm.convertToStringM(
-                    self.interact.f2.comm.decapsulate(result[1], self.common_t.get()), convtype
-                )"""
+                + resultString
             )
-            print("ok")
 
     def onExportMatlab(self, evt):
         t = datetime.today().__str__().replace(" ", "_").replace(":", "-").split(".")[0]
