@@ -89,6 +89,7 @@ class CommunicationInterface:
         freq: float,
         cyc: int,
         decimation: int,
+        dec_thresh: float
     ):
         time.sleep(5)
         return zeros(2, int)

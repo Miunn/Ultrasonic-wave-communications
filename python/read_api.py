@@ -29,36 +29,41 @@ class Read_Api:
 
         #return normalized_correlated, demodulated, lpf, bits
         
-        signal, square_correlate, bits = self.listenSignal(freq, decimation, sig_trig, cyc)
+        signal, square_correlate, bits = self.listenSignal(freq, decimation, sig_trig, cyc, dec_thesh)
         return signal, square_correlate, bits
 
     def listenSignal(self, freq, decimation, sig_trig, cyc, dec_thresh=0.5):
         data = self.pitayaReader.read(decimation, sig_trig)
         return self.readData(data, freq, cyc, decimation, sig_trig, dec_thresh)
 
-    def readData(self, data, freq, cyc, decimation, sig_trig, dec_thresh=0.5) -> Tuple[np.ndarray, np.ndarray, List[int]]:
+    def readData(self, data, freq, cyc, decimation, dec_thresh, sig_trig) -> Tuple[np.ndarray, np.ndarray, List[int]]:
+        print("Reading data with decition threshold: ", dec_thresh)
         (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
         
         
         maxs_graph = np.zeros(start_probing)
         bits = []
+        correlation_samples = 15
         
         # Probing the probe (to tget the max)
-        _, extremum_value_probe, _ = self.correlate_through_one_block(probe_sine, data, start_probing, end_probing, 15, start_probing, end_probing, 0, plot=True)
+        _, extremum_value_probe, _ = self.correlate_through_one_block(probe_sine, data, start_probing, end_probing, correlation_samples, start_probing, end_probing, 0, plot=True)
         
         maxs_graph = np.concatenate((maxs_graph, [extremum_value_probe/extremum_value_probe] * (end_probing-start_probing)))
         
         realign_offset = 0
-        correlation_samples = 15
         
         for i in range(1, len(data)//get_one_block_step(freq, cyc, decimation)-2):
             block_start, block_end = self.get_block_indexes(data, sig_trig, freq, cyc, decimation, i)
-            correlation_points, extremum_value, extremum_index = self.correlate_through_one_block(probe_sine, data, block_start+realign_offset, block_end+realign_offset, correlation_samples, start_probing, end_probing, extremum_value_probe, plot=True)
+            
+            block_start -= realign_offset
+            block_end -= realign_offset
+            
+            correlation_points, extremum_value, extremum_index = self.correlate_through_one_block(probe_sine, data, block_start, block_end, correlation_samples, start_probing, end_probing, extremum_value_probe, plot=False)
             #avg = np.mean(correlation_points)
             
-            if extremum_index != correlation_samples//2:
+            if extremum_index != correlation_samples//2 and i != 1:
                 print(f"[{i} ({block_start}-{block_end})] Extremum found at index {extremum_index}, realign by {extremum_index - correlation_samples//2}")
-                realign_offset = extremum_index - correlation_samples//2
+                realign_offset += extremum_index - correlation_samples//2
             
             extremum_value = extremum_value / extremum_value_probe
             
@@ -100,7 +105,7 @@ class Read_Api:
         #return normalized_correlated, demodulated, lpf
         return data, maxs_graph, bits
 
-    def readFromSignal(self, signal: np.ndarray, freq: int, cyc: int, decimation: int, sig_trig: float = 0.6) -> np.ndarray:
+    def readFromSignal(self, signal: np.ndarray, freq: int, cyc: int, decimation: int, dec_thresh: float, sig_trig: float = 0.6) -> np.ndarray:
         """(probe_sine, start, end) = self.get_probing_sine_from_signal(signal, freq, cyc, decimation, sig_trig)
 
 
@@ -134,7 +139,7 @@ class Read_Api:
                 (demodulation, "#FFBB99", "Demodulated"),
             ],
         ]"""
-        data, maxs_graph, bits = self.readData(signal, freq, cyc, decimation, sig_trig)
+        data, maxs_graph, bits = self.readData(signal, freq, cyc, decimation, dec_thresh, sig_trig)
         print("Bits: ", bits)
         return [
             0,
