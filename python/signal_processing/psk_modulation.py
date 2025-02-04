@@ -83,6 +83,19 @@ def correlation_demodulation(modulated: np.ndarray, freq, decimation):
     return
 
 if __name__ == "__main__":
-    mod = psk_modulation([1, 0, 1, 0, 1, 1], cyc=1)
-    plt.plot(mod)
+    message = [1, 1, 0, 1, 0, 0, 1, 1, 1, 0]
+    mod, c = psk_modulation(message, cyc=1)
+
+    fig, (message_ax, cosine, modulated) = plt.subplots(3)
+    
+    message_signal = []
+    for b in message:
+        message_signal += [1 if b == 1 else -1] * (16384//(len(message)))
+    
+    message_ax.plot(message_signal)
+    cosine.plot(c)
+        
+    modulated.plot(mod)
+    
+
     plt.show()
