@@ -1,7 +1,7 @@
 import argparse
 
 from gui.gui import Gui
-from communication_pitaya import CommunicationMode, CommunicationPitaya
+from python.communication.communication_pitaya_scpi import CommunicationPitayaSCPI
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
         
     if args.scpi:
-        g = Gui(CommunicationPitaya(CommunicationMode.SCPI, args.ip))
+        g = Gui(CommunicationPitayaSCPI(args.ip))
         g.mainloop()
     elif args.standalone:
         print("Standalone mode")

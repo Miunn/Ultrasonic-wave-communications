@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.signal
-from signal_processing.modulation_utils import bpsk_demodulation
+from signal_processing.modulation_utils import bpsk_demodulation, butter_lowpass_filter
 from utils import get_one_block_step
 
 from typing import List, Tuple
@@ -35,11 +35,33 @@ class DemodulationApi:
         return self.readData(data, freq, cyc, decimation, dec_thresh, sig_trig)
 
     def readData(
-        self, data, freq, cyc, decimation, dec_thresh, sig_trig
+        self, data, freq, cyc, decimation, dec_thresh, sig_trig, mode=1
     ) -> Tuple[np.ndarray, np.ndarray, List[int]]:
-        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(
-            data, freq, cyc, decimation, sig_trig
-        )
+        if mode == 0:
+            return self.bpsk_demodulation(data, freq, cyc, decimation, sig_trig, dec_thresh)
+        elif mode == 1:
+            return self.cross_correlation_demodulation(data, freq, cyc, decimation, dec_thresh, sig_trig)
+    
+    def bpsk_demodulation(self, data, freq, cyc, decimation, sig_trig, dec_thresh):
+        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
+        # self.correlate_in_new_graph(data, freq, cyc, decimation, sig_trig)
+
+        # Correlate the signal with the first sine as probing signal
+        correlated = self.correlate_signal(probe_sine, data)
+
+        # Normalize the signal
+        normalized_correlated = correlated / np.max(correlated)
+        normalized_correlated = data / np.max(data)
+        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
+
+        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
+        
+        bits = self.decision_making_device(lpf, freq, cyc, decimation, 0.2, dec_thresh)
+
+        return normalized_correlated, demodulated, lpf, bits
+    
+    def cross_correlation_demodulation(self, data, freq, cyc, decimation, dec_thresh, sig_trig):
+        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
 
         maxs_graph = np.zeros(start_probing)
         bits = []
@@ -69,9 +91,7 @@ class DemodulationApi:
         realign_offset = 0
 
         for i in range(1, len(data) // get_one_block_step(freq, cyc, decimation) - 2):
-            block_start, block_end = self.get_block_indexes(
-                data, sig_trig, freq, cyc, decimation, i
-            )
+            block_start, block_end = self.get_block_indexes(data, sig_trig, freq, cyc, decimation, i)
 
             block_start -= realign_offset
             block_end -= realign_offset
@@ -92,9 +112,6 @@ class DemodulationApi:
             # avg = np.mean(correlation_points)
 
             if extremum_index != correlation_samples // 2 and i != 1:
-                print(
-                    f"[{i} ({block_start}-{block_end})] Extremum found at index {extremum_index}, realign by {extremum_index - correlation_samples // 2}"
-                )
                 realign_offset += extremum_index - correlation_samples // 2
 
             extremum_value = extremum_value / extremum_value_probe
@@ -115,28 +132,6 @@ class DemodulationApi:
                 elif extremum_value < -dec_thresh:
                     bits.append(0)
 
-        # self.correlate_in_new_graph(data, freq, cyc, decimation, sig_trig)
-
-        # Correlate the signal with the first sine as probing signal
-        # correlated = self.correlate_signal(data[75:140], data)
-
-        # Normalize the signal
-        # normalized_correlated = correlated / np.max(correlated)
-        # normalized_correlated = data / np.max(data)
-        # demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
-
-        # lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-
-        """with open("sig-dec-64-voltage.txt", "w") as f:
-            f.write(" ".join([str(i) for i in normalized_correlated]))
-
-        with open("sig-dec-64-demod.txt", "w") as f:
-            f.write(" ".join([str(i) for i in demodulated]))
-
-        with open("sig-dec-64-lpf.txt", "w") as f:
-            f.write(" ".join([str(i) for i in lpf]))"""
-
-        # return normalized_correlated, demodulated, lpf
         return data, maxs_graph, bits
 
     def readFromSignal(

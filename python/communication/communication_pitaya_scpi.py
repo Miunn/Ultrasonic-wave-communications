@@ -11,26 +11,20 @@ class CommunicationMode(StrEnum):
     STANDALONE = "standalone"       # Run on local RedPitaya without gui
     DEFAULT = "default"             # Connect to distant standalone instance
 
-class CommunicationPitaya(CommunicationInterface):
-    def __init__(self, mode: CommunicationMode, addr):
+class CommunicationPitayaSCPI(CommunicationInterface):
+    demodulationMode: int
+    
+    def __init__(self, addr):
         super().__init__(addr)
 
-        if (mode == CommunicationMode.STANDALONE):
-            return
-        elif (mode == CommunicationMode.SCPI):
-            self.readPitayaApi = Read_Pitaya_SCPI(addr)
-            self.writePitayaApi = Write_Pitaya_SCPI(addr)
-        elif (mode == CommunicationMode.DEFAULT):
-            
-            return
-        else:
-            raise ValueError("Invalid mode")
+        self.readPitayaApi = Read_Pitaya_SCPI(addr)
+        self.writePitayaApi = Write_Pitaya_SCPI(addr)
 
         self.demodulationApi = DemodulationApi()
         self.modulationApi = ModulationApi()
 
     def toggleMode(self, current):
-        return super().toggleMode(current)
+        self.demodulationMode = current
 
     def connect(self):
         print("Trying to connect apis to pitaya")
@@ -45,24 +39,51 @@ class CommunicationPitaya(CommunicationInterface):
 
     def startListening(self, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh, mode=1):
         data = self.readPitayaApi.read(decimation, sig_trig)
-        signal, square_correlation, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_thresh, sig_trig)
+        
+        if mode == 0:
+            signal, demodulated, lpf, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_thresh, sig_trig, mode=mode)
 
-        return [
-            0,
-            bits,
-            [
-                (
-                    signal,
-                    "#BBBBFF",
-                    "Signal"
-                ),
-                (
-                    square_correlation,
-                    "orange",
-                    "Correlation"
-                )
+            return [
+                0,
+                bits,
+                [
+                    (
+                        signal,
+                        "#BBBBFF",
+                        "Signal"
+                    ),
+                    (
+                        demodulated,
+                        "orange",
+                        "Demodulation"
+                    ),
+                    (
+                        lpf,
+                        "green",
+                        "Low-pass filter"
+                    )
+                ]
             ]
-        ]
+        
+        elif mode == 1:
+            signal, square_correlation, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_thresh, sig_trig, mode=mode)
+
+            return [
+                0,
+                bits,
+                [
+                    (
+                        signal,
+                        "#BBBBFF",
+                        "Signal"
+                    ),
+                    (
+                        square_correlation,
+                        "orange",
+                        "Correlation"
+                    )
+                ]
+            ]
         
     def readFromSignal(self, signal, freq: int, cyc: int, decimation: int, sig_trig=0.2):
         return self.demodulationApi.readFromSignal(signal, freq, cyc, decimation, sig_trig)
