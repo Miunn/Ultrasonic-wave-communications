@@ -9,31 +9,6 @@ from matplotlib import pyplot as plt
 
 
 class DemodulationApi:
-    def startListening(
-        self, freq, cyc, decimation, sig_trig, dec_trig, dec_thesh, mode=1
-    ):
-        # normalized_correlated, demodulated, lpf = self.listenSignal(
-        #    freq, decimation, sig_trig, cyc
-        # )
-
-        # step = int(get_one_block_step(freq, cyc, decimation))
-        # integralSignal = scipy.signal.square(np.linspace(0, 1, 16384))
-
-        # bits = self.decision_making_device(
-        #    lpf, freq, cyc, decimation, dec_trig, dec_thesh
-        # )
-
-        # return normalized_correlated, demodulated, lpf, bits
-
-        signal, square_correlate, bits = self.listenSignal(
-            freq, decimation, sig_trig, cyc, dec_thesh
-        )
-        return signal, square_correlate, bits
-
-    def listenSignal(self, freq, decimation, sig_trig, cyc, dec_thresh=0.5):
-        data = self.pitayaReader.read(decimation, sig_trig)
-        return self.readData(data, freq, cyc, decimation, dec_thresh, sig_trig)
-
     def readData(
         self, data, freq, cyc, decimation, dec_thresh, sig_trig, mode=1
     ) -> Tuple[np.ndarray, np.ndarray, List[int]]:
