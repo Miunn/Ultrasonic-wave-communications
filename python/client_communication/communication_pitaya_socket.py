@@ -21,5 +21,5 @@ class CommunicationPitayaSocket(CommunicationInterface):
         
     
     def changeParameter(self, parameters):
-        self.socketApi.write('change-parameters', {})
+        self.socketApi.write('change-parameters', { "data": parameters})
         

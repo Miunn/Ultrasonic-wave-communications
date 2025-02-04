@@ -7,7 +7,25 @@ If you want to run the software with a distant RedPitaya, use SCPI mode
 """
 
 import numpy as np
-import rp
+
+try:
+    import rp
+except ModuleNotFoundError:
+    import sys
+    sys.path.append('/opt/redpitaya/lib/python')
+    
+    try:
+        import rp
+    except ModuleNotFoundError:
+        print(
+            """
+            Couldn't found rp library, you are most likely not running this program on a RedPitaya.
+            If you want to connect a distant RedPitaya, use SCPI mode.
+            
+            If you are running this program on a RedPitaya, make sure you have the rp library installed in /opt/redpitaya/lib/python or located next to these sources.
+            """
+        )
+        exit(1)
 
 class Read_Pitaya_API:
     def read(self, dec, trig_lvl, trig_delay=8192):

@@ -11,7 +11,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 
-modes = ["BSPK   ", "CROSS."]
+modes = ["BSPK", "CROSS."]
 
 
 class AutoMode(tk.Frame):
@@ -109,7 +109,14 @@ class AutoMode(tk.Frame):
         tk.Label(f1, text="%").grid(column=3, row=7, sticky="w")
 
         self.optionButton = tk.Button(
-            f1, text="Apply Options", command=lambda: comm.changeParameter("")
+            f1, text="Apply Options", command=lambda: comm.changeParameter({
+                "mode": self.mode.get(),
+                "freq": self.freq.get(),
+                "cyc": self.cyc.get(),
+                "trig_lvl": self.trigger.get(),
+                "dec_trig": self.trigg_dd.get(),
+                "dec_thresh": self.threshold.get(),
+            })
         )
         self.optionButton.grid(column=1, row=8, columnspan=3)
 
