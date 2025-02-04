@@ -12,7 +12,7 @@ class CtxMenu(tk.Menu):
 
         # File submenu
         file = tk.Menu(master=master)
-        file.add_command(label="Connect to RedPitaya", command=self.askConnect)
+        file.add_command(label="Connect to IOron", command=self.askConnect)
         file.add_command(label="Save current graph as...", command=self.askSave)
         file.add_command(label="Load graph from file...", command=self.askLoad)
         self.add_cascade(label="File", menu=file)

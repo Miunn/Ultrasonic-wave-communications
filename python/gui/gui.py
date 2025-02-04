@@ -30,10 +30,10 @@ class Gui:
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
     ):
+        self.root = tk.Tk()
+
         self.t_connect = None
         self.connectedLabel = "Not connected"
-
-        self.root = tk.Tk()
 
         self.menu = CtxMenu(self.root)
 
@@ -54,6 +54,8 @@ class Gui:
 
         self.connectedLabel = tk.Label(self.root, text="Not connected", fg="red")
         self.connectedLabel.grid(column=0, row=2, sticky="e")
+
+        self.ip = tk.StringVar(self.root, self.interact.comm.addr)
 
         self.root.bind("<<CONNECT>>", self.onConnect)
         self.root.bind("<Configure>", self.onResize)
@@ -104,12 +106,20 @@ class Gui:
         if self.t_connect is None or not self.t_connect.is_alive():
             if self.t_connect is not None:
                 self.t_connect.join()
-            print("On connect")
-            self.connectedLabel.configure(text="Connecting...")
-            self.connectedLabel.configure(fg="orange")
-            self.toggleWait(True)
-            self.t_connect = threading.Thread(target=self.t_onConnect)
-            self.t_connect.start()
+        t = tk.Toplevel(self.root)
+        tk.Label(t, text="IP adress").grid(column=0, row=0, columnspan=2)
+
+        tk.Entry(t, textvariable=self.ip).grid(column=0, row=1)
+        tk.Button(t, text="Connect", command=self.commitConnect).grid(column=1, row=1)
+
+    def commitConnect(self) -> None:
+        self.interact.comm.addr = self.ip.get()
+        print("On connect")
+        self.connectedLabel.configure(text="Connecting...")
+        self.connectedLabel.configure(fg="orange")
+        self.toggleWait(True)
+        self.t_connect = threading.Thread(target=self.t_onConnect)
+        self.t_connect.start()
 
     def t_onConnect(self):
         if self.interact.comm.connect():
@@ -176,7 +186,7 @@ class Gui:
                 float(self.interact.f2.freq.get()) * 1000,
                 int(self.interact.f2.cyc.get()),
                 self.interact.f2.getDecim(),
-                float(self.interact.f2.threshold.get())/100
+                float(self.interact.f2.threshold.get()) / 100,
             )
 
             """self.interact.f2.RecepterStatusLabel.configure(
