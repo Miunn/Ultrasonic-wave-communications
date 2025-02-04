@@ -3,6 +3,7 @@ import argparse
 from gui.gui import Gui
 from communication.communication_pitaya_scpi import CommunicationPitayaSCPI
 from communication.communication_pitaya_socket import CommunicationPitayaSocket
+from pitaya.redpitaya_standalone import RedPitaya_Standalone
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -20,7 +21,10 @@ if __name__ == "__main__":
         g = Gui(CommunicationPitayaSCPI(args.ip if args.ip is not None else '10.42.0.125'))
         g.mainloop()
     elif args.standalone:
-        print("Standalone mode")
+        from werkzeug.serving import run_simple
+        app = RedPitaya_Standalone()
+        run_simple('127.0.0.1', 5000, app.getServerApp(), use_debugger=True, use_reloader=True)
+        
     else:
         g = Gui(CommunicationPitayaSocket(args.ip if args.ip is not None else '10.42.0.125'))
         g.mainloop()

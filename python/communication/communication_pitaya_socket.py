@@ -10,7 +10,7 @@ class CommunicationPitayaSocket(CommunicationInterface):
 
     def connect(self):
         self.socketApi.IP = self.addr
-        self.socketApi.connect()
+        return self.socketApi.connect()
 
     def fetchNewComparedData(self):
         return super().fetchNewComparedData()

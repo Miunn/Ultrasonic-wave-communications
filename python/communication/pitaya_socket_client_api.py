@@ -10,9 +10,10 @@ class Client_Pitaya_Socket:
     def connect(self):
         print(f"[*] Client socket trying to connect to {self.IP}")
         try:
-            self.sio.connect(f'http://{self.IP}')
+            self.sio.connect(f'http://{self.IP}', transports=['websocket'], wait_timeout=5)
             return True
         except Exception as e:
+            print("Exception connecting to socket")
             print(f"Error: {e}")
             return False
     
