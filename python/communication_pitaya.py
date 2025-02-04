@@ -21,6 +21,7 @@ class CommunicationPitaya(CommunicationInterface):
             self.readPitayaApi = Read_Pitaya_SCPI(addr)
             self.writePitayaApi = Write_Pitaya_SCPI(addr)
         elif (mode == CommunicationMode.DEFAULT):
+            
             return
         else:
             raise ValueError("Invalid mode")
@@ -31,10 +32,10 @@ class CommunicationPitaya(CommunicationInterface):
     def toggleMode(self, current):
         return super().toggleMode(current)
 
-    def connect(self, ip):
+    def connect(self):
         print("Trying to connect apis to pitaya")
-        self.readPitayaApi.IP = ip
-        self.writePitayaApi.IP = ip
+        self.readPitayaApi.IP = self.addr
+        self.writePitayaApi.IP = self.addr
         return self.readPitayaApi.connect() and self.writePitayaApi.connect()
 
     def emit(self, message, freq, cyc, mode=1):
