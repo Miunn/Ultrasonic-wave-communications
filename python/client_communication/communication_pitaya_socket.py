@@ -1,5 +1,5 @@
 from gui.communication_interface import CommunicationInterface
-from pitaya_communication.pitaya_socket_client_api import Client_Pitaya_Socket
+from client_communication.pitaya_socket_client_api import Client_Pitaya_Socket
 
 
 class CommunicationPitayaSocket(CommunicationInterface):    

@@ -1,8 +1,8 @@
 import argparse
 
 from gui.gui import Gui
-from communication.communication_pitaya_scpi import CommunicationPitayaSCPI
-from communication.communication_pitaya_socket import CommunicationPitayaSocket
+from client_communication.communication_pitaya_scpi import CommunicationPitayaSCPI
+from client_communication.communication_pitaya_socket import CommunicationPitayaSocket
 from pitaya.redpitaya_standalone import RedPitaya_Standalone
 
 if __name__ == "__main__":
