@@ -109,7 +109,7 @@ class AutoMode(tk.Frame):
         tk.Label(f1, text="%").grid(column=3, row=7, sticky="w")
 
         self.optionButton = tk.Button(
-            f1, text="Apply Options", command=comm.changeParameter
+            f1, text="Apply Options", command=lambda: comm.changeParameter("")
         )
         self.optionButton.grid(column=1, row=8, columnspan=3)
 

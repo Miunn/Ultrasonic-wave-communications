@@ -18,4 +18,7 @@ class Client_Pitaya_Socket:
             return False
     
     def write(self, event, args):
+        if not self.sio.connected:
+            raise Exception("Socket not connected")
+        
         self.sio.emit(event, args)

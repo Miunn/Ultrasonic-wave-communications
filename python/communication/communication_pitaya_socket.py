@@ -13,10 +13,13 @@ class CommunicationPitayaSocket(CommunicationInterface):
         return self.socketApi.connect()
 
     def fetchNewComparedData(self):
-        return super().fetchNewComparedData()
+        self.socketApi.write('fetch-new-compared-data', {})
+        
     
     def requestGraph(self):
-        return super().requestGraph()
+        self.socketApi.write('request-graph', {})
+        
     
     def changeParameter(self, parameters):
-        return super().changeParameter(parameters)
+        self.socketApi.write('change-parameters', {})
+        

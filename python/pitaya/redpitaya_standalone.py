@@ -23,3 +23,16 @@ class RedPitaya_Standalone:
         @self.server.event
         def disconnect(sid, reason):
             print('disconnect ', sid, reason)
+    
+        @self.server.on('fetch-new-compared-data')
+        def onFetchNewComparedData(sid, data):
+            print('Fetch new compared data')
+            
+        @self.server.on('request-graph')
+        def onRequestGraph(sid, data):
+            print('Request graph')
+            
+        @self.server.on('change-parameters')
+        def onChangeParameters(sid, data):
+            print('Change parameters')
+            print(data)
