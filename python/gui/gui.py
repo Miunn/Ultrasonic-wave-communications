@@ -26,10 +26,12 @@ class Gui:
     cid: int = 0
     interact: ihub.Hub
     t_connect: threading.Thread | None
+    t: tk.Toplevel | None
 
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
     ):
+        self.t = None
         self.root = tk.Tk()
 
         self.t_connect = None
@@ -106,13 +108,17 @@ class Gui:
         if self.t_connect is None or not self.t_connect.is_alive():
             if self.t_connect is not None:
                 self.t_connect.join()
-        t = tk.Toplevel(self.root)
-        tk.Label(t, text="IP adress").grid(column=0, row=0, columnspan=2)
+        self.t = tk.Toplevel(self.root)
+        tk.Label(self.t, text="IP adress").grid(column=0, row=0, columnspan=2)
 
-        tk.Entry(t, textvariable=self.ip).grid(column=0, row=1)
-        tk.Button(t, text="Connect", command=self.commitConnect).grid(column=1, row=1)
+        tk.Entry(self.t, textvariable=self.ip).grid(column=0, row=1)
+        tk.Button(self.t, text="Connect", command=self.commitConnect).grid(
+            column=1, row=1
+        )
 
     def commitConnect(self) -> None:
+        self.t.destroy()
+        self.t = None
         self.interact.comm.addr = self.ip.get()
         print("On connect")
         self.connectedLabel.configure(text="Connecting...")
