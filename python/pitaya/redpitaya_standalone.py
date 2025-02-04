@@ -42,15 +42,39 @@ class RedPitaya_Standalone:
         @self.server.on('fetch-new-compared-data')
         def onFetchNewComparedData(sid, data):
             print('Fetch new compared data')
+            return (
+                    self.unknownErrors,
+                    self.ioron_frame_errors,
+                    self.encapsulated_frame_errors,
+                    self.valid_data
+                )
             
         @self.server.on('request-graph')
         def onRequestGraph(sid, data):
             print('Request graph')
             
+            # Map ndarray graph inside last_graph to a list
+            serializable_graph = []
+            
+            for graph in self.last_graph:
+                serializable_graph.append(
+                    (
+                        graph[0].tolist(),
+                        graph[1],
+                        graph[2]
+                    )
+                )
+            
+            return (
+                self.last_message.tolist(),
+                serializable_graph
+            )
+            
         @self.server.on('change-parameters')
         def onChangeParameters(sid, data):
             print('Change parameters')
             print(data)
+            return "OK"
     
     def start_daemon():
         

@@ -21,4 +21,4 @@ class Client_Pitaya_Socket:
         if not self.sio.connected:
             raise Exception("Socket not connected")
         
-        self.sio.emit(event, args)
+        return self.sio.call(event, args, timeout=5)
