@@ -6,39 +6,68 @@ This file is meant to be running on local RedPitaya
 If you want to run the software with a distant RedPitaya, use SCPI mode
 """
 
+import numpy as np
 import rp
 
 class Read_Pitaya_API:
-    def tx_txt(self, txt):
-        self.rp_s.tx_txt(txt)
+    def read(self, dec, trig_lvl, trig_delay=8192):
+        N = 16384
+        rp_dec = None
+        
+        if dec == 1:
+            rp_dec = rp.RP_DEC_1
+        elif dec == 8:
+            rp_dec = rp.RP_DEC_8
+        elif dec == 64:
+            rp_dec = rp.RP_DEC_64
+        elif dec == 1024:
+            rp_dec = rp.RP_DEC_1024
+        
+        acq_trig_src = rp.RP_TRIG_SRC_CHA_PE
+        
+        rp.rp_Init()
 
-    def rx_txt(self):
-        return self.rp_s.rx_txt()
-    
-    def acq_set(self, dec, trig_lvl, units='volts', sample_format='bin', trig_delay=8192):
-        self.rp_s.acq_set(dec, trig_lvl, units=units, sample_format=sample_format, trig_delay=trig_delay)
+        rp.rp_AcqReset()
+        
+        rp.rp_AcqSetDecimation(rp_dec)
 
-    def acq_data(self, channel, binary=True, convert=True):
-        return self.rp_s.acq_data(channel, binary=binary, convert=convert)
-
-    def read(self, dec, trig_lvl):
-        self.tx_txt('ACQ:RST')
-        self.acq_set(dec, trig_lvl, units='volts', sample_format='bin', trig_delay=8100)
-        self.tx_txt('ACQ:START')
-        self.tx_txt('ACQ:TRig CH1_PE')
+        rp.rp_AcqSetTriggerLevel(rp.RP_T_CH_1, trig_lvl)
+        rp.rp_AcqSetTriggerDelay(trig_delay)
+        
         print("[*] Acquisition params set, ready to acquire")
+        rp.rp_AcqStart()
+        
+        rp.rp_AcqSetTriggerSrc(acq_trig_src)
 
+        rp.rp_GenTriggerOnly(rp.RP_CH_1)       # Trigger generator
+
+        # Trigger state
         while 1:
-            self.tx_txt('ACQ:TRig:STAT?')
-            if self.rx_txt() == 'TD':
+            trig_state = rp.rp_AcqGetTriggerState()[1]
+            if trig_state == rp.RP_TRIG_STATE_TRIGGERED:
                 break
 
+        ## ! OS 2.00 or higher only ! ##
+        # Fill state
         while 1:
-            self.tx_txt('ACQ:TRig:FILL?')
-            if self.rx_txt() == '1':
+            if rp.rp_AcqGetBufferFillState()[1]:
                 break
+            
+        ibuff = rp.i16Buffer(N)
+        rp.rp_AcqGetOldestDataRaw(rp.RP_CH_1, N, ibuff.cast())
 
-        print("[*] Triggered, acquire buffer")
-        buff = self.acq_data(1, binary=True, convert=True)
+        # Volts
+        fbuff = rp.fBuffer(N)
+        rp.rp_AcqGetDataV(rp.RP_CH_1, 0, N, fbuff)
 
-        return buff
+        data_V = np.zeros(N, dtype = float)
+        #data_raw = np.zeros(N, dtype = int)
+
+        for i in range(0, N, 1):
+            data_V[i] = fbuff[i]
+            #data_raw[i] = ibuff[i]
+
+        # Release resources
+        rp.rp_Release()
+        
+        return data_V
