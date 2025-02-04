@@ -74,14 +74,14 @@ class TestingMode(tk.Frame):
         self.tr = None
         self.comm = comm
         self.freq = tk.StringVar(self, value="250")
-        self.cyc = tk.StringVar(self, value="5")
-        self.entry_t = tk.StringVar(self, value="Bits")
+        self.cyc = tk.StringVar(self, value="3")
+        self.entry_t = tk.StringVar(self, value="Hex")
         self.entry_v = tk.StringVar(self, value="")
-        self.common_t = tk.StringVar(self, value="Plain")
-        self.deim_t = tk.StringVar(self, value=generate_deim_text(64))
-        self.trigger = tk.StringVar(self, "0.6")
+        self.common_t = tk.StringVar(self, value="CAN")
+        self.deim_t = tk.StringVar(self, value=generate_deim_text(8))
+        self.trigger = tk.StringVar(self, "0.5")
         self.trigg_dd = tk.StringVar(self, "0.2")
-        self.threshold = tk.StringVar(self, "30")
+        self.threshold = tk.StringVar(self, "1")
         self.mode = tk.StringVar(self, "CROSS.")
 
         self.emmiter = tk.Frame(self)
@@ -304,9 +304,9 @@ class TestingMode(tk.Frame):
             column=0, row=8, columnspan=4
         )
 
-        tk.Button(self.reciever, text="Read from graph", command=self.listenFromGraph).grid(
-            column=3, row=8, columnspan=4
-        )
+        tk.Button(
+            self.reciever, text="Read from graph", command=self.listenFromGraph
+        ).grid(column=3, row=8, columnspan=4)
 
         self.result_label = tk.Label(self.reciever, text="RESULT :\n")
         self.result_label.grid(column=1, row=9, columnspan=4)
