@@ -1,10 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-import numpy as np
-
-import threading
-
 from gui.communication_interface import CommunicationInterface
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
