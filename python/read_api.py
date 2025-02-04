@@ -52,7 +52,7 @@ class Read_Api:
 
         maxs_graph = np.zeros(start_probing)
         bits = []
-        correlation_samples = 21
+        correlation_samples = 17
 
         # Probing the probe (to tget the max)
         _, extremum_value_probe, _ = self.correlate_through_one_block(
