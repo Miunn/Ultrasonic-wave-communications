@@ -84,12 +84,7 @@ class CommunicationInterface:
 
     @staticmethod
     def readFromSignal(
-        self,
-        signal: ndarray,
-        freq: float,
-        cyc: int,
-        decimation: int,
-        dec_thresh: float
+        self, signal: ndarray, freq: float, cyc: int, decimation: int, dec_thresh: float
     ):
         time.sleep(5)
         return zeros(2, int)
@@ -234,11 +229,15 @@ class CommunicationInterface:
         the type of the frame is deterined by cap_type
         ("Plain" / "CAN" / "ENCcan")
         """
+        print(list(value))
         match cap_type:
             case "Plain":
                 return value
             case "CAN":
-                return CanFrame.FromIntArray(CommunicationInterface.trimCan(value)).data
+                v = CanFrame.FromIntArray(CommunicationInterface.trimCan(value))
+                print("decoded :", v)
+                return v.data
+
             case "ENCcan":
                 return IOronSTD1Frame.FromIntArrayWKey(
                     CommunicationInterface.trimCan(value), b"sau6ctrobon"
@@ -259,7 +258,8 @@ class CommunicationInterface:
             else:
                 compteur += 1
             if compteur == 11:
-                return value[0, i + 1]
+                print(value[0 : i + 1])
+                return value[0 : i + 1]
         return value
 
     def emergencyStop(self):
@@ -267,21 +267,3 @@ class CommunicationInterface:
         Never used, do not need to implement it.
         """
         pass
-
-
-if __name__ == "__main__":
-    a = "10100011101010101001010"
-    b = CommunicationInterface.convertToBitString(
-        CommunicationInterface.convertBitString(a)
-    )
-    print(a, a == b, b)
-
-    a = "1234DEADBEEF"
-
-    h = CommunicationInterface.convertHexString(a)
-    b = CommunicationInterface.convertToHexString(h)
-    print(a, h, a == b, b)
-
-    a = "bonjoir"
-    b = CommunicationInterface.convertToString(CommunicationInterface.convertString(a))
-    print(a, a == b, b)
