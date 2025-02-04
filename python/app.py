@@ -1,7 +1,8 @@
 import argparse
 
 from gui.gui import Gui
-from python.communication.communication_pitaya_scpi import CommunicationPitayaSCPI
+from communication.communication_pitaya_scpi import CommunicationPitayaSCPI
+from communication.communication_pitaya_socket import CommunicationPitayaSocket
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -14,11 +15,12 @@ if __name__ == "__main__":
     parser.add_argument("--ip", help="IP address of the distant RedPitaya", type=str)
     
     args = parser.parse_args()
-        
+    
     if args.scpi:
-        g = Gui(CommunicationPitayaSCPI(args.ip))
+        g = Gui(CommunicationPitayaSCPI(args.ip if args.ip is not None else '10.42.0.125'))
         g.mainloop()
     elif args.standalone:
         print("Standalone mode")
     else:
-        print("Default mode")
+        g = Gui(CommunicationPitayaSocket(args.ip if args.ip is not None else '10.42.0.125'))
+        g.mainloop()

@@ -1,4 +1,4 @@
-from python.communication.pitaya_socket_client_api import Client_Pitaya_Socket
+from communication.pitaya_socket_client_api import Client_Pitaya_Socket
 from gui.communication_interface import CommunicationInterface
 
 
@@ -7,6 +7,10 @@ class CommunicationPitayaSocket(CommunicationInterface):
         super().__init__(addr)
 
         self.socketApi = Client_Pitaya_Socket(addr)
+
+    def connect(self):
+        self.socketApi.IP = self.addr
+        self.socketApi.connect()
 
     def fetchNewComparedData(self):
         return super().fetchNewComparedData()
