@@ -23,8 +23,7 @@ if __name__ == "__main__":
     elif args.standalone:
         from werkzeug.serving import run_simple
         app = RedPitaya_Standalone()
-        run_simple('127.0.0.1', 5000, app.getServerApp(), use_debugger=True, use_reloader=True)
-        
+        run_simple('127.0.0.1', 5000, app.getServerApp(), use_debugger=True, use_reloader=True)  
     else:
         g = Gui(CommunicationPitayaSocket(args.ip if args.ip is not None else '10.42.0.125'))
         g.mainloop()

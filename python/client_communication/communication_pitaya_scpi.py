@@ -1,6 +1,6 @@
-from communication.read_pitaya_scpi_api import Read_Pitaya_SCPI
-from communication.write_pitaya_scpi_api import Write_Pitaya_SCPI
 from gui.communication_interface import CommunicationInterface
+from pitaya_communication.read_pitaya_scpi_api import Read_Pitaya_SCPI
+from pitaya_communication.write_pitaya_scpi_api import Write_Pitaya_SCPI
 from signal_processing.demodulation_api import DemodulationApi
 from signal_processing.modulation_api import ModulationApi
 

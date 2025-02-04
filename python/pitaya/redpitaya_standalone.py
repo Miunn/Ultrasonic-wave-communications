@@ -36,3 +36,6 @@ class RedPitaya_Standalone:
         def onChangeParameters(sid, data):
             print('Change parameters')
             print(data)
+    
+    def start_daemon():
+        return
