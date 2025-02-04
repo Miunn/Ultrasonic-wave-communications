@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import pitaya.redpitaya_scpi as scpi
+from utils import get_signal_frequency_from_sampling
 
-class Read_Pitaya:
+class Write_Pitaya_SCPI:
     IP = '10.42.0.125'
     rp_s: scpi.scpi
 
@@ -32,24 +33,11 @@ class Read_Pitaya:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def read(self, dec, trig_lvl):
-        self.tx_txt('ACQ:RST')
-        self.acq_set(dec, trig_lvl, units='volts', sample_format='bin', trig_delay=8100)
-        self.tx_txt('ACQ:START')
-        self.tx_txt('ACQ:TRig CH1_PE')
-        print("[*] Acquisition params set, ready to acquire")
-
-        while 1:
-            self.tx_txt('ACQ:TRig:STAT?')
-            if self.rx_txt() == 'TD':
-                break
-
-        while 1:
-            self.tx_txt('ACQ:TRig:FILL?')
-            if self.rx_txt() == '1':
-                break
-
-        print("[*] Triggered, acquire buffer")
-        buff = self.acq_data(1, binary=True, convert=True)
-
-        return buff
+    def write(self, data, len_data, cyc, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
+        self.rp_s.tx_txt('GEN:RST')
+        if wave_form != 'arbitrary':
+            self.rp_s.sour_set(channel, wave_form, volt, freq, burst=burst)
+        else:
+            self.rp_s.sour_set(channel, wave_form, volt, get_signal_frequency_from_sampling(freq, cyc, len_data), data=data, burst=burst)
+        self.rp_s.tx_txt(f'OUTPUT{channel}:STATE ON')
+        self.rp_s.tx_txt(f'SOUR{channel}:TRig:INT')

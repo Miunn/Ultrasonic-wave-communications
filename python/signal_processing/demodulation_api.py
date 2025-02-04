@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.signal
-from python.signal_processing.modulation_utils import bpsk_demodulation
+from signal_processing.modulation_utils import bpsk_demodulation
 from utils import get_one_block_step
 
 from typing import List, Tuple
