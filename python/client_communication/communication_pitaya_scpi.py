@@ -41,7 +41,7 @@ class CommunicationPitayaSCPI(CommunicationInterface):
         data = self.readPitayaApi.read(decimation, sig_trig)
         
         if mode == 0:
-            signal, demodulated, lpf, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_thresh, sig_trig, mode=mode)
+            signal, demodulated, lpf, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_trig, dec_thresh, sig_trig, mode=mode)
 
             return [
                 0,
@@ -66,7 +66,7 @@ class CommunicationPitayaSCPI(CommunicationInterface):
             ]
         
         elif mode == 1:
-            signal, square_correlation, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_thresh, sig_trig, mode=mode)
+            signal, square_correlation, bits = self.demodulationApi.readData(data, freq, cyc, decimation, dec_trig, dec_thresh, sig_trig, mode=mode)
 
             return [
                 0,

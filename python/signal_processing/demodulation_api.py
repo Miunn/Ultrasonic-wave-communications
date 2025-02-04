@@ -10,14 +10,14 @@ from matplotlib import pyplot as plt
 
 class DemodulationApi:
     def readData(
-        self, data, freq, cyc, decimation, dec_thresh, sig_trig, mode=1
+        self, data, freq, cyc, decimation, dec_trig, dec_thresh, sig_trig, mode=1
     ) -> Tuple[np.ndarray, np.ndarray, List[int]]:
         if mode == 0:
-            return self.bpsk_demodulation(data, freq, cyc, decimation, sig_trig, dec_thresh)
+            return self.bpsk_demodulation(data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh)
         elif mode == 1:
             return self.cross_correlation_demodulation(data, freq, cyc, decimation, dec_thresh, sig_trig)
     
-    def bpsk_demodulation(self, data, freq, cyc, decimation, sig_trig, dec_thresh):
+    def bpsk_demodulation(self, data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh):
         (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
         # self.correlate_in_new_graph(data, freq, cyc, decimation, sig_trig)
 
@@ -115,6 +115,7 @@ class DemodulationApi:
         freq: int,
         cyc: int,
         decimation: int,
+        dec_trig: float,
         dec_thresh: float,
         sig_trig: float = 0.6,
     ) -> np.ndarray:
@@ -152,7 +153,7 @@ class DemodulationApi:
             ],
         ]"""
         data, maxs_graph, bits = self.readData(
-            signal, freq, cyc, decimation, dec_thresh, sig_trig
+            signal, freq, cyc, decimation, dec_trig, dec_thresh, sig_trig
         )
         print("Bits: ", bits)
         return [

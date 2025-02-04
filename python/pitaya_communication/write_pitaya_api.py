@@ -16,12 +16,12 @@ except ModuleNotFoundError:
         import rp
     except ModuleNotFoundError:
         print(
-            """
-            Couldn't found rp library, you are most likely not running this program on a RedPitaya.
-            If you want to connect a distant RedPitaya, use SCPI mode.
-            
-            If you are running this program on a RedPitaya, make sure you have the rp library installed in /opt/redpitaya/lib/python or located next to these sources.
-            """
+"""
+Couldn't found rp library, you are most likely not running this program on a RedPitaya.
+If you want to connect a distant RedPitaya, use SCPI mode.
+
+If you are running this program on a RedPitaya, make sure you have the rp library installed in /opt/redpitaya/lib/python or located next to these sources.
+"""
         )
         exit(1)
 
