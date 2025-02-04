@@ -10,7 +10,7 @@ import rp
 
 from utils import get_signal_frequency_from_sampling
 
-class Write_Pitaya_SCPI:
+class Write_Pitaya_API:
     def write(self, data, len_data, cyc, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
         N = 16384
         
