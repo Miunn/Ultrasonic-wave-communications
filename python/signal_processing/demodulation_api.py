@@ -1,4 +1,3 @@
-from python.communication.read_pitaya_api import Read_Pitaya
 import numpy as np
 import scipy.signal
 from python.signal_processing.modulation_utils import bpsk_demodulation
