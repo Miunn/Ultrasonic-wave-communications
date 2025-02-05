@@ -348,10 +348,6 @@ class DemodulationApi:
         # Extremum value (max without abs)
         extremum_value = graph[np.where(np.abs(graph) == max_)[0][0]]
 
-        print(
-            f"[{start_block_index}, {end_block_index}] Extremum index: {np.where(np.abs(graph) == max_)[0][0]} Extremum: {extremum_value} Extremum probe: {extremum_probe}"
-        )
-
         if plot:
             fig, (signal_plot, correlation_graph) = plt.subplots(2)
             signal_plot.plot(signal)

@@ -25,10 +25,14 @@ class CommunicationPitayaSocket(CommunicationInterface):
         return received == 0
 
     def emit(self, message, freq, cyc, mode=1):
-        return self.socketApi.write(
-            "write",
-            {"message": message.tolist(), "freq": freq, "cyc": cyc, "mode": mode},
-        )
+        try:
+            return self.socketApi.write(
+                "write",
+                {"message": message.tolist(), "freq": freq, "cyc": cyc, "mode": mode},
+            )
+        except Exception as e:
+            print("Error", e)
+            return 1, f"Error {e}"
 
     def startListening(
         self,

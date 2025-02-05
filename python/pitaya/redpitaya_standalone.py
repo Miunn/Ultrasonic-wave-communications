@@ -68,34 +68,14 @@ class RedPitaya_Standalone:
 
         @self.server.on("start-listening")
         def onStartListening(sid, data):
-            signal = self.readPitayaApi.read(
-                data["decimation"], data["sig_trig"], trig_delay=8192
-            )
-
-            if data["mode"] == 0:
-                signal, demodulated, lpf, bits = self.demodulationApi.bpsk_demodulation(
-                    signal,
-                    data["freq"],
-                    data["cyc"],
-                    data["decimation"],
-                    data["sig_trig"],
-                    data["dec_trig"],
-                    data["dec_thresh"],
+            try:
+                signal = self.readPitayaApi.read(
+                    data["decimation"], data["sig_trig"], trig_delay=8192
                 )
+                print("[INFO] Signal received, starting demodulation")
 
-                return [
-                    0,
-                    bits.tolist(),
-                    [
-                        (signal.tolist(), "#BBBBFF", "Signal"),
-                        (demodulated.tolist(), "orange", "Demodulation"),
-                        (lpf.tolist(), "green", "Low-pass filter"),
-                    ],
-                ]
-
-            elif data["mode"] == 1:
-                signal, square_correlation, bits = (
-                    self.demodulationApi.cross_correlation_demodulation(
+                if data["mode"] == 0:
+                    signal, demodulated, lpf, bits = self.demodulationApi.bpsk_demodulation(
                         signal,
                         data["freq"],
                         data["cyc"],
@@ -104,17 +84,40 @@ class RedPitaya_Standalone:
                         data["dec_trig"],
                         data["dec_thresh"],
                     )
-                )
 
-                return [
-                    0,
-                    bits.tolist(),
-                    [
-                        (signal.tolist(), "#BBBBFF", "Signal"),
-                        (square_correlation.tolist(), "orange", "Correlation"),
-                    ],
-                ]
-            return 0
+                    return [
+                        0,
+                        bits.tolist(),
+                        [
+                            (signal.tolist(), "#BBBBFF", "Signal"),
+                            (demodulated.tolist(), "orange", "Demodulation"),
+                            (lpf.tolist(), "green", "Low-pass filter"),
+                        ],
+                    ]
+
+                elif data["mode"] == 1:
+                    signal, square_correlation, bits = (
+                        self.demodulationApi.cross_correlation_demodulation(
+                            signal,
+                            data["freq"],
+                            data["cyc"],
+                            data["decimation"],
+                            data["dec_thresh"],
+                            data["sig_trig"],
+                        )
+                    )
+
+                    return [
+                        0,
+                        bits.tolist(),
+                        [
+                            (signal.tolist(), "#BBBBFF", "Signal"),
+                            (square_correlation.tolist(), "orange", "Correlation"),
+                        ],
+                    ]
+            except Exception as e:
+                print("[ERROR] ", e)
+                return [1, [], []]
 
         @self.server.on("write")
         def onWrite(sid, data):
@@ -122,17 +125,22 @@ class RedPitaya_Standalone:
             mod = self.modulationApi.modulate(
                 data["message"], data["cyc"], mode=data["mode"]
             )
-            self.writePitayaApi.write(
-                mod,
-                len(data["message"]),
-                data["cyc"],
-                channel=1,
-                wave_form="arbitrary",
-                freq=data["freq"],
-                volt=1,
-                burst=True,
-            )
-            return 0
+            try:
+                self.writePitayaApi.write(
+                    mod,
+                    len(data["message"]),
+                    data["cyc"],
+                    channel=1,
+                    wave_form="arbitrary",
+                    freq=data["freq"],
+                    volt=1,
+                    burst=True,
+                )
+                print("[INFO] Signal sent")
+                return 0
+            except Exception as e:
+                print("[ERROR] ", e)
+                return 1
 
     def start_daemon():
         return

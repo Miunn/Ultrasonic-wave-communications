@@ -62,17 +62,23 @@ class Read_Pitaya_API:
         # Trigger state
         while 1:
             trig_state = rp.rp_AcqGetTriggerState()[1]
+            print(trig_state)
             if trig_state == rp.RP_TRIG_STATE_TRIGGERED:
+                print("[*] Triggered state")
                 break
+
+        print("[*] Triggered, waiting for buffer to fill")
 
         ## ! OS 2.00 or higher only ! ##
         # Fill state
         while 1:
             if rp.rp_AcqGetBufferFillState()[1]:
                 break
-            
-        ibuff = rp.i16Buffer(N)
-        rp.rp_AcqGetOldestDataRaw(rp.RP_CH_1, N, ibuff.cast())
+        
+        print("[*] Triggered, reading data")
+        
+        #ibuff = rp.i16Buffer(N)
+        #rp.rp_AcqGetOldestDataRaw(rp.RP_CH_1, N, ibuff.cast())
 
         # Volts
         fbuff = rp.fBuffer(N)
