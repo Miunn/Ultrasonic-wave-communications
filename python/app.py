@@ -38,7 +38,7 @@ if __name__ == "__main__":
         app = RedPitaya_Standalone()
         run_simple(
             "0.0.0.0", 5000, app.getServerApp(),
-            use_debugger=True,
+            use_debugger=False,
             use_reloader=True
         )
     else:
