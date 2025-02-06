@@ -19,9 +19,12 @@ class CommunicationInterface:
         return True
 
     # ------------------------- Manual Mode commands --------------------------------
-    def connect(self) -> bool:
+    def connect(self, hub_frame) -> bool:
         """
         Connect to the capture device
+        hub_frame : 
+            - 0 Auto
+            - 1 Testing
         """
         time.sleep(2)
         return True
@@ -60,10 +63,28 @@ class CommunicationInterface:
     # -----------------------------------------------------------
 
     # --------- AUTO MODE COMMAND -------------------------------
-    def fetchNewComparedData(self) -> list[tuple[ndarray, ndarray]]:
+    def play(self) -> bool:
         """
-        Fetch the last data exchnanges into a list of tuples
-        (sent_data, receieved_data)
+        Start the auto mode
+        """
+        pass
+    
+    def pause(self) -> bool:
+        """
+        Pause the auto mode
+        """
+        pass
+    
+    def fetchNewComparedData(self) -> tuple[int, int, int, int, float]:
+        """
+        Fetch the last data exchanges
+        (
+            truePositive: int,
+            trueNegative: int,
+            falsePositive: int,
+            falseNegative: int,
+            bep: float
+        )
         """
         pass
 
@@ -77,6 +98,12 @@ class CommunicationInterface:
         """
         change the parameter of the exchange in auto mode
         (this may restart to exchange process)
+        """
+        pass
+    
+    def resetStat(self) -> bool:
+        """
+        Reset the statistics
         """
         pass
 
