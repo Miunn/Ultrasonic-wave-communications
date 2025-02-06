@@ -113,4 +113,5 @@ class CommunicationPitayaSCPI(CommunicationInterface):
         return
         
     def stop_daemon(self):
+        self.daemon_started = False
         return

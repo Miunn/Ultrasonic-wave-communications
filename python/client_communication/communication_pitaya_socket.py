@@ -11,10 +11,15 @@ class CommunicationPitayaSocket(CommunicationInterface):
     def connect(self, hub_frame):
         self.socketApi.IP = self.addr
         return self.socketApi.connect()
+    
+    def play(self):
+        return self.socketApi.write("play", {})
+    
+    def pause(self):
+        return self.socketApi.write("pause", {})
 
     def fetchNewComparedData(self):
-        new_data = self.socketApi.write("fetch-new-compared-data", {})
-        return
+        return self.socketApi.write("fetch-new-compared-data", {})
 
     def requestGraph(self):
         return self.socketApi.write("request-graph", {})

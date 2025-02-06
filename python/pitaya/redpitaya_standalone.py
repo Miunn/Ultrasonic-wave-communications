@@ -2,14 +2,15 @@ import numpy as np
 import socketio
 import traceback
 
-from pitaya_communication.read_pitaya_api import Read_Pitaya_API
-from pitaya_communication.write_pitaya_api import Write_Pitaya_API
+#from pitaya_communication.read_pitaya_api import Read_Pitaya_API
+#from pitaya_communication.write_pitaya_api import Write_Pitaya_API
 from signal_processing.modulation_api import ModulationApi
 from signal_processing.demodulation_api import DemodulationApi
 from threading import Lock
 
 
 class RedPitaya_Standalone:
+    daemon_started: bool = False
     
     truePositive: int = 0
     falsePositive: int = 0
@@ -22,6 +23,13 @@ class RedPitaya_Standalone:
     last_message: np.ndarray = np.array([])
     last_error_state: int = 0
     
+    demodulation_mode: int = 0
+    frequency: float = 0
+    cyc: int = 0
+    trig_lvl: float = 0
+    dec_trig: float = 0
+    dec_thresh: float = 0
+    
     ex: Lock
 
     def __init__(self):
@@ -29,8 +37,8 @@ class RedPitaya_Standalone:
         self.server = socketio.Server()
         self.events()
 
-        self.readPitayaApi = Read_Pitaya_API()
-        self.writePitayaApi = Write_Pitaya_API()
+        #self.readPitayaApi = Read_Pitaya_API()
+        #self.writePitayaApi = Write_Pitaya_API()
 
         self.modulationApi = ModulationApi()
         self.demodulationApi = DemodulationApi()
@@ -46,6 +54,16 @@ class RedPitaya_Standalone:
         @self.server.event
         def disconnect(sid, reason):
             print("disconnect ", sid, reason)
+
+        @self.server.on("play")
+        def start_daemon(sid, data):
+            print("Play")
+            return True
+
+        @self.server.on("pause")
+        def stop_daemon(sid, data):
+            print("Pause")
+            return True
 
         @self.server.on("fetch-new-compared-data")
         def onFetchNewComparedData(sid, data):
@@ -72,9 +90,19 @@ class RedPitaya_Standalone:
 
         @self.server.on("change-parameters")
         def onChangeParameters(sid, data):
-            print("Change parameters")
-            print(data)
+            print("[INFO] Change parameters to", data["data"])
+            
             return 0
+
+        @self.server.on("reset-stat")
+        def resetStat(sid, data):
+            print("Reset stat")
+            self.truePositive = 0
+            self.trueNegative = 0
+            self.falsePositive = 0
+            self.falseNegative = 0
+            self.bep = 0
+            return True
 
         @self.server.on("start-listening")
         def onStartListening(sid, data):
@@ -158,5 +186,12 @@ class RedPitaya_Standalone:
                 print("[ERROR] ", e)
                 return 1
 
-    def start_daemon():
-        return
+    def t_start_daemon(self):
+        self.daemon_started = True
+        print("Daemon started")
+        while self.daemon_started:
+            pass
+        
+    def t_stop_daemon(self):
+        self.daemon_started = False
+        print("Daemon stopped")
