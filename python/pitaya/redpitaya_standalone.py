@@ -2,11 +2,6 @@ import numpy as np
 import socketio
 import traceback
 
-try:
-    import rp
-except ModuleNotFoundError:
-    import sys
-
 from pitaya_communication.read_pitaya_api import Read_Pitaya_API
 from pitaya_communication.write_pitaya_api import Write_Pitaya_API
 from signal_processing.modulation_api import ModulationApi
@@ -25,7 +20,6 @@ class RedPitaya_Standalone:
     ex: Lock
 
     def __init__(self):
-        rp.rp_Init()
         self.ex = Lock()
         self.server = socketio.Server()
         self.events()
@@ -82,7 +76,7 @@ class RedPitaya_Standalone:
                 print("=========== START LISTENING =======")
                 try:
                     signal = self.readPitayaApi.read(
-                        data["decimation"], data["sig_trig"], trig_delay=8192
+                        data["decimation"], data["sig_trig"], trig_delay=8000
                     )
                     print("[INFO] Signal received, starting demodulation")
 
