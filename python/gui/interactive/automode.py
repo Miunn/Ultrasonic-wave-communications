@@ -104,16 +104,7 @@ class AutoMode(tk.Frame):
 
         tk.Label(f1, text="%").grid(column=3, row=7, sticky="w")
 
-        self.optionButton = tk.Button(
-            f1, text="Apply Options", command=lambda: comm.changeParameter({
-                "mode": self.mode.get(),
-                "freq": self.freq.get(),
-                "cyc": self.cyc.get(),
-                "trig_lvl": self.trigger.get(),
-                "dec_trig": self.trigg_dd.get(),
-                "dec_thresh": self.threshold.get(),
-            })
-        )
+        self.optionButton = tk.Button(f1, text="Apply Options", command=self.applyParam)
         self.optionButton.grid(column=1, row=8, columnspan=3)
 
         f1.columnconfigure(0, weight=1)
@@ -130,7 +121,7 @@ class AutoMode(tk.Frame):
         self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
         self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.graph.draw()
-        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=5)
+        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=6)
         tk.Label(f2, text="Unknown errors", fg="red").grid(column=1, row=0, sticky="w")
         tk.Label(f2, text="IOron frame error", fg="orange").grid(
             column=1, row=1, sticky="w"
@@ -140,9 +131,31 @@ class AutoMode(tk.Frame):
         )
         tk.Label(f2, text="Valid data", fg="green").grid(column=1, row=3, sticky="w")
 
+        f2_1 = tk.Frame(f2)
+        f2_1.grid(column=1, row=5)
+        self.updateButton = tk.Button(
+            f2_1, text="Update data", command=self.updateData
+        ).grid(column=1, row=0)
+
+        self.playButton = tk.Button(
+            f2_1, text="Resume session", command=self.Play
+        ).grid(column=2, row=0)
+
+        self.pauseButton = tk.Button(
+            f2_1, text="Pause Session", command=self.Pause
+        ).grid(column=1, row=1)
+
+        self.resetButton = tk.Button(
+            f2_1, text="Reset session", command=self.Reset
+        ).grid(column=2, row=1)
+
         self.requestGraphButton = tk.Button(
-            f2, text="Request graph", command=self.rqGraph
-        ).grid(column=1, row=4)
+            f2_1, text="Request graph", command=self.rqGraph
+        ).grid(column=1, row=3, columnspan=2)
+
+        self.statusLabel = tk.Label(f2_1, text="Status : Stopped")
+        self.statusLabel.grid(column=1, row=4, columnspan=2)
+
         f2.rowconfigure(4, weight=1)
 
         # -----------------------------------------------------
@@ -155,3 +168,34 @@ class AutoMode(tk.Frame):
 
     def getMode(self) -> int:
         return modes.index(self.mode.get())
+
+    def applyParam(self) -> None:
+        self.comm.changeParameter(
+            {
+                "mode": self.mode.get(),
+                "freq": self.freq.get(),
+                "cyc": self.cyc.get(),
+                "trig_lvl": self.trigger.get(),
+                "dec_trig": self.trigg_dd.get(),
+                "dec_thresh": self.threshold.get(),
+            }
+        )
+
+    def updateStatus(self, status: bool) -> None:
+        if status:
+            self.statusLabel.configure(text="Status : Started")
+        else:
+            self.statusLabel.configure(text="Status : Stopped")
+
+    def updateData(self) -> None:
+        return
+
+    def Play(self) -> None:
+        self.updateStatus(self.comm.play())
+
+    def Pause(self) -> None:
+        self.updateStatus(not self.comm.pause())
+
+    def Reset(self) -> None:
+        self.updateStatus(not self.comm.resetStat())
+        # TODO set data to Blank

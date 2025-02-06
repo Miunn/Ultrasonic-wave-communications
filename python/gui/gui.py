@@ -128,7 +128,7 @@ class Gui:
         self.t_connect.start()
 
     def t_onConnect(self):
-        if self.interact.comm.connect():
+        if self.interact.connect():
             self.connectedLabel.config(text="Connected")
             self.connectedLabel.config(fg="green")
         else:
