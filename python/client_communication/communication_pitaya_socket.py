@@ -44,6 +44,7 @@ class CommunicationPitayaSocket(CommunicationInterface):
         dec_thresh,
         mode=1,
     ):
+        print("ASK TRIGGER")
         return self.socketApi.write(
             "start-listening",
             {

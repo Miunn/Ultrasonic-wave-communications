@@ -1,10 +1,17 @@
 import numpy as np
 import socketio
+import traceback
+
+try:
+    import rp
+except ModuleNotFoundError:
+    import sys
 
 from pitaya_communication.read_pitaya_api import Read_Pitaya_API
 from pitaya_communication.write_pitaya_api import Write_Pitaya_API
 from signal_processing.modulation_api import ModulationApi
 from signal_processing.demodulation_api import DemodulationApi
+from threading import Lock
 
 
 class RedPitaya_Standalone:
@@ -15,8 +22,11 @@ class RedPitaya_Standalone:
 
     last_graph: list[tuple[np.ndarray, str, str]] = []
     last_message: np.ndarray = np.array([])
+    ex: Lock
 
     def __init__(self):
+        rp.rp_Init()
+        self.ex = Lock()
         self.server = socketio.Server()
         self.events()
 
@@ -68,56 +78,62 @@ class RedPitaya_Standalone:
 
         @self.server.on("start-listening")
         def onStartListening(sid, data):
-            try:
-                signal = self.readPitayaApi.read(
-                    data["decimation"], data["sig_trig"], trig_delay=8192
-                )
-                print("[INFO] Signal received, starting demodulation")
-
-                if data["mode"] == 0:
-                    signal, demodulated, lpf, bits = self.demodulationApi.bpsk_demodulation(
-                        signal,
-                        data["freq"],
-                        data["cyc"],
-                        data["decimation"],
-                        data["sig_trig"],
-                        data["dec_trig"],
-                        data["dec_thresh"],
+            if self.ex.acquire(True, 0.1):
+                print("=========== START LISTENING =======")
+                try:
+                    signal = self.readPitayaApi.read(
+                        data["decimation"], data["sig_trig"], trig_delay=8192
                     )
+                    print("[INFO] Signal received, starting demodulation")
 
-                    return [
-                        0,
-                        bits.tolist(),
-                        [
-                            (signal.tolist(), "#BBBBFF", "Signal"),
-                            (demodulated.tolist(), "orange", "Demodulation"),
-                            (lpf.tolist(), "green", "Low-pass filter"),
-                        ],
-                    ]
-
-                elif data["mode"] == 1:
-                    signal, square_correlation, bits = (
-                        self.demodulationApi.cross_correlation_demodulation(
-                            signal,
-                            data["freq"],
-                            data["cyc"],
-                            data["decimation"],
-                            data["dec_thresh"],
-                            data["sig_trig"],
+                    if data["mode"] == 0:
+                        signal, demodulated, lpf, bits = (
+                            self.demodulationApi.bpsk_demodulation(
+                                signal,
+                                data["freq"],
+                                data["cyc"],
+                                data["decimation"],
+                                data["sig_trig"],
+                                data["dec_trig"],
+                                data["dec_thresh"],
+                            )
                         )
-                    )
+                        self.ex.release()
+                        return [
+                            0,
+                            bits,
+                            [
+                                (signal.tolist(), "#BBBBFF", "Signal"),
+                                (demodulated.tolist(), "orange", "Demodulation"),
+                                (lpf.tolist(), "green", "Low-pass filter"),
+                            ],
+                        ]
 
-                    return [
-                        0,
-                        bits.tolist(),
-                        [
-                            (signal.tolist(), "#BBBBFF", "Signal"),
-                            (square_correlation.tolist(), "orange", "Correlation"),
-                        ],
-                    ]
-            except Exception as e:
-                print("[ERROR] ", e)
-                return [1, [], []]
+                    elif data["mode"] == 1:
+                        signal, square_correlation, bits = (
+                            self.demodulationApi.cross_correlation_demodulation(
+                                signal,
+                                data["freq"],
+                                data["cyc"],
+                                data["decimation"],
+                                data["dec_thresh"],
+                                data["sig_trig"],
+                            )
+                        )
+                        self.ex.release()
+                        return [
+                            0,
+                            bits,
+                            [
+                                (signal.tolist(), "#BBBBFF", "Signal"),
+                                (square_correlation.tolist(), "orange", "Correlation"),
+                            ],
+                        ]
+                except Exception as e:
+                    print("[ERROR] ", e)
+                    print(traceback.format_exc())
+                    self.ex.release()
+                    return [1, [], []]
 
         @self.server.on("write")
         def onWrite(sid, data):

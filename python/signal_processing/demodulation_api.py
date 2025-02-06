@@ -13,12 +13,20 @@ class DemodulationApi:
         self, data, freq, cyc, decimation, dec_trig, dec_thresh, sig_trig, mode=1
     ) -> Tuple[np.ndarray, np.ndarray, List[int]]:
         if mode == 0:
-            return self.bpsk_demodulation(data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh)
+            return self.bpsk_demodulation(
+                data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh
+            )
         elif mode == 1:
-            return self.cross_correlation_demodulation(data, freq, cyc, decimation, dec_thresh, sig_trig)
-    
-    def bpsk_demodulation(self, data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh):
-        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
+            return self.cross_correlation_demodulation(
+                data, freq, cyc, decimation, dec_thresh, sig_trig
+            )
+
+    def bpsk_demodulation(
+        self, data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh
+    ):
+        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(
+            data, freq, cyc, decimation, sig_trig
+        )
         # self.correlate_in_new_graph(data, freq, cyc, decimation, sig_trig)
 
         # Correlate the signal with the first sine as probing signal
@@ -30,13 +38,17 @@ class DemodulationApi:
         demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
 
         lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
-        
+
         bits = self.decision_making_device(lpf, freq, cyc, decimation, 0.2, dec_thresh)
 
         return normalized_correlated, demodulated, lpf, bits
-    
-    def cross_correlation_demodulation(self, data, freq, cyc, decimation, dec_thresh, sig_trig):
-        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(data, freq, cyc, decimation, sig_trig)
+
+    def cross_correlation_demodulation(
+        self, data, freq, cyc, decimation, dec_thresh, sig_trig
+    ):
+        (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(
+            data, freq, cyc, decimation, sig_trig
+        )
 
         maxs_graph = np.zeros(start_probing)
         bits = []
@@ -66,10 +78,19 @@ class DemodulationApi:
         realign_offset = 0
 
         for i in range(1, len(data) // get_one_block_step(freq, cyc, decimation) - 2):
-            block_start, block_end = self.get_block_indexes(data, sig_trig, freq, cyc, decimation, i)
+            block_start, block_end = self.get_block_indexes(
+                data, sig_trig, freq, cyc, decimation, i
+            )
 
             block_start -= realign_offset
             block_end -= realign_offset
+
+            print(
+                "block :",
+                i,
+                "of",
+                len(data) // get_one_block_step(freq, cyc, decimation) - 2,
+            )
 
             correlation_points, extremum_value, extremum_index = (
                 self.correlate_through_one_block(
@@ -261,7 +282,12 @@ class DemodulationApi:
 
     @staticmethod
     def correlate_signal(probing: np.ndarray, signal: np.ndarray) -> np.ndarray:
-        return scipy.signal.correlate(signal, probing, mode="full")
+        x = [0]
+        try:
+            x = scipy.signal.correlate(signal, probing, mode="full")
+        except:
+            x = [0]
+        return x
 
     @staticmethod
     def slide_correlate_through_one_block(
