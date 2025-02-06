@@ -85,13 +85,6 @@ class DemodulationApi:
             block_start -= realign_offset
             block_end -= realign_offset
 
-            print(
-                "block :",
-                i,
-                "of",
-                len(data) // get_one_block_step(freq, cyc, decimation) - 2,
-            )
-
             correlation_points, extremum_value, extremum_index = (
                 self.correlate_through_one_block(
                     probe_sine,
