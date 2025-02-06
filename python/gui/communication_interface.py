@@ -22,7 +22,7 @@ class CommunicationInterface:
     def connect(self, hub_frame) -> bool:
         """
         Connect to the capture device
-        hub_frame : 
+        hub_frame :
             - 0 Auto
             - 1 Testing
         """
@@ -67,14 +67,14 @@ class CommunicationInterface:
         """
         Start the auto mode
         """
-        pass
-    
+        return True
+
     def pause(self) -> bool:
         """
         Pause the auto mode
         """
-        pass
-    
+        return True
+
     def fetchNewComparedData(self) -> tuple[int, int, int, int, float]:
         """
         Fetch the last data exchanges
@@ -99,13 +99,13 @@ class CommunicationInterface:
         change the parameter of the exchange in auto mode
         (this may restart to exchange process)
         """
-        pass
-    
+        print(parameters)
+
     def resetStat(self) -> bool:
         """
         Reset the statistics
         """
-        pass
+        return True
 
     # -----------------------------------------------------------
 

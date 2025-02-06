@@ -26,7 +26,7 @@ class Hub(ttk.Notebook):
         self.bind("<<NotebookTabChanged>>", self.toggleMode)
 
     def connect(self) -> bool:
-        return self.comm.connect()
+        return self.comm.connect(self.index(self.select()))
 
     def handleGraphModF2(self, event):
         self.event_generate("<<changeGraph_f2>>")
