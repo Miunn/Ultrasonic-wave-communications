@@ -88,7 +88,7 @@ class CommunicationInterface:
         """
         pass
 
-    def requestGraph(self) -> list[tuple[list[float], str, str]]:
+    def requestGraph(self) -> list[0, list, tuple[list[float], str, str]]:
         """
         Request the graph data of the last exchange
         """

@@ -10,13 +10,18 @@ from threading import Lock
 
 
 class RedPitaya_Standalone:
-    unknownErrors: int = 0
-    ioron_frame_errors: int = 0
-    encapsulated_frame_errors: int = 0
-    valid_data: int = 0
+    
+    truePositive: int = 0
+    falsePositive: int = 0
+    trueNegative: int = 0
+    falseNegative: int = 0
+    
+    bep: float = 0
 
     last_graph: list[tuple[np.ndarray, str, str]] = []
     last_message: np.ndarray = np.array([])
+    last_error_state: int = 0
+    
     ex: Lock
 
     def __init__(self):
@@ -46,10 +51,11 @@ class RedPitaya_Standalone:
         def onFetchNewComparedData(sid, data):
             print("Fetch new compared data")
             return (
-                self.unknownErrors,
-                self.ioron_frame_errors,
-                self.encapsulated_frame_errors,
-                self.valid_data,
+                self.truePositive,
+                self.trueNegative,
+                self.falsePositive,
+                self.falseNegative,
+                self.bep,
             )
 
         @self.server.on("request-graph")

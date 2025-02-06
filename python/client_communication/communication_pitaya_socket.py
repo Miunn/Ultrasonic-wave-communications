@@ -8,7 +8,7 @@ class CommunicationPitayaSocket(CommunicationInterface):
 
         self.socketApi = Client_Pitaya_Socket(addr)
 
-    def connect(self):
+    def connect(self, hub_frame):
         self.socketApi.IP = self.addr
         return self.socketApi.connect()
 

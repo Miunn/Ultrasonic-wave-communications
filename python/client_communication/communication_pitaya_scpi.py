@@ -36,7 +36,7 @@ class CommunicationPitayaSCPI(CommunicationInterface):
     def toggleMode(self, current):
         self.demodulationMode = current
 
-    def connect(self):
+    def connect(self, hub_frame):
         print("Trying to connect apis to pitaya")
         self.readPitayaApi.IP = self.addr
         self.writePitayaApi.IP = self.addr
