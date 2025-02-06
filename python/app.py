@@ -39,7 +39,7 @@ if __name__ == "__main__":
         run_simple(
             "0.0.0.0", 5000, app.getServerApp(),
             use_debugger=False,
-            use_reloader=True
+            use_reloader=False
         )
     else:
         from client_communication.communication_pitaya_socket import (

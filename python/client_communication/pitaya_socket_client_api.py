@@ -9,6 +9,9 @@ class Client_Pitaya_Socket:
 
     def connect(self):
         print(f"[*] Client socket trying to connect to {self.IP}")
+        if self.sio.connected:
+            self.sio.disconnect()
+        
         try:
             self.sio.connect(f'http://{self.IP}', wait_timeout=5)
             return True

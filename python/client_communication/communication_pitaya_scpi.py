@@ -1,3 +1,4 @@
+import numpy as np
 from gui.communication_interface import CommunicationInterface
 from pitaya_communication.read_pitaya_scpi_api import Read_Pitaya_SCPI
 from pitaya_communication.write_pitaya_scpi_api import Write_Pitaya_SCPI
@@ -13,6 +14,15 @@ class CommunicationMode(StrEnum):
 
 class CommunicationPitayaSCPI(CommunicationInterface):
     demodulationMode: int
+    
+    last_graph: list[int, list, tuple[np.ndarray, str, str]]
+    
+    unknownErrors: int = 0
+    ioron_frame_errors: int = 0
+    encapsulated_frame_errors: int = 0
+    valid_data: int = 0
+    
+    daemon_started: bool = False
     
     def __init__(self, addr):
         super().__init__(addr)
@@ -90,3 +100,17 @@ class CommunicationPitayaSCPI(CommunicationInterface):
 
     def emergencyStop(self):
         return super().emergencyStop()
+
+    def start_daemon(self, freq, cyc, mode=1):
+        self.daemon_started = True
+        while self.daemon_started:
+            # Generate a random message to send
+            message = np.random.randint(0, 2, 10)
+            
+            # Send the message
+            self.emit(message, freq, cyc, mode)
+
+        return
+        
+    def stop_daemon(self):
+        return
