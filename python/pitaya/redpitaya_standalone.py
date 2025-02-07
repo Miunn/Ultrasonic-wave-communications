@@ -99,7 +99,7 @@ class RedPitaya_Standalone:
             for graph in self.last_graph:
                 serializable_graph.append((graph[0].tolist(), graph[1], graph[2]))
 
-            return (self.last_message.tolist(), serializable_graph)
+            return (self.last_error_state, self.last_message.tolist(), serializable_graph)
 
         @self.server.on("change-parameters")
         def onChangeParameters(sid, data):
