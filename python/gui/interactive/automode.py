@@ -172,7 +172,7 @@ class AutoMode(tk.Frame):
     def applyParam(self) -> None:
         self.comm.changeParameter(
             {
-                "mode": self.mode.get(),
+                "mode": modes.index(self.mode.get()),
                 "freq": self.freq.get(),
                 "cyc": self.cyc.get(),
                 "trig_lvl": self.trigger.get(),

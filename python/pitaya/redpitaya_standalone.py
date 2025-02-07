@@ -92,6 +92,14 @@ class RedPitaya_Standalone:
         def onChangeParameters(sid, data):
             print("[INFO] Change parameters to", data["data"])
             
+            self.demodulation_mode = int(data["data"]["mode"])
+            self.frequency = float(data["data"]["freq"])
+            self.cyc = int(data["data"]["cyc"])
+            self.trig_lvl = float(data["data"]["trig_lvl"])
+            self.dec_trig = float(data["data"]["dec_trig"])
+            self.dec_thresh = float(data["data"]["dec_thresh"])
+            
+            
             return 0
 
         @self.server.on("reset-stat")
