@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 
     try:
         import rp
+        from rp_overlay import overlay
     except ModuleNotFoundError:
         print(
             """
