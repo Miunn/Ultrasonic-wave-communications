@@ -10,6 +10,8 @@ import numpy as np
 
 import time
 
+from pitaya_communication.write_pitaya_api import Write_Pitaya_API
+
 try:
     import rp
     from rp_overlay import overlay
@@ -114,7 +116,7 @@ class Read_Pitaya_API:
 
         return data_V
 
-    def messageDaemon(self, dec, trig_lvl, trig_delay=8192):
+    def messageDaemon(self, dec, trig_lvl, message, cyc, freq, write_api: Write_Pitaya_API, trig_delay=8192):
         N = 16384
         rp_dec = None
 
@@ -148,6 +150,7 @@ class Read_Pitaya_API:
 
         # This is used to generate FROM OUTPUT not setting INPUT Setting
         rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
+        #write_api.write(message, len(message), cyc, freq=freq)
 
         # Trigger state
         print(rp.rp_AcqGetTriggerState()[1], rp.RP_TRIG_STATE_TRIGGERED)

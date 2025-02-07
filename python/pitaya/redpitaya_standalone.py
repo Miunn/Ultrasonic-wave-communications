@@ -217,12 +217,17 @@ class RedPitaya_Standalone:
             # CAN encapsulation
             message = CommunicationInterface.encapsulate(message, "CAN")
             
+            # Modulation
+            modulated_message = self.modulationApi.modulate(
+                message, self.cyc, self.demodulation_mode
+            )
+            
             # Set the buffer
-            self.writePitayaApi.prepareWriteDaemon(message, len(message), self.cyc, freq=self.frequency)
+            self.writePitayaApi.prepareWriteDaemon(modulated_message, len(message), self.cyc, freq=self.frequency)
             
             # Start acquisition
             print(f"[INFO] Send {message} in CAN frame with trig_lvl: {self.trig_lvl}")
-            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl, trig_delay=8000)
+            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl, message, self.cyc, self.frequency, self.writePitayaApi, trig_delay=8000)
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:
                 signal, demodulated, lpf, encoded_bits = self.demodulationApi.bpsk_demodulation()
