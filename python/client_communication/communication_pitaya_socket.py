@@ -11,17 +11,17 @@ class CommunicationPitayaSocket(CommunicationInterface):
     def connect(self, hub_frame):
         self.socketApi.IP = self.addr
         return self.socketApi.connect()
-    
+
     def play(self):
         return self.socketApi.write("play", {})
-    
+
     def pause(self):
         return self.socketApi.write("pause", {})
 
     def toggleMode(self, current):
         if current == 1:
             # Just switched to manual mode
-            return self.socketApi.write("pause")
+            return self.socketApi.write("pause", {})
 
     def fetchNewComparedData(self):
         return self.socketApi.write("fetch-new-compared-data", {})
