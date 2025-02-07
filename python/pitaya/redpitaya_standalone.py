@@ -221,7 +221,7 @@ class RedPitaya_Standalone:
             self.writePitayaApi.prepareWriteDaemon(message, len(message), self.cyc, freq=self.frequency)
             
             # Start acquisition
-            print(f"[INFO] Send {message} in CAN frame")
+            print(f"[INFO] Send {message} in CAN frame with trig_lvl: {self.trig_lvl}")
             signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl, trig_delay=8000)
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:
