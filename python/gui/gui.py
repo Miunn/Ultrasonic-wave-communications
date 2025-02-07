@@ -73,7 +73,7 @@ class Gui:
         self.setPlot(self.interact.f2.graphToUpdate)
 
     def updateGraphFromResultF1(self, event):
-        self.setPlot(self.interact.f1.graphToUpdate)
+        self.setPlot(self.interact.f1.graphToUpdate[2])
 
     def onToggle(self, event):
         print(event)
