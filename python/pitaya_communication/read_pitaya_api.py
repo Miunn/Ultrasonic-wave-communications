@@ -96,7 +96,7 @@ class Read_Pitaya_API:
         # rp.rp_AcqGetOldestDataRaw(rp.RP_CH_1, N, ibuff.cast())
 
         # Volts
-        tp = rp.rp_AcqGetWritePointerAtTrig()
+        tp = rp.rp_AcqGetWritePointer()
         fbuff = rp.fBuffer(N)
         rp.rp_AcqGetDataV(rp.RP_CH_1, 0, N, fbuff)
 
@@ -104,7 +104,7 @@ class Read_Pitaya_API:
         # data_raw = np.zeros(N, dtype = int)
         print(tp)
         for i in range(0, N, 1):
-            data_V[i] = fbuff[(i + tp[1]) % N]
+            data_V[i] = fbuff[(i + tp[1] + 1) % N]
             # data_raw[i] = ibuff[i]
 
         # Release resources
