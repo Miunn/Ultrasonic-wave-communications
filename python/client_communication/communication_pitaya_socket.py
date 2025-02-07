@@ -19,10 +19,7 @@ class CommunicationPitayaSocket(CommunicationInterface):
         return self.socketApi.write("pause", {})
 
     def toggleMode(self, current):
-        if current == 0:
-            # Just switched to auto mode
-            return self.socketApi.write("play")
-        else:
+        if current == 1:
             # Just switched to manual mode
             return self.socketApi.write("pause")
 

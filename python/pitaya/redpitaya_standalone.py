@@ -240,7 +240,7 @@ class RedPitaya_Standalone:
                     (square_correlation, "orange", "Correlation"),
                 ]
             
-            try:
+            """try:
                 print("Encoded bits:", encoded_bits)
                 decoded_can_data = CommunicationInterface.decapsulate(encoded_bits, "CAN")
                 
@@ -256,4 +256,4 @@ class RedPitaya_Standalone:
                     self.falseNegative += 1
                 else:
                     print("[INFO] True negative")
-                    self.trueNegative += 1
+                    self.trueNegative += 1"""
