@@ -1,9 +1,11 @@
+import threading
 import numpy as np
 import socketio
 import traceback
 
-#from pitaya_communication.read_pitaya_api import Read_Pitaya_API
-#from pitaya_communication.write_pitaya_api import Write_Pitaya_API
+from pitaya_communication.read_pitaya_api import Read_Pitaya_API
+from pitaya_communication.write_pitaya_api import Write_Pitaya_API
+from gui.communication_interface import CommunicationInterface
 from signal_processing.modulation_api import ModulationApi
 from signal_processing.demodulation_api import DemodulationApi
 from threading import Lock
@@ -30,6 +32,8 @@ class RedPitaya_Standalone:
     dec_trig: float = 0
     dec_thresh: float = 0
     
+    t_daemon: threading.Thread = None
+    
     ex: Lock
 
     def __init__(self):
@@ -37,8 +41,8 @@ class RedPitaya_Standalone:
         self.server = socketio.Server()
         self.events()
 
-        #self.readPitayaApi = Read_Pitaya_API()
-        #self.writePitayaApi = Write_Pitaya_API()
+        self.readPitayaApi = Read_Pitaya_API()
+        self.writePitayaApi = Write_Pitaya_API()
 
         self.modulationApi = ModulationApi()
         self.demodulationApi = DemodulationApi()
@@ -57,12 +61,21 @@ class RedPitaya_Standalone:
 
         @self.server.on("play")
         def start_daemon(sid, data):
-            print("Play")
-            return True
+            if self.t_daemon is None or not self.t_daemon.is_alive():
+                if self.t_daemon is not None:
+                    self.t_daemon.join()
+                self.t_daemon = threading.Thread(target=self.t_start_daemon)
+                self.t_daemon.start()
+                return True
+            return False
 
         @self.server.on("pause")
         def stop_daemon(sid, data):
-            print("Pause")
+            if self.t_daemon is not None and self.t_daemon.is_alive():
+                self.daemon_started = False
+                self.t_daemon.join()
+                return True
+
             return True
 
         @self.server.on("fetch-new-compared-data")
@@ -196,10 +209,46 @@ class RedPitaya_Standalone:
 
     def t_start_daemon(self):
         self.daemon_started = True
-        print("Daemon started")
+        print("[INFO] Daemon thread started")
         while self.daemon_started:
-            pass
-        
-    def t_stop_daemon(self):
-        self.daemon_started = False
-        print("Daemon stopped")
+            # Generate a random message to send
+            message = np.random.randint(0, 2, 16)
+            
+            # CAN encapsulation
+            message = CommunicationInterface.encapsulate(message, "CAN")
+            
+            # Set the buffer
+            self.writePitayaApi.prepareWriteDaemon(message, len(message), self.cyc, freq=self.frequency)
+            
+            # Start acquisition
+            print(f"[INFO] Send {message} in CAN frame")
+            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl)
+            
+            if self.demodulation_mode == 0:
+                signal, demodulated, lpf, encoded_bits = self.demodulationApi.bpsk_demodulation()
+                self.last_error_state = 0
+                self.last_graph= [
+                    (signal, "#BBBBFF", "Signal"),
+                    (demodulated, "orange", "Demodulation"),
+                    (lpf, "green", "Low-pass filter"),
+                ]
+            else:
+                signal, square_correlation, encoded_bits = self.demodulationApi.cross_correlation_demodulation(signal, self.frequency, self.cyc, 8, self.dec_thresh, self.trig_lvl)
+                self.last_error_state = 0
+                self.last_graph = [
+                    (signal, "#BBBBFF", "Signal"),
+                    (square_correlation, "orange", "Correlation"),
+                ]
+            
+            try:
+                decoded_can_data = CommunicationInterface.decapsulate(encoded_bits, "CAN")
+                
+                if message.tolist() == decoded_can_data:
+                    self.truePositive += 1
+                else:
+                    self.falsePositive += 1
+            except ValueError:
+                if message.tolist() == decoded_can_data:
+                    self.falseNegative += 1
+                else:
+                    self.trueNegative += 1
