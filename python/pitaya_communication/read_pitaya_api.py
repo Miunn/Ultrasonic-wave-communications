@@ -116,7 +116,7 @@ class Read_Pitaya_API:
 
         return data_V
 
-    def messageDaemon(self, dec, trig_lvl, message, cyc, freq, write_api: Write_Pitaya_API, trig_delay=8192):
+    def messageDaemon(self, dec, trig_lvl, message, len_message, cyc, freq, write_api: Write_Pitaya_API, trig_delay=8192):
         N = 16384
         rp_dec = None
 
@@ -149,8 +149,8 @@ class Read_Pitaya_API:
         time.sleep(0.1)
 
         # This is used to generate FROM OUTPUT not setting INPUT Setting
-        rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
-        #write_api.write(message, len(message), cyc, freq=freq)
+        #rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
+        write_api.write(message, len_message, cyc, freq=freq)
 
         # Trigger state
         print(rp.rp_AcqGetTriggerState()[1], rp.RP_TRIG_STATE_TRIGGERED)
