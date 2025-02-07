@@ -151,6 +151,7 @@ class Read_Pitaya_API:
         # This is used to generate FROM OUTPUT not setting INPUT Setting
         #rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
         write_api.write(message, len_message, cyc, freq=freq)
+        time.sleep(0.1)
 
         # Trigger state
         print(rp.rp_AcqGetTriggerState()[1], rp.RP_TRIG_STATE_TRIGGERED)
