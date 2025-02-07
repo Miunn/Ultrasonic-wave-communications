@@ -23,6 +23,7 @@ class Hub(ttk.Notebook):
         self.add(self.f1, text="Auto Mode")
         self.add(self.f2, text="Testing Mode")
         self.f2.bind("<<ChangeGraph>>", self.handleGraphModF2)
+        self.f1.bind("<<ChangeGraph>>", self.handleGraphModF1)
         self.bind("<<NotebookTabChanged>>", self.toggleMode)
 
     def connect(self) -> bool:
@@ -30,6 +31,9 @@ class Hub(ttk.Notebook):
 
     def handleGraphModF2(self, event):
         self.event_generate("<<changeGraph_f2>>")
+
+    def handleGraphModF1(self, event):
+        self.event_generate("<<changeGraph_f1>>")
 
     def setResult(self, value: ndarray):
         pass
