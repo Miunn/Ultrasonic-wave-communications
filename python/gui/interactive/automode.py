@@ -115,24 +115,22 @@ class AutoMode(tk.Frame):
         # ------------------- f2 -----------------------------
         self.sp = fig.add_subplot(111)
         self.graph = FigureCanvasTkAgg(fig, master=f2)
-        colors = "Red", "Orange", "Yellow", "Green"
-        explode = (0.1, 0.0, 0.0, 0.1)
-        sizes = [5, 30, 10, 51]
-        self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
         self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        self.graph.draw()
         self.graph.get_tk_widget().grid(column=0, row=0, rowspan=6)
-        tk.Label(f2, text="Unknown errors", fg="red").grid(column=1, row=0, sticky="w")
-        tk.Label(f2, text="IOron frame error", fg="orange").grid(
-            column=1, row=1, sticky="w"
-        )
-        tk.Label(f2, text="Encapsulated Frame Error", fg="yellow").grid(
-            column=1, row=2, sticky="w"
-        )
-        tk.Label(f2, text="Valid data", fg="green").grid(column=1, row=3, sticky="w")
+        self.tpl = tk.Label(f2, text="True Positive : 0", fg="green")
+        self.tpl.grid(column=1, row=0, sticky="w")
+        self.tnl = tk.Label(f2, text="True Negative : 0", fg="yellow")
+        self.tnl.grid(column=1, row=1, sticky="w")
+        self.fnl = tk.Label(f2, text="False Negative : 0", fg="orange")
+        self.fnl.grid(column=1, row=2, sticky="w")
+        self.fpl = tk.Label(f2, text="False Positive : 0", fg="red")
+        self.fpl.grid(column=1, row=3, sticky="w")
+
+        self.bepdisplayer = tk.Label(f2, text="BEP\n\nNaN")
+        self.bepdisplayer.grid(column=2, row=0, rowspan=4)
 
         f2_1 = tk.Frame(f2)
-        f2_1.grid(column=1, row=5)
+        f2_1.grid(column=1, row=5, columnspan=2)
         self.updateButton = tk.Button(
             f2_1, text="Update data", command=self.updateData
         ).grid(column=1, row=0)
@@ -157,6 +155,7 @@ class AutoMode(tk.Frame):
         self.statusLabel.grid(column=1, row=4, columnspan=2)
 
         f2.rowconfigure(4, weight=1)
+        f2.columnconfigure(2, weight=1)
 
         # -----------------------------------------------------
 
@@ -164,7 +163,8 @@ class AutoMode(tk.Frame):
         self.columnconfigure(2, weight=1)
 
     def rqGraph(self):
-        self.comm.requestGraph()
+        self.graphToUpdate = self.comm.requestGraph()
+        self.event_generate("<<ChangeGraph>>")
 
     def getMode(self) -> int:
         return modes.index(self.mode.get())
@@ -188,7 +188,18 @@ class AutoMode(tk.Frame):
             self.statusLabel.configure(text="Status : Stopped")
 
     def updateData(self) -> None:
-        return
+        tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
+        colors = "Red", "Orange", "Yellow", "Green"
+        explode = (0.1, 0.1, 0.1, 0.1)
+        sizes = [fp, fn, tn, tp]
+        self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
+        self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
+        self.graph.draw()
+        self.tpl.configure(text=f"True Positive : {tp}")
+        self.tnl.configure(text=f"True Negative : {tn}")
+        self.fpl.configure(text=f"False Positive : {fp}")
+        self.fnl.configure(text=f"False Negative : {fn}")
+        self.bepdisplayer.config(text=f"BEP\n\n{bep * 100}%")
 
     def Play(self) -> None:
         self.updateStatus(self.comm.play())

@@ -86,13 +86,13 @@ class CommunicationInterface:
             bep: float
         )
         """
-        pass
+        return [50, 5, 2, 1, 0.05]
 
     def requestGraph(self) -> list[tuple[list[float], str, str]]:
         """
         Request the graph data of the last exchange
         """
-        pass
+        return [([0, 0.5, 1, 0.5, 0, -0.5, -1, -0.5, 0], "blue", "a")]
 
     def changeParameter(self, parameters: any) -> bool:
         """

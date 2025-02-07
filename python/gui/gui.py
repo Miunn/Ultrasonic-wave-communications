@@ -67,9 +67,13 @@ class Gui:
         self.root.bind("<<LOAD>>", self.onLoad)
         self.root.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
+        self.interact.bind("<<changeGraph_f1>>", self.updateGraphFromResultF1)
 
     def updateGraphFromResultF2(self, event):
         self.setPlot(self.interact.f2.graphToUpdate)
+
+    def updateGraphFromResultF1(self, event):
+        self.setPlot(self.interact.f1.graphToUpdate)
 
     def onToggle(self, event):
         print(event)
