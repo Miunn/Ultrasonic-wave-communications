@@ -240,7 +240,7 @@ class CommunicationInterface:
 
             case "ENCcan":
                 return IOronSTD1Frame.FromIntArrayWKey(
-                    CommunicationInterface.trimCan(value), b"sau6ctrobon"
+                    CommunicationInterface.trimCan(value), b"sau6ctrobon88130zer"
                 ).data_.data
             case _:
                 raise ValueError()

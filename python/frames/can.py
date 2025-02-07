@@ -21,7 +21,7 @@ class CanFrame:
     def ToIntArray(self) -> np.ndarray:
         if len(self.data) > 64:
             raise ValueError("data len cannot be more than 64 bits")
-        tmp = np.zeros(108, int)
+        tmp = np.zeros(128, int)
         # arbitration field
         id = self.ident
         for i in range(0, 11):
