@@ -222,7 +222,7 @@ class RedPitaya_Standalone:
             
             # Start acquisition
             print(f"[INFO] Send {message} in CAN frame")
-            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl)
+            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl, trig_delay=8000)
             
             if self.demodulation_mode == 0:
                 signal, demodulated, lpf, encoded_bits = self.demodulationApi.bpsk_demodulation()
@@ -241,6 +241,7 @@ class RedPitaya_Standalone:
                 ]
             
             try:
+                print("Encoded bits:", encoded_bits)
                 decoded_can_data = CommunicationInterface.decapsulate(encoded_bits, "CAN")
                 
                 if message.tolist() == decoded_can_data:
