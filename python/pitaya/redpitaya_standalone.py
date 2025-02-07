@@ -223,7 +223,7 @@ class RedPitaya_Standalone:
             )
 
             # Set the buffer
-            self.writePitayaApi.prepareWriteDaemon(modulated_message, len(message), self.cyc, freq=self.frequency)
+            #self.writePitayaApi.prepareWriteDaemon(modulated_message, len(message), self.cyc, freq=self.frequency)
 
             # Start acquisition
             print(f"[INFO] Send {message} in CAN frame with trig_lvl: {self.trig_lvl}")
