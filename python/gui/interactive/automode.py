@@ -200,7 +200,7 @@ class AutoMode(tk.Frame):
         self.tnl.configure(text=f"True Negative : {tn}")
         self.fpl.configure(text=f"False Positive : {fp}")
         self.fnl.configure(text=f"False Negative : {fn}")
-        self.bepdisplayer.config(text=f"BEP\n\n{bep * 100}%")
+        self.bepdisplayer.config(text=f"BEP\n\n{bep}%")
 
     def Play(self) -> None:
         self.updateStatus(self.comm.play())
