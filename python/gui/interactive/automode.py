@@ -188,6 +188,7 @@ class AutoMode(tk.Frame):
             self.statusLabel.configure(text="Status : Stopped")
 
     def updateData(self) -> None:
+        self.sp.clear()
         tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
         colors = "Red", "Orange", "Yellow", "Green"
         explode = (0.1, 0.1, 0.1, 0.1)
