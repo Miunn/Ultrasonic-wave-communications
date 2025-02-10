@@ -63,7 +63,7 @@ class RedPitaya_Standalone:
             
         @self.server.on("get-daemon-status")
         def get_daemon_status(sid):
-            return 1 if self.t_daemon is not None and self.t_daemon.is_alive() and self.daemon_started else 0
+            return self.t_daemon is not None and self.t_daemon.is_alive() and self.daemon_started
 
         @self.server.on("play")
         def start_daemon(sid, data):
