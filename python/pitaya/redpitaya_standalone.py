@@ -279,10 +279,10 @@ class RedPitaya_Standalone:
                     encoded_bits, "CAN"
                 )
                 print("Message encoded:", message)
-                print("Decoded CAN data:", decoded_can_data)
+                print("Encoded bits:", encoded_bits)
                 tested = False
                 for (i, b) in enumerate(message):
-                    if b != decoded_can_data[i]:
+                    if b != encoded_bits[i]:
                         print("[ERROR] False positive")
                         self.falsePositive += 1
                         tested = True
@@ -294,7 +294,7 @@ class RedPitaya_Standalone:
             except ValueError:
                 tested = False
                 for (i, b) in enumerate(message):
-                    if b != decoded_can_data[i]:
+                    if b != encoded_bits[i]:
                         print("[ERROR] True negative")
                         self.truePositive += 1
                         tested = True
