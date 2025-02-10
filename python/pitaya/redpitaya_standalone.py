@@ -2,6 +2,7 @@ import threading
 import numpy as np
 import socketio
 import traceback
+import time
 
 from pitaya_communication.read_pitaya_api import Read_Pitaya_API
 from pitaya_communication.write_pitaya_api import Write_Pitaya_API
@@ -238,7 +239,7 @@ class RedPitaya_Standalone:
                 modulated_message,
                 len(message),
                 self.cyc,
-                self.frequency * 1000,
+                self.frequency,
                 self.writePitayaApi,
                 trig_delay=8000,
             )
@@ -270,10 +271,12 @@ class RedPitaya_Standalone:
                     (square_correlation, "orange", "Correlation"),
                 ]
 
-            """try:
+            try:
                 print("Encoded bits:", encoded_bits)
-                decoded_can_data = CommunicationInterface.decapsulate(encoded_bits, "CAN")
-                
+                decoded_can_data = CommunicationInterface.decapsulate(
+                    encoded_bits, "CAN"
+                )
+
                 if message.tolist() == decoded_can_data:
                     print("[INFO] Message decoded successfully")
                     self.truePositive += 1
@@ -286,4 +289,5 @@ class RedPitaya_Standalone:
                     self.falseNegative += 1
                 else:
                     print("[INFO] True negative")
-                    self.trueNegative += 1"""
+                    self.trueNegative += 1
+            time.sleep(0.5)

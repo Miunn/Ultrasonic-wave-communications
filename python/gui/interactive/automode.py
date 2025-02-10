@@ -173,11 +173,11 @@ class AutoMode(tk.Frame):
         self.comm.changeParameter(
             {
                 "mode": modes.index(self.mode.get()),
-                "freq": self.freq.get(),
+                "freq": float(self.freq.get()) * 1000,
                 "cyc": self.cyc.get(),
                 "trig_lvl": self.trigger.get(),
                 "dec_trig": self.trigg_dd.get(),
-                "dec_thresh": self.threshold.get(),
+                "dec_thresh": float(self.threshold.get()) * 0.01,
             }
         )
 

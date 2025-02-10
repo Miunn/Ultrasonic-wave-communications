@@ -46,6 +46,7 @@ class DemodulationApi:
     def cross_correlation_demodulation(
         self, data, freq, cyc, decimation, dec_thresh, sig_trig
     ):
+        print(dec_thresh, type(dec_thresh))
         (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(
             data, freq, cyc, decimation, sig_trig
         )
@@ -121,6 +122,7 @@ class DemodulationApi:
                 elif extremum_value < -dec_thresh:
                     bits.append(0)
 
+        print(bits)
         return data, maxs_graph, bits
 
     def readFromSignal(
