@@ -305,7 +305,7 @@ class RedPitaya_Standalone:
                     
             # Compute BEP
             for (i, b) in enumerate(message):
-                if b != decoded_can_data[i]:
+                if b != encoded_bits[i]:
                     self.error_bits += 1
             self.sent_bits += len(message)
             time.sleep(0.5)
