@@ -151,7 +151,7 @@ class AutoMode(tk.Frame):
             f2_1, text="Request graph", command=self.rqGraph
         ).grid(column=1, row=3, columnspan=2)
 
-        self.statusLabel = tk.Label(f2_1, text="Status : Stopped")
+        self.statusLabel = tk.Label(f2_1, text="Status : Unkown")
         self.statusLabel.grid(column=1, row=4, columnspan=2)
 
         f2.rowconfigure(4, weight=1)
@@ -163,6 +163,9 @@ class AutoMode(tk.Frame):
         self.columnconfigure(2, weight=1)
 
     def rqGraph(self):
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.graphToUpdate = self.comm.requestGraph()
         self.event_generate("<<ChangeGraph>>")
 
@@ -170,6 +173,9 @@ class AutoMode(tk.Frame):
         return modes.index(self.mode.get())
 
     def applyParam(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.comm.changeParameter(
             {
                 "mode": modes.index(self.mode.get()),
@@ -181,13 +187,20 @@ class AutoMode(tk.Frame):
             }
         )
 
-    def updateStatus(self, status: bool) -> None:
-        if status:
-            self.statusLabel.configure(text="Status : Started")
+    def updateStatus(self) -> None:
+        if self.comm.isConnected():
+            status = self.comm.getDaemonStatus()
+            if status:
+                self.statusLabel.configure(text="Status : Started")
+            else:
+                self.statusLabel.configure(text="Status : Stopped")
         else:
-            self.statusLabel.configure(text="Status : Stopped")
+            self.statusLabel.configure(text="Status : Not connected")
 
     def updateData(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.sp.clear()
         try:
             tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
@@ -211,13 +224,13 @@ class AutoMode(tk.Frame):
 
     def Play(self) -> None:
         self.comm.play()
-        self.updateStatus(self.comm.getDaemonStatus())
+        self.updateStatus()
 
     def Pause(self) -> None:
         self.comm.pause()
-        self.updateStatus(self.comm.getDaemonStatus())
+        self.updateStatus()
 
     def Reset(self) -> None:
         self.comm.resetStat()
-        self.updateStatus(self.comm.getDaemonStatus())
+        self.updateStatus()
         # TODO set data to Blank

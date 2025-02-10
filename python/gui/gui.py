@@ -119,6 +119,7 @@ class Gui:
         tk.Button(self.t, text="Connect", command=self.commitConnect).grid(
             column=1, row=1
         )
+        self.interact.f1.updateStatus()
 
     def commitConnect(self) -> None:
         self.t.destroy()

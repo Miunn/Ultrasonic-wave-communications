@@ -10,7 +10,7 @@ from gui.communication_interface import CommunicationInterface
 
 class Hub(ttk.Notebook):
     comm: CommunicationInterface
-    f1: ttk.Frame
+    f1: AutoMode
     f2: TestingMode
 
     def __init__(self, master, comm: CommunicationInterface):
@@ -39,5 +39,8 @@ class Hub(ttk.Notebook):
         pass
 
     def toggleMode(self, evt) -> None:
-        print("[HUB EVENT] changing to mode", self.index(self.select()))
-        self.comm.toggleMode(self.index(self.select()))
+        mode = self.index(self.select())
+        print("[HUB EVENT] changing to mode", mode)
+        self.comm.toggleMode(mode)
+        if mode == 0 and self.comm.isConnected:
+            self.f1.updateStatus()
