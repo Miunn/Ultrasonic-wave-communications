@@ -300,6 +300,7 @@ class RedPitaya_Standalone:
                         print("[ERROR] True negative")
                         self.trueNegative += 1
                         tested = True
+                        break
                 
                 if not tested:
                     print("[ERROR] False negative")
