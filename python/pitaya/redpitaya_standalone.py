@@ -276,18 +276,27 @@ class RedPitaya_Standalone:
                 decoded_can_data = CommunicationInterface.decapsulate(
                     encoded_bits, "CAN"
                 )
-
-                if message.tolist() == decoded_can_data:
+                
+                tested = False
+                for b in message:
+                    if b != decoded_can_data:
+                        print("[ERROR] False positive")
+                        self.falsePositive += 1
+                        tested = True
+                        break
+                    
+                if not tested:
                     print("[INFO] Message decoded successfully")
                     self.truePositive += 1
-                else:
-                    print("[ERROR] False positive")
-                    self.falsePositive += 1
             except ValueError:
-                if message.tolist() == decoded_can_data:
+                tested = False
+                for b in message:
+                    if b != decoded_can_data:
+                        print("[ERROR] True negative")
+                        self.truePositive += 1
+                        tested = True
+                
+                if not tested:
                     print("[ERROR] False negative")
                     self.falseNegative += 1
-                else:
-                    print("[INFO] True negative")
-                    self.trueNegative += 1
             time.sleep(0.5)
