@@ -278,8 +278,8 @@ class RedPitaya_Standalone:
                 )
                 
                 tested = False
-                for b in message:
-                    if b != decoded_can_data:
+                for (i, b) in enumerate(message):
+                    if b != decoded_can_data[i]:
                         print("[ERROR] False positive")
                         self.falsePositive += 1
                         tested = True
@@ -290,8 +290,8 @@ class RedPitaya_Standalone:
                     self.truePositive += 1
             except ValueError:
                 tested = False
-                for b in message:
-                    if b != decoded_can_data:
+                for (i, b) in enumerate(message):
+                    if b != decoded_can_data[i]:
                         print("[ERROR] True negative")
                         self.truePositive += 1
                         tested = True
