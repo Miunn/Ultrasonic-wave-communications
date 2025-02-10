@@ -12,6 +12,9 @@ class CommunicationPitayaSocket(CommunicationInterface):
         self.socketApi.IP = self.addr
         return self.socketApi.connect()
 
+    def getDaemonStatus(self):
+        return self.socketApi.write("get-daemon-status", {})
+
     def play(self):
         return self.socketApi.write("play", {})
 

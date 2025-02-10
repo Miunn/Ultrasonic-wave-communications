@@ -17,6 +17,9 @@ class CommunicationInterface:
         """
         time.sleep(0.5)
         return True
+    
+    def getDaemonStatus(self) -> bool:
+        return False
 
     # ------------------------- Manual Mode commands --------------------------------
     def connect(self, hub_frame) -> bool:
