@@ -60,6 +60,10 @@ class RedPitaya_Standalone:
         @self.server.event
         def disconnect(sid, reason):
             print("disconnect ", sid, reason)
+            
+        @self.server.on("get-daemon-status")
+        def get_daemon_status(sid):
+            return 1 if self.t_daemon is not None and self.t_daemon.is_alive() and self.daemon_started else 0
 
         @self.server.on("play")
         def start_daemon(sid, data):

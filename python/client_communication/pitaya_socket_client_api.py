@@ -15,11 +15,12 @@ class Client_Pitaya_Socket:
         
         try:
             self.sio.connect(f"http://{self.IP}", wait_timeout=5)
-            return True
+            
+            return self.write("get-daemon-status", {})
         except Exception as e:
             print("Exception connecting to socket")
             print(f"Error: {e}")
-            return False
+            return -1
 
     def write(self, event, args):
         if not self.sio.connected:
