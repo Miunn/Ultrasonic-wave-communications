@@ -20,7 +20,8 @@ class RedPitaya_Standalone:
     trueNegative: int = 0
     falseNegative: int = 0
 
-    bep: float = 0
+    error_bits: int = 0
+    sent_bits: int = 0
 
     last_graph: list[tuple[np.ndarray, str, str]] = []
     last_message: np.ndarray = np.array([])
@@ -87,7 +88,7 @@ class RedPitaya_Standalone:
                 self.trueNegative,
                 self.falsePositive,
                 self.falseNegative,
-                self.bep,
+                self.error_bits/self.sent_bits * 100 if self.sent_bits > 0 else 0,
             )
 
         @self.server.on("request-graph")
@@ -126,7 +127,8 @@ class RedPitaya_Standalone:
             self.trueNegative = 0
             self.falsePositive = 0
             self.falseNegative = 0
-            self.bep = 0
+            self.error_bits = 0
+            self.sent_bits = 0
             return True
 
         @self.server.on("start-listening")
@@ -276,7 +278,8 @@ class RedPitaya_Standalone:
                 decoded_can_data = CommunicationInterface.decapsulate(
                     encoded_bits, "CAN"
                 )
-                
+                print("Message encoded:", message)
+                print("Decoded CAN data:", decoded_can_data)
                 tested = False
                 for (i, b) in enumerate(message):
                     if b != decoded_can_data[i]:
@@ -299,4 +302,10 @@ class RedPitaya_Standalone:
                 if not tested:
                     print("[ERROR] False negative")
                     self.falseNegative += 1
+                    
+            # Compute BEP
+            for (i, b) in enumerate(message):
+                if b != decoded_can_data[i]:
+                    self.error_bits += 1
+            self.sent_bits += len(message)
             time.sleep(0.5)
