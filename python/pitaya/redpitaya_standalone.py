@@ -298,7 +298,7 @@ class RedPitaya_Standalone:
                 for (i, b) in enumerate(message):
                     if b != encoded_bits[i]:
                         print("[ERROR] True negative")
-                        self.truePositive += 1
+                        self.trueNegative += 1
                         tested = True
                 
                 if not tested:
