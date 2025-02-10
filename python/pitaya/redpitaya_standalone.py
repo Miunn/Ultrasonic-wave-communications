@@ -88,7 +88,7 @@ class RedPitaya_Standalone:
                 self.trueNegative,
                 self.falsePositive,
                 self.falseNegative,
-                self.error_bits/self.sent_bits * 100 if self.sent_bits > 0 else 0,
+                round((self.error_bits/self.sent_bits) * 100, 2) if self.sent_bits > 0 else 0,
             )
 
         @self.server.on("request-graph")
@@ -272,6 +272,8 @@ class RedPitaya_Standalone:
                     (signal, "#BBBBFF", "Signal"),
                     (square_correlation, "orange", "Correlation"),
                 ]
+                
+            encoded_bits = encoded_bits[:len(message)]
 
             try:
                 print("Encoded bits:", encoded_bits)
@@ -308,4 +310,5 @@ class RedPitaya_Standalone:
                 if b != encoded_bits[i]:
                     self.error_bits += 1
             self.sent_bits += len(message)
+            
             time.sleep(0.5)
