@@ -159,4 +159,4 @@ class Write_Pitaya_API:
         rp.rp_GenOutEnable(rp_channel)
 
         # rp.rp_Release()
-        print("SIGNAL RELEASED")
+        # print("SIGNAL RELEASED")

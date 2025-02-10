@@ -13,27 +13,27 @@ from threading import Lock
 
 class RedPitaya_Standalone:
     daemon_started: bool = False
-    
+
     truePositive: int = 0
     falsePositive: int = 0
     trueNegative: int = 0
     falseNegative: int = 0
-    
+
     bep: float = 0
 
     last_graph: list[tuple[np.ndarray, str, str]] = []
     last_message: np.ndarray = np.array([])
     last_error_state: int = 0
-    
+
     demodulation_mode: int = 0
     frequency: float = 0
     cyc: int = 0
     trig_lvl: float = 0
     dec_trig: float = 0
     dec_thresh: float = 0
-    
+
     t_daemon: threading.Thread = None
-    
+
     ex: Lock
 
     def __init__(self):
@@ -99,20 +99,23 @@ class RedPitaya_Standalone:
             for graph in self.last_graph:
                 serializable_graph.append((graph[0].tolist(), graph[1], graph[2]))
 
-            return (self.last_error_state, self.last_message.tolist(), serializable_graph)
+            return (
+                self.last_error_state,
+                self.last_message.tolist(),
+                serializable_graph,
+            )
 
         @self.server.on("change-parameters")
         def onChangeParameters(sid, data):
             print("[INFO] Change parameters to", data["data"])
-            
+
             self.demodulation_mode = int(data["data"]["mode"])
             self.frequency = float(data["data"]["freq"])
             self.cyc = int(data["data"]["cyc"])
             self.trig_lvl = float(data["data"]["trig_lvl"])
             self.dec_trig = float(data["data"]["dec_trig"])
             self.dec_thresh = float(data["data"]["dec_thresh"])
-            
-            
+
             return 0
 
         @self.server.on("reset-stat")
@@ -223,28 +226,50 @@ class RedPitaya_Standalone:
             )
 
             # Set the buffer
-            #self.writePitayaApi.prepareWriteDaemon(modulated_message, len(message), self.cyc, freq=self.frequency)
+            # self.writePitayaApi.prepareWriteDaemon(modulated_message, len(message), self.cyc, freq=self.frequency)
 
             # Start acquisition
-            print(f"[INFO] Send {message} in CAN frame with trig_lvl: {self.trig_lvl}")
-            signal = self.readPitayaApi.messageDaemon(8, self.trig_lvl, modulated_message, len(message), self.cyc, self.frequency, self.writePitayaApi, trig_delay=8000)
+            print(
+                f"[INFO] Send {message} in CAN frame with trig_lvl: {self.trig_lvl} {type(self.trig_lvl)}"
+            )
+            signal = self.readPitayaApi.messageDaemon(
+                8,
+                self.trig_lvl,
+                modulated_message,
+                len(message),
+                self.cyc,
+                self.frequency * 1000,
+                self.writePitayaApi,
+                trig_delay=8000,
+            )
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:
-                signal, demodulated, lpf, encoded_bits = self.demodulationApi.bpsk_demodulation()
+                signal, demodulated, lpf, encoded_bits = (
+                    self.demodulationApi.bpsk_demodulation()
+                )
                 self.last_error_state = 0
-                self.last_graph= [
+                self.last_graph = [
                     (signal, "#BBBBFF", "Signal"),
                     (demodulated, "orange", "Demodulation"),
                     (lpf, "green", "Low-pass filter"),
                 ]
             else:
-                signal, square_correlation, encoded_bits = self.demodulationApi.cross_correlation_demodulation(signal, self.frequency, self.cyc, 8, self.dec_thresh, self.trig_lvl)
+                signal, square_correlation, encoded_bits = (
+                    self.demodulationApi.cross_correlation_demodulation(
+                        signal,
+                        self.frequency,
+                        self.cyc,
+                        8,
+                        self.dec_thresh,
+                        self.trig_lvl,
+                    )
+                )
                 self.last_error_state = 0
                 self.last_graph = [
                     (signal, "#BBBBFF", "Signal"),
                     (square_correlation, "orange", "Correlation"),
                 ]
-            
+
             """try:
                 print("Encoded bits:", encoded_bits)
                 decoded_can_data = CommunicationInterface.decapsulate(encoded_bits, "CAN")

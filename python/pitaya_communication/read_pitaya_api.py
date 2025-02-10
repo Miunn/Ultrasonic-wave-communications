@@ -116,7 +116,17 @@ class Read_Pitaya_API:
 
         return data_V
 
-    def messageDaemon(self, dec, trig_lvl, message, len_message, cyc, freq, write_api: Write_Pitaya_API, trig_delay=8192):
+    def messageDaemon(
+        self,
+        dec,
+        trig_lvl,
+        message,
+        len_message,
+        cyc,
+        freq,
+        write_api: Write_Pitaya_API,
+        trig_delay=8192,
+    ):
         N = 16384
         rp_dec = None
 
@@ -135,6 +145,9 @@ class Read_Pitaya_API:
 
         rp.rp_AcqReset()
 
+        print(cyc, freq)
+        write_api.prepareWriteDaemon(message, len_message, cyc, freq=freq)
+
         rp.rp_AcqSetDecimation(rp_dec)
 
         rp.rp_AcqSetTriggerLevel(rp.RP_T_CH_1, trig_lvl)
@@ -149,18 +162,21 @@ class Read_Pitaya_API:
         time.sleep(0.1)
 
         # This is used to generate FROM OUTPUT not setting INPUT Setting
-        #rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
-        write_api.write(message, len_message, cyc, freq=freq)
-        time.sleep(0.1)
+        rp.rp_GenTriggerOnly(rp.RP_CH_1)  # Trigger generator
 
         # Trigger state
         print(rp.rp_AcqGetTriggerState()[1], rp.RP_TRIG_STATE_TRIGGERED)
+        t = time.time()
         while 1:
-            time.sleep(0.001)
+            time.sleep(0.1)
             trig_state = rp.rp_AcqGetTriggerState()[1]
             # print(trig_state)
             if trig_state == rp.RP_TRIG_STATE_TRIGGERED:
                 break
+            if time.time() - t > 10:
+                t = time.time()
+                print("Retry to send")
+                rp.rp_GenTriggerOnly(rp.RP_CH_1)
 
         print("[*] Triggered, waiting for buffer to fill")
 
