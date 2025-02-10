@@ -76,3 +76,23 @@ class CommunicationPitayaSocket(CommunicationInterface):
                 "mode": mode,
             },
         )
+
+    def readFromSignal(
+        self,
+        signal,
+        freq: float,
+        cyc: int,
+        decimation: int,
+        sig_trig: float,
+        dec_trig: float,
+        dec_thesh: float,
+    ):
+        return self.demodulationApi.readFromSignal(
+            signal,
+            freq,
+            cyc,
+            decimation,
+            sig_trig,
+            dec_trig,
+            dec_thesh,
+        )

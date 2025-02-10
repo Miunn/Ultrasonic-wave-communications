@@ -196,6 +196,8 @@ class Gui:
                 float(self.interact.f2.freq.get()) * 1000,
                 int(self.interact.f2.cyc.get()),
                 self.interact.f2.getDecim(),
+                float(self.interact.f2.trigger.get()),
+                float(self.interact.f2.trigg_dd.get()),
                 float(self.interact.f2.threshold.get()) / 100,
             )
 

@@ -252,7 +252,15 @@ class RedPitaya_Standalone:
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:
                 signal, demodulated, lpf, encoded_bits = (
-                    self.demodulationApi.bpsk_demodulation()
+                    self.demodulationApi.bpsk_demodulation(
+                        signal,
+                        self.frequency,
+                        self.cyc,
+                        8,
+                        self.trig_lvl,
+                        0,
+                        self.dec_thresh,
+                    )
                 )
                 self.last_error_state = 0
                 self.last_graph = [
