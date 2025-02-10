@@ -34,6 +34,9 @@ class CommunicationPitayaSocket(CommunicationInterface):
 
         return received == 0
 
+    def resetStat(self):
+        return self.socketApi.write("reset-stat", {})
+
     def emit(self, message, freq, cyc, mode=1):
         try:
             return self.socketApi.write(
