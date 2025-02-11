@@ -27,12 +27,12 @@ class RedPitaya_Standalone:
     last_message: np.ndarray = np.array([])
     last_error_state: int = 0
 
-    demodulation_mode: int = 0
-    frequency: float = 0
-    cyc: int = 0
-    trig_lvl: float = 0
-    dec_trig: float = 0
-    dec_thresh: float = 0
+    demodulation_mode: int = 1
+    frequency: float = 300000
+    cyc: int = 3
+    trig_lvl: float = 0.5
+    dec_trig: float = 0.2
+    dec_thresh: float = 0.05
 
     t_daemon: threading.Thread = None
 
@@ -259,7 +259,7 @@ class RedPitaya_Standalone:
                         self.cyc,
                         8,
                         self.trig_lvl,
-                        0,
+                        self.dec_trig,
                         self.dec_thresh,
                     )
                 )
