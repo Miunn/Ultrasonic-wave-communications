@@ -251,8 +251,17 @@ class RedPitaya_Standalone:
             )
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:
+                print("[INFO] Start BPSK demodulation")
                 signal, demodulated, lpf, encoded_bits = (
-                    self.demodulationApi.bpsk_demodulation()
+                    self.demodulationApi.bpsk_demodulation(
+                        signal,
+                        self.frequency,
+                        self.cyc,
+                        8,
+                        self.trig_lvl,
+                        0,
+                        self.dec_thresh,
+                    )
                 )
                 self.last_error_state = 0
                 self.last_graph = [
@@ -261,6 +270,7 @@ class RedPitaya_Standalone:
                     (lpf, "green", "Low-pass filter"),
                 ]
             else:
+                print("[INFO] Start cross-correlation demodulation")
                 signal, square_correlation, encoded_bits = (
                     self.demodulationApi.cross_correlation_demodulation(
                         signal,

@@ -117,7 +117,14 @@ class CommunicationInterface:
 
     @staticmethod
     def readFromSignal(
-        self, signal: ndarray, freq: float, cyc: int, decimation: int, dec_thresh: float
+        self,
+        signal,
+        freq: float,
+        cyc: int,
+        decimation: int,
+        sig_trig: float,
+        dec_trig: float,
+        dec_thesh: float,
     ):
         time.sleep(5)
         return zeros(2, int)
