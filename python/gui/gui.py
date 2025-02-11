@@ -119,7 +119,6 @@ class Gui:
         tk.Button(self.t, text="Connect", command=self.commitConnect).grid(
             column=1, row=1
         )
-        self.interact.f1.updateStatus()
 
     def commitConnect(self) -> None:
         self.t.destroy()
@@ -136,6 +135,7 @@ class Gui:
         if self.interact.connect():
             self.connectedLabel.config(text="Connected")
             self.connectedLabel.config(fg="green")
+            self.interact.f1.updateStatus()
         else:
             self.connectedLabel.config(text="Not connected")
             self.connectedLabel.config(fg="red")

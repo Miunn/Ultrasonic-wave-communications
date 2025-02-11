@@ -41,6 +41,7 @@ class Hub(ttk.Notebook):
     def toggleMode(self, evt) -> None:
         mode = self.index(self.select())
         print("[HUB EVENT] changing to mode", mode)
-        self.comm.toggleMode(mode)
-        if mode == 0 and self.comm.isConnected:
-            self.f1.updateStatus()
+        if self.comm.isConnected:
+            self.comm.toggleMode(mode)
+            if mode == 0:
+                self.f1.updateStatus()

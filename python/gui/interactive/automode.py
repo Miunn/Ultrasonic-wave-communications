@@ -232,5 +232,5 @@ class AutoMode(tk.Frame):
 
     def Reset(self) -> None:
         self.comm.resetStat()
-        self.updateStatus()
+        self.updateData()
         # TODO set data to Blank
