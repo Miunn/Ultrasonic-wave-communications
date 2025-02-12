@@ -15,6 +15,7 @@ class CtxMenu(tk.Menu):
         file.add_command(label="Connect to RedPitaya", command=self.askConnect)
         file.add_command(label="Save current graph as...", command=self.askSave)
         file.add_command(label="Load graph from file...", command=self.askLoad)
+        file.add_command(label="Exit (alt+f4)", command=self.askClose)
         self.add_cascade(label="File", menu=file)
 
         # Edit submenu
@@ -88,3 +89,6 @@ class CtxMenu(tk.Menu):
 
     def askFullScreen(self):
         self.master.event_generate("<<FULLSCREEN>>", when="now")
+
+    def askClose(self):
+        self.master.event_generate("<<DESTROY>>", when="now")

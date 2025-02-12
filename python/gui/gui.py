@@ -70,6 +70,7 @@ class Gui:
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
         self.interact.bind("<<changeGraph_f1>>", self.updateGraphFromResultF1)
         self.root.bind("<<FULLSCREEN>>", self.gofullscreen)
+        self.root.bind("<<DESTROY>>", lambda evt: self.root.destroy())
 
     def updateGraphFromResultF2(self, event):
         self.setPlot(self.interact.f2.graphToUpdate)
