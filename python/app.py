@@ -19,6 +19,9 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument("--ip", help="IP address of the distant RedPitaya", type=str)
+    parser.add_argument(
+        "--fullscreen", help="Enable full screen at startup", action="store_true"
+    )
 
     args = parser.parse_args()
 
@@ -28,7 +31,8 @@ if __name__ == "__main__":
         )
 
         g = Gui(
-            CommunicationPitayaSCPI(args.ip if args.ip is not None else "10.42.0.125")
+            CommunicationPitayaSCPI(args.ip if args.ip is not None else "10.42.0.125"),
+            args.fullscreen,
         )
         g.mainloop()
     elif args.standalone:
@@ -37,9 +41,7 @@ if __name__ == "__main__":
 
         app = RedPitaya_Standalone()
         run_simple(
-            "0.0.0.0", 5000, app.getServerApp(),
-            use_debugger=False,
-            use_reloader=False
+            "0.0.0.0", 5000, app.getServerApp(), use_debugger=False, use_reloader=False
         )
     else:
         from client_communication.communication_pitaya_socket import (
@@ -47,6 +49,9 @@ if __name__ == "__main__":
         )
 
         g = Gui(
-            CommunicationPitayaSocket(args.ip if args.ip is not None else "10.42.0.125")
+            CommunicationPitayaSocket(
+                args.ip if args.ip is not None else "10.42.0.125"
+            ),
+            args.fullscreen,
         )
         g.mainloop()

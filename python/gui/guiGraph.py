@@ -37,6 +37,7 @@ class GuiGraph:
         fig = Figure(figsize=(9, 1.3), dpi=88.9)
         self.plot_array = []
         self.sp = fig.add_subplot(111, projection="Ratio_le_y")
+        self.sp.set(ylim=(-1.1, 1.1))
         self.root = parent
         self.frame = tk.Frame(parent, background="white")
         self.graph = FigureCanvasTkAgg(fig, master=self.frame)
