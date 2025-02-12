@@ -120,6 +120,7 @@ class TestingMode(tk.Frame):
             if self.tr != None:
                 self.tr.join()
             self.tr = threading.Thread(target=self.t_listen)
+            self.result_label.configure(text="RESULT :\n--")
             self.tr.start()
 
     def listenFromGraph(self):

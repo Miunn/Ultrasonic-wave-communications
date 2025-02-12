@@ -147,8 +147,10 @@ class Gui:
         print(index)
         if index == 1:
             deci = self.interact.f2.getDecim()
+        elif index == 0:
+            deci = 8
         else:
-            deci = 64
+            deci = 8
         self.graph.generateFourier(deci)
 
     def onSave(self, event) -> None:

@@ -96,7 +96,7 @@ class DemodulationApi:
                     start_probing,
                     end_probing,
                     extremum_value_probe,
-                    plot=True,
+                    plot=False,
                 )
             )
             # avg = np.mean(correlation_points)
