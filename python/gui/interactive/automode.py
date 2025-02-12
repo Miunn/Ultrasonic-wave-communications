@@ -126,7 +126,7 @@ class AutoMode(tk.Frame):
         self.fpl = tk.Label(f2, text="False Positive : 0", fg="red")
         self.fpl.grid(column=1, row=3, sticky="w")
 
-        self.bepdisplayer = tk.Label(f2, text="BEP\n\nNaN")
+        self.bepdisplayer = tk.Label(f2, text="BEP\n\n--")
         self.bepdisplayer.grid(column=2, row=0, rowspan=4)
 
         f2_1 = tk.Frame(f2)
@@ -151,7 +151,7 @@ class AutoMode(tk.Frame):
             f2_1, text="Request graph", command=self.rqGraph
         ).grid(column=1, row=3, columnspan=2)
 
-        self.statusLabel = tk.Label(f2_1, text="Status : Stopped")
+        self.statusLabel = tk.Label(f2_1, text="Status : Unkown")
         self.statusLabel.grid(column=1, row=4, columnspan=2)
 
         f2.rowconfigure(4, weight=1)
@@ -163,6 +163,9 @@ class AutoMode(tk.Frame):
         self.columnconfigure(2, weight=1)
 
     def rqGraph(self):
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.graphToUpdate = self.comm.requestGraph()
         self.event_generate("<<ChangeGraph>>")
 
@@ -170,6 +173,9 @@ class AutoMode(tk.Frame):
         return modes.index(self.mode.get())
 
     def applyParam(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.comm.changeParameter(
             {
                 "mode": modes.index(self.mode.get()),
@@ -181,33 +187,50 @@ class AutoMode(tk.Frame):
             }
         )
 
-    def updateStatus(self, status: bool) -> None:
-        if status:
-            self.statusLabel.configure(text="Status : Started")
+    def updateStatus(self) -> None:
+        if self.comm.isConnected():
+            status = self.comm.getDaemonStatus()
+            if status:
+                self.statusLabel.configure(text="Status : Started")
+            else:
+                self.statusLabel.configure(text="Status : Stopped")
         else:
-            self.statusLabel.configure(text="Status : Stopped")
+            self.statusLabel.configure(text="Status : Not connected")
 
     def updateData(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
         self.sp.clear()
-        tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
-        colors = "Red", "Orange", "Yellow", "Green"
-        explode = (0.1, 0.1, 0.1, 0.1)
-        sizes = [fp, fn, tn, tp]
-        self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
-        self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        self.graph.draw()
-        self.tpl.configure(text=f"True Positive : {tp}")
-        self.tnl.configure(text=f"True Negative : {tn}")
-        self.fpl.configure(text=f"False Positive : {fp}")
-        self.fnl.configure(text=f"False Negative : {fn}")
-        self.bepdisplayer.config(text=f"BEP\n\n{bep}%")
+        try:
+            tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
+            colors = "Red", "Orange", "Yellow", "Green"
+            explode = (0.1, 0.1, 0.1, 0.1)
+            sizes = [fp, fn, tn, tp]
+            self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
+            self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
+            self.graph.draw()
+            self.tpl.configure(text=f"True Positive : {tp}")
+            self.tnl.configure(text=f"True Negative : {tn}")
+            self.fpl.configure(text=f"False Positive : {fp}")
+            self.fnl.configure(text=f"False Negative : {fn}")
+            self.bepdisplayer.config(text=f"BEP\n\n{bep}%")
+        except:
+            self.tpl.configure(text="True Positive : 0")
+            self.tnl.configure(text="True Negative : 0")
+            self.fpl.configure(text="False Positive : 0")
+            self.fnl.configure(text="False Negative : 0")
+            self.bepdisplayer.config(text="BEP\n\n--%")
 
     def Play(self) -> None:
-        self.updateStatus(self.comm.play())
+        self.comm.play()
+        self.updateStatus()
 
     def Pause(self) -> None:
-        self.updateStatus(not self.comm.pause())
+        self.comm.pause()
+        self.updateStatus()
 
     def Reset(self) -> None:
-        self.updateStatus(not self.comm.resetStat())
+        self.comm.resetStat()
+        self.updateData()
         # TODO set data to Blank

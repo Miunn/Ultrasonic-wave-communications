@@ -135,6 +135,7 @@ class Gui:
         if self.interact.connect():
             self.connectedLabel.config(text="Connected")
             self.connectedLabel.config(fg="green")
+            self.interact.f1.updateStatus()
         else:
             self.connectedLabel.config(text="Not connected")
             self.connectedLabel.config(fg="red")
@@ -146,8 +147,10 @@ class Gui:
         print(index)
         if index == 1:
             deci = self.interact.f2.getDecim()
+        elif index == 0:
+            deci = 8
         else:
-            deci = 64
+            deci = 8
         self.graph.generateFourier(deci)
 
     def onSave(self, event) -> None:
