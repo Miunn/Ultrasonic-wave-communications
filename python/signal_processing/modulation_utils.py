@@ -8,9 +8,16 @@ from utils import get_sampling_signal_frequency
 PTS_BITS = 1000
 FREQ = 5
 
-def psk_modulation(bits: List[int], cyc: int = 5):
+def psk_modulation(bits: List[int], cyc: int = 5, mode=1):
+    # Mode
+    # - 0 : To be demodulated with bpsk (without probe)
+    # - 1 : To be demodulated with cross (with probe)
+    
     len_bits = len(bits)
-    pts_bits = 16384//(len(bits)+2)
+    if mode == 1:
+        pts_bits = 16384//(len(bits)+2)
+    else:
+        pts_bits = 16384//(len(bits))
     linspace = np.linspace(0, len_bits, len_bits * pts_bits)
     c_t = np.cos(cyc * 2 * np.pi * linspace + np.pi/2)
 
@@ -23,10 +30,13 @@ def psk_modulation(bits: List[int], cyc: int = 5):
             assert bits[i] == 1
             modulated[i * pts_bits:(i + 1) * pts_bits] = 1
     
-    first_positive = c_t[:pts_bits]
-    waiting =  np.zeros(pts_bits)
     modulation = (modulated * c_t)[:len_bits * pts_bits]
-    return np.concatenate((first_positive, waiting, modulation))
+    if mode == 1:
+        first_positive = c_t[:pts_bits]
+        waiting =  np.zeros(pts_bits)
+        return np.concatenate((first_positive, waiting, modulation))
+    else:
+        return modulation
     #return modulation
 
 def butter_lowpass(cutoff, fs, order=5):

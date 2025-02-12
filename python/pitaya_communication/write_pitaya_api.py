@@ -40,6 +40,7 @@ class Write_Pitaya_API:
         freq=250000,
         volt=1,
         burst=True,
+        mode=1
     ):
         print(
             f"[INFO] Start write data: {data} with len: {len_data, len(data)} cyc: {cyc}, channel: {channel}, wave_form: {wave_form}, freq: {freq}, volt: {volt}, burst: {burst}"
@@ -78,7 +79,7 @@ class Write_Pitaya_API:
             rp.rp_GenFreqDirect(rp_channel, freq)
         else:
             rp.rp_GenFreqDirect(
-                rp_channel, get_signal_frequency_from_sampling(freq, cyc, len_data)
+                rp_channel, get_signal_frequency_from_sampling(freq, cyc, len_data, mode=mode)
             )
         rp.rp_GenAmp(rp_channel, volt)
 
@@ -106,6 +107,7 @@ class Write_Pitaya_API:
         freq=250000,
         volt=1,
         burst=True,
+        mode=1
     ):
         print(
             f"[INFO] Start write data: {data} with len: {len_data, len(data)} cyc: {cyc}, channel: {channel}, wave_form: {wave_form}, freq: {freq}, volt: {volt}, burst: {burst}"
@@ -144,7 +146,7 @@ class Write_Pitaya_API:
             rp.rp_GenFreqDirect(rp_channel, freq)
         else:
             rp.rp_GenFreqDirect(
-                rp_channel, get_signal_frequency_from_sampling(freq, cyc, len_data)
+                rp_channel, get_signal_frequency_from_sampling(freq, cyc, len_data, mode=mode)
             )
         rp.rp_GenAmp(rp_channel, volt)
 

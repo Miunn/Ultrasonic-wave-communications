@@ -33,11 +33,11 @@ class Write_Pitaya_SCPI:
     def acq_data(self, channel, binary=True, convert=True):
         return self.rp_s.acq_data(channel, binary=binary, convert=convert)
 
-    def write(self, data, len_data, cyc, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True):
+    def write(self, data, len_data, cyc, channel=1, wave_form='arbitrary', freq=250000, volt=1, burst=True, mode=1):
         self.rp_s.tx_txt('GEN:RST')
         if wave_form != 'arbitrary':
             self.rp_s.sour_set(channel, wave_form, volt, freq, burst=burst)
         else:
-            self.rp_s.sour_set(channel, wave_form, volt, get_signal_frequency_from_sampling(freq, cyc, len_data), data=data, burst=burst)
+            self.rp_s.sour_set(channel, wave_form, volt, get_signal_frequency_from_sampling(freq, cyc, len_data, mode=mode), data=data, burst=burst)
         self.rp_s.tx_txt(f'OUTPUT{channel}:STATE ON')
         self.rp_s.tx_txt(f'SOUR{channel}:TRig:INT')

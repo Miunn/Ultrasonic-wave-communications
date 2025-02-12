@@ -126,6 +126,7 @@ class Read_Pitaya_API:
         freq,
         write_api: Write_Pitaya_API,
         trig_delay=8192,
+        mode=1
     ):
         N = 16384
         rp_dec = None
@@ -146,7 +147,7 @@ class Read_Pitaya_API:
         rp.rp_AcqReset()
 
         print(cyc, freq)
-        write_api.prepareWriteDaemon(message, len_message, cyc, freq=freq)
+        write_api.prepareWriteDaemon(message, len_message, cyc, freq=freq, mode=mode)
 
         rp.rp_AcqSetDecimation(rp_dec)
 

@@ -1,12 +1,13 @@
 import numpy as np
 import scipy.signal
 from signal_processing.modulation_utils import bpsk_demodulation, butter_lowpass_filter
-from utils import get_one_block_step
+from utils import get_one_block_step, get_sampling_signal_frequency
 
 from typing import List, Tuple
 
 from matplotlib import pyplot as plt
 
+from math import cos
 
 class DemodulationApi:
     def readData(
@@ -24,6 +25,13 @@ class DemodulationApi:
     def bpsk_demodulation(
         self, data, freq, cyc, decimation, sig_trig, dec_trig, dec_thresh
     ):
+        print("Start a BPSK demodulation with the following parameters:")
+        print("Frequency: ", freq)
+        print("Cycles: ", cyc)
+        print("Decimation: ", decimation)
+        print("Signal trigger: ", sig_trig)
+        print("Decision trigger: ", dec_trig)
+        print("Decision threshold: ", dec_thresh)
         (probe_sine, start_probing, end_probing) = self.get_probing_sine_from_signal(
             data, freq, cyc, decimation, sig_trig
         )
@@ -33,11 +41,23 @@ class DemodulationApi:
         correlated = self.correlate_signal(probe_sine, data)
 
         # Normalize the signal
-        normalized_correlated = correlated / np.max(correlated)
+        # normalized_correlated = correlated / np.max(correlated)
         normalized_correlated = data / np.max(data)
-        demodulated = bpsk_demodulation(normalized_correlated, freq, decimation)
+        
+        len_modulated = len(normalized_correlated)
+        #f = 2 * (0.002402) * np.pi
+        signal_frequency = get_sampling_signal_frequency(freq, decimation)
+        f = 2 * signal_frequency * np.pi
+        linspace = np.linspace(0, len_modulated, len_modulated)
+        c = np.linspace(0, len_modulated, len_modulated)
+        for i in range(len_modulated):
+            x = float(linspace[i])
+            c[i] = cos(f * x)
 
-        lpf = butter_lowpass_filter(demodulated, 5, 100, order=6)
+        demodulated = normalized_correlated * c
+
+        print("Low pass filter params: 5, 100, 3")
+        lpf = butter_lowpass_filter(demodulated, 3, 1000, order=3)
 
         bits = self.decision_making_device(lpf, freq, cyc, decimation, 0.2, dec_thresh)
 

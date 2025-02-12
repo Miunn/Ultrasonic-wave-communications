@@ -210,6 +210,7 @@ class RedPitaya_Standalone:
                     freq=data["freq"],
                     volt=1,
                     burst=True,
+                    mode=data["mode"],
                 )
                 print("[INFO] Signal sent")
                 return 0
@@ -248,6 +249,7 @@ class RedPitaya_Standalone:
                 self.frequency,
                 self.writePitayaApi,
                 trig_delay=8000,
+                mode=self.demodulation_mode
             )
             print("[INFO] Signal received :", signal)
             if self.demodulation_mode == 0:

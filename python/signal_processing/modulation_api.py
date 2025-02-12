@@ -6,4 +6,4 @@ class ModulationApi:
             print("[*] Skip empty message")
             return 1
 
-        return psk_modulation(bits, cyc)
+        return psk_modulation(bits, cyc, mode)

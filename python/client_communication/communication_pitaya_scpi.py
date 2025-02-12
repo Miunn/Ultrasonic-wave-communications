@@ -54,6 +54,7 @@ class CommunicationPitayaSCPI(CommunicationInterface):
             wave_form="arbitrary",
             freq=freq,
             burst=True,
+            mode=mode
         )
         return 0
 
