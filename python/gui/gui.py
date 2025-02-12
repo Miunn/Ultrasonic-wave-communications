@@ -34,6 +34,8 @@ class Gui:
         fullscreen=False,
     ):
         self.fullscreen = fullscreen
+        self.root.attributes("-fullscreen", self.fullscreen)
+
         self.t = None
         self.root = tk.Tk()
 
