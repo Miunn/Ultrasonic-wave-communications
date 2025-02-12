@@ -27,6 +27,7 @@ class CtxMenu(tk.Menu):
         self.view_graph.add_command(label="dummy")
         view.add_cascade(label="Graph", menu=self.view_graph)
         view.add_command(label="Fourier transform", command=self.askFourier)
+        view.add_command(label="Toggle full screen", command=self.askFullScreen)
         self.add_cascade(label="View", menu=view)
 
         # Help submenu
@@ -84,3 +85,6 @@ class CtxMenu(tk.Menu):
 
     def askLoad(self):
         self.master.event_generate("<<LOAD>>", when="now")
+
+    def askFullScreen(self):
+        self.master.event_generate("<<FULLSCREEN>>", when="now")

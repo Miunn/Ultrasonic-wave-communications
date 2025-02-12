@@ -31,6 +31,7 @@ class Gui:
     def __init__(
         self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
     ):
+        self.fullscreen = False
         self.t = None
         self.root = tk.Tk()
 
@@ -68,6 +69,7 @@ class Gui:
         self.root.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
         self.interact.bind("<<changeGraph_f1>>", self.updateGraphFromResultF1)
+        self.root.bind("<<FULLSCREEN>>", self.gofullscreen)
 
     def updateGraphFromResultF2(self, event):
         self.setPlot(self.interact.f2.graphToUpdate)
@@ -267,3 +269,7 @@ class Gui:
         tl.rowconfigure(0, weight=1)
 
         tl.mainloop()
+
+    def gofullscreen(self, evnt):
+        self.fullscreen = not self.fullscreen
+        self.root.attributes("-fullscreen", self.fullscreen)
