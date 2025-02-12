@@ -14,6 +14,7 @@ from gui import decToFreq
 
 from utils import get_one_block_step
 
+
 class MyAxes(Axes):
     name = "Ratio_le_y"
 
@@ -33,7 +34,7 @@ class GuiGraph:
     cid: int = 0
 
     def __init__(self, parent: tk.Widget | tk.Tk):
-        fig = Figure(figsize=(9, 1.7), dpi=88.9)
+        fig = Figure(figsize=(9, 1.6), dpi=88.9)
         self.plot_array = []
         self.sp = fig.add_subplot(111, projection="Ratio_le_y")
         self.root = parent
@@ -49,7 +50,7 @@ class GuiGraph:
         self.toolbar.release_zoom = types.MethodType(self.release_zoom, self.toolbar)
 
     def onResize(self, width):
-        self.graph.figure.set_size_inches(9 * (width / 800), 1.7 * (width / 800))
+        self.graph.figure.set_size_inches(9 * (width / 800), 1.6 * (width / 800))
         self.graph.get_tk_widget().config(
             height=int((1.7 / 9) * width),
             width=int(width),
@@ -85,8 +86,8 @@ class GuiGraph:
                 continue
             self.sp.plot(item[0], color=item[1])
 
-        #for x in range(102, 16384)[::get_one_block_step(250000, 5, 64)]:
-            #self.sp.axvline(x, color='r')
+        # for x in range(102, 16384)[::get_one_block_step(250000, 5, 64)]:
+        # self.sp.axvline(x, color='r')
 
         if reset_lim:
             self.sp.set(ylim=(-1.1, 1.1), xlim=(0, len(self.plot_array[0][0])))
