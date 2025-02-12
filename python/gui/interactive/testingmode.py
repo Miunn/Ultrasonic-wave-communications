@@ -227,7 +227,7 @@ class TestingMode(tk.Frame):
             self.common,
             from_=100,
             to=400,
-            increment=0.1,
+            increment=1.0,
             width=7,
             textvariable=self.freq,
         )

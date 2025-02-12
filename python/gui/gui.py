@@ -29,9 +29,11 @@ class Gui:
     t: tk.Toplevel | None
 
     def __init__(
-        self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
+        self,
+        comm: CommunicationInterface = CommunicationInterface("0.0.0.0"),
+        fullscreen=False,
     ):
-        self.fullscreen = False
+        self.fullscreen = fullscreen
         self.t = None
         self.root = tk.Tk()
 

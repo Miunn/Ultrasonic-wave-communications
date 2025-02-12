@@ -47,7 +47,7 @@ class AutoMode(tk.Frame):
             f1,
             from_=100,
             to=400,
-            increment=0.1,
+            increment=1.0,
             width=7,
             textvariable=self.freq,
         )
