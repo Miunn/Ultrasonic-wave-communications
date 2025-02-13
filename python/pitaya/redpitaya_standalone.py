@@ -328,7 +328,7 @@ class RedPitaya_Standalone:
                     self.falseNegative += 1
                     
             # Compute BEP
-            for i in range(min(message, encoded_bits)):
+            for i in range(min(len(message), len(encoded_bits))):
                 if message[i] != encoded_bits[i]:
                     self.error_bits += 1
             self.sent_bits += len(message)
