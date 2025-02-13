@@ -177,18 +177,16 @@ class TestingMode(tk.Frame):
             )
             self.graphToUpdate = result[2]
             self.event_generate("<<ChangeGraph>>")
+            value = self.comm.convertToStringM(
+                self.comm.decapsulate(result[1], self.common_t.get()), convtype
+            )
             self.result_label.configure(
-                text="RESULT :\n"
-                + self.comm.convertToStringM(
-                    self.comm.decapsulate(result[1], self.common_t.get()), convtype
-                )
+                text="RESULT :\n" + (value if len(value) <= 20 else value[0:17] + "...")
             )
         else:
-            self.result_label.configure(text="RESULT :\n")
+            self.result_label.configure(text="RESULT :\n--")
             self.RecepterStatusLabel.configure(
-                text=status[0][0]
-                if len(status[0][0]) < 20
-                else status[0][0][0:17] + "...",
+                text=(status[0][0]),
                 foreground=status[0][1],
             )
 
