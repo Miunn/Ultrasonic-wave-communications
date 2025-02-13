@@ -271,6 +271,11 @@ class RedPitaya_Standalone:
                     (demodulated, "orange", "Demodulation"),
                     (lpf, "green", "Low-pass filter"),
                 ]
+                
+                # Flip every bits
+                for bit in range(len(encoded_bits)):
+                    encoded_bits[bit] = 1 - encoded_bits[bit]
+                
             else:
                 print("[INFO] Start cross-correlation demodulation")
                 signal, square_correlation, encoded_bits = (
