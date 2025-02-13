@@ -299,8 +299,8 @@ class RedPitaya_Standalone:
                 print("Message encoded:", message)
                 print("Encoded bits:", encoded_bits)
                 tested = False
-                for (i, b) in enumerate(message):
-                    if b != encoded_bits[i]:
+                for i in range(min(len(message), len(encoded_bits))):
+                    if message[i] != encoded_bits[i]:
                         print("[ERROR] False positive")
                         self.falsePositive += 1
                         tested = True
@@ -311,8 +311,8 @@ class RedPitaya_Standalone:
                     self.truePositive += 1
             except ValueError:
                 tested = False
-                for (i, b) in enumerate(message):
-                    if b != encoded_bits[i]:
+                for i in range(min(len(message), len(encoded_bits))):
+                    if message[i] != encoded_bits[i]:
                         print("[ERROR] True negative")
                         self.trueNegative += 1
                         tested = True
@@ -323,8 +323,8 @@ class RedPitaya_Standalone:
                     self.falseNegative += 1
                     
             # Compute BEP
-            for (i, b) in enumerate(message):
-                if b != encoded_bits[i]:
+            for i in range(min(message, encoded_bits)):
+                if message[i] != encoded_bits[i]:
                     self.error_bits += 1
             self.sent_bits += len(message)
             
