@@ -186,7 +186,10 @@ class TestingMode(tk.Frame):
         else:
             self.result_label.configure(text="RESULT :\n")
             self.RecepterStatusLabel.configure(
-                text=status[0][0], foreground=status[0][1]
+                text=status[0][0]
+                if len(status[0][0]) < 20
+                else status[0][0][0:17] + "...",
+                foreground=status[0][1],
             )
 
     def generateEmitter(self):
