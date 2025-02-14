@@ -1,6 +1,7 @@
 import argparse
 
 from gui.gui import Gui
+from gui.communication_interface import CommunicationInterface
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -19,9 +20,6 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument("--ip", help="IP address of the distant RedPitaya", type=str)
-    parser.add_argument(
-        "--fullscreen", help="Enable full screen at startup", action="store_true"
-    )
 
     args = parser.parse_args()
 
@@ -31,8 +29,7 @@ if __name__ == "__main__":
         )
 
         g = Gui(
-            CommunicationPitayaSCPI(args.ip if args.ip is not None else "10.42.0.125"),
-            args.fullscreen,
+            CommunicationPitayaSCPI(args.ip if args.ip is not None else "10.42.0.125")
         )
         g.mainloop()
     elif args.standalone:
@@ -48,10 +45,5 @@ if __name__ == "__main__":
             CommunicationPitayaSocket,
         )
 
-        g = Gui(
-            CommunicationPitayaSocket(
-                args.ip if args.ip is not None else "10.42.0.125"
-            ),
-            args.fullscreen,
-        )
+        g = Gui(CommunicationInterface(""))
         g.mainloop()

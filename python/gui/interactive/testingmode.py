@@ -120,6 +120,7 @@ class TestingMode(tk.Frame):
             if self.tr != None:
                 self.tr.join()
             self.tr = threading.Thread(target=self.t_listen)
+            self.result_label.configure(text="RESULT :\n--")
             self.tr.start()
 
     def listenFromGraph(self):
@@ -176,16 +177,17 @@ class TestingMode(tk.Frame):
             )
             self.graphToUpdate = result[2]
             self.event_generate("<<ChangeGraph>>")
+            value = self.comm.convertToStringM(
+                self.comm.decapsulate(result[1], self.common_t.get()), convtype
+            )
             self.result_label.configure(
-                text="RESULT :\n"
-                + self.comm.convertToStringM(
-                    self.comm.decapsulate(result[1], self.common_t.get()), convtype
-                )
+                text="RESULT :\n" + (value if len(value) <= 20 else value[0:17] + "...")
             )
         else:
-            self.result_label.configure(text="RESULT :\n")
+            self.result_label.configure(text="RESULT :\n--")
             self.RecepterStatusLabel.configure(
-                text=status[0][0], foreground=status[0][1]
+                text=(status[0][0]),
+                foreground=status[0][1],
             )
 
     def generateEmitter(self):
@@ -226,7 +228,7 @@ class TestingMode(tk.Frame):
             self.common,
             from_=100,
             to=400,
-            increment=0.1,
+            increment=1.0,
             width=7,
             textvariable=self.freq,
         )

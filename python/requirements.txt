@@ -3,3 +3,5 @@ matplotlib>=3.10.0,<3.11.0  # https://github.com/matplotlib/matplotlib
 PIL>=1.1.6,<1.2.0  # http://www.pythonware.com/products/pil
 classifiedjson>=1.1.0,<1.2.0  # https://github.com/shootingsoul/classifiedjson
 scipy>=1.15.1,<1.16.0  # https://github.com/scipy/scipy
+python-socketio>=0.2.1
+python-socketio[client]>=1.8.0

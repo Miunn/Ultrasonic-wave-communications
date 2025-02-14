@@ -10,7 +10,7 @@ from gui.communication_interface import CommunicationInterface
 
 class Hub(ttk.Notebook):
     comm: CommunicationInterface
-    f1: ttk.Frame
+    f1: AutoMode
     f2: TestingMode
 
     def __init__(self, master, comm: CommunicationInterface):
@@ -23,17 +23,25 @@ class Hub(ttk.Notebook):
         self.add(self.f1, text="Auto Mode")
         self.add(self.f2, text="Testing Mode")
         self.f2.bind("<<ChangeGraph>>", self.handleGraphModF2)
+        self.f1.bind("<<ChangeGraph>>", self.handleGraphModF1)
         self.bind("<<NotebookTabChanged>>", self.toggleMode)
 
     def connect(self) -> bool:
-        return self.comm.connect()
+        return self.comm.connect(self.index(self.select()))
 
     def handleGraphModF2(self, event):
         self.event_generate("<<changeGraph_f2>>")
+
+    def handleGraphModF1(self, event):
+        self.event_generate("<<changeGraph_f1>>")
 
     def setResult(self, value: ndarray):
         pass
 
     def toggleMode(self, evt) -> None:
-        print("[HUB EVENT] changing to mode", self.index(self.select()))
-        self.comm.toggleMode(self.index(self.select()))
+        mode = self.index(self.select())
+        print("[HUB EVENT] changing to mode", mode)
+        if self.comm.isConnected:
+            self.comm.toggleMode(mode)
+            if mode == 0:
+                self.f1.updateStatus()

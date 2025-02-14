@@ -26,14 +26,21 @@ class Gui:
     cid: int = 0
     interact: ihub.Hub
     t_connect: threading.Thread | None
+    t: tk.Toplevel | None
 
     def __init__(
-        self, comm: CommunicationInterface = CommunicationInterface("0.0.0.0")
+        self,
+        comm: CommunicationInterface = CommunicationInterface("0.0.0.0"),
+        fullscreen=False,
     ):
+        self.fullscreen = fullscreen
+
+        self.t = None
+        self.root = tk.Tk()
+        self.root.attributes("-fullscreen", self.fullscreen)
+
         self.t_connect = None
         self.connectedLabel = "Not connected"
-
-        self.root = tk.Tk()
 
         self.menu = CtxMenu(self.root)
 
@@ -55,6 +62,8 @@ class Gui:
         self.connectedLabel = tk.Label(self.root, text="Not connected", fg="red")
         self.connectedLabel.grid(column=0, row=2, sticky="e")
 
+        self.ip = tk.StringVar(self.root, self.interact.comm.addr)
+
         self.root.bind("<<CONNECT>>", self.onConnect)
         self.root.bind("<Configure>", self.onResize)
         self.root.bind("<<toggleEvent>>", self.onToggle)
@@ -63,9 +72,15 @@ class Gui:
         self.root.bind("<<LOAD>>", self.onLoad)
         self.root.bind("<<EXPORT_MATLAB>>", self.onExportMatlab)
         self.interact.bind("<<changeGraph_f2>>", self.updateGraphFromResultF2)
+        self.interact.bind("<<changeGraph_f1>>", self.updateGraphFromResultF1)
+        self.root.bind("<<FULLSCREEN>>", self.gofullscreen)
+        self.root.bind("<<DESTROY>>", lambda evt: self.root.destroy())
 
     def updateGraphFromResultF2(self, event):
         self.setPlot(self.interact.f2.graphToUpdate)
+
+    def updateGraphFromResultF1(self, event):
+        self.setPlot(self.interact.f1.graphToUpdate[2])
 
     def onToggle(self, event):
         print(event)
@@ -104,17 +119,30 @@ class Gui:
         if self.t_connect is None or not self.t_connect.is_alive():
             if self.t_connect is not None:
                 self.t_connect.join()
-            print("On connect")
-            self.connectedLabel.configure(text="Connecting...")
-            self.connectedLabel.configure(fg="orange")
-            self.toggleWait(True)
-            self.t_connect = threading.Thread(target=self.t_onConnect)
-            self.t_connect.start()
+        self.t = tk.Toplevel(self.root)
+        tk.Label(self.t, text="IP adress").grid(column=0, row=0, columnspan=2)
+
+        tk.Entry(self.t, textvariable=self.ip).grid(column=0, row=1)
+        tk.Button(self.t, text="Connect", command=self.commitConnect).grid(
+            column=1, row=1
+        )
+
+    def commitConnect(self) -> None:
+        self.t.destroy()
+        self.t = None
+        self.interact.comm.addr = self.ip.get()
+        print("On connect")
+        self.connectedLabel.configure(text="Connecting...")
+        self.connectedLabel.configure(fg="orange")
+        self.toggleWait(True)
+        self.t_connect = threading.Thread(target=self.t_onConnect)
+        self.t_connect.start()
 
     def t_onConnect(self):
-        if self.interact.comm.connect():
+        if self.interact.connect():
             self.connectedLabel.config(text="Connected")
             self.connectedLabel.config(fg="green")
+            self.interact.f1.updateStatus()
         else:
             self.connectedLabel.config(text="Not connected")
             self.connectedLabel.config(fg="red")
@@ -126,8 +154,10 @@ class Gui:
         print(index)
         if index == 1:
             deci = self.interact.f2.getDecim()
+        elif index == 0:
+            deci = 8
         else:
-            deci = 64
+            deci = 8
         self.graph.generateFourier(deci)
 
     def onSave(self, event) -> None:
@@ -176,7 +206,9 @@ class Gui:
                 float(self.interact.f2.freq.get()) * 1000,
                 int(self.interact.f2.cyc.get()),
                 self.interact.f2.getDecim(),
-                float(self.interact.f2.threshold.get())/100
+                float(self.interact.f2.trigger.get()),
+                float(self.interact.f2.trigg_dd.get()),
+                float(self.interact.f2.threshold.get()) / 100,
             )
 
             """self.interact.f2.RecepterStatusLabel.configure(
@@ -242,3 +274,7 @@ class Gui:
         tl.rowconfigure(0, weight=1)
 
         tl.mainloop()
+
+    def gofullscreen(self, evnt):
+        self.fullscreen = not self.fullscreen
+        self.root.attributes("-fullscreen", self.fullscreen)

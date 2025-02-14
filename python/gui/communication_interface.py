@@ -17,11 +17,20 @@ class CommunicationInterface:
         """
         time.sleep(0.5)
         return True
+    
+    def getDaemonStatus(self) -> bool:
+        return False
+    
+    def isConnected(self) -> bool:
+        return False
 
     # ------------------------- Manual Mode commands --------------------------------
-    def connect(self) -> bool:
+    def connect(self, hub_frame) -> bool:
         """
         Connect to the capture device
+        hub_frame :
+            - 0 Auto
+            - 1 Testing
         """
         time.sleep(2)
         return True
@@ -60,31 +69,62 @@ class CommunicationInterface:
     # -----------------------------------------------------------
 
     # --------- AUTO MODE COMMAND -------------------------------
-    def fetchNewComparedData(self) -> list[tuple[ndarray, ndarray]]:
+    def play(self) -> bool:
         """
-        Fetch the last data exchnanges into a list of tuples
-        (sent_data, receieved_data)
+        Start the auto mode
         """
-        pass
+        return True
 
-    def requestGraph(self) -> list[tuple[list[float], str, str]]:
+    def pause(self) -> bool:
+        """
+        Pause the auto mode
+        """
+        return True
+
+    def fetchNewComparedData(self) -> tuple[int, int, int, int, float]:
+        """
+        Fetch the last data exchanges
+        (
+            truePositive: int,
+            trueNegative: int,
+            falsePositive: int,
+            falseNegative: int,
+            bep: float
+        )
+        """
+        return [50, 5, 2, 1, 0.05]
+
+    def requestGraph(self) -> list[int, list, tuple[list[float], str, str]]:
         """
         Request the graph data of the last exchange
         """
-        pass
+        return [([0, 0.5, 1, 0.5, 0, -0.5, -1, -0.5, 0], "blue", "a")]
 
     def changeParameter(self, parameters: any) -> bool:
         """
         change the parameter of the exchange in auto mode
         (this may restart to exchange process)
         """
-        pass
+        print(parameters)
+
+    def resetStat(self) -> bool:
+        """
+        Reset the statistics
+        """
+        return True
 
     # -----------------------------------------------------------
 
     @staticmethod
     def readFromSignal(
-        self, signal: ndarray, freq: float, cyc: int, decimation: int, dec_thresh: float
+        self,
+        signal,
+        freq: float,
+        cyc: int,
+        decimation: int,
+        sig_trig: float,
+        dec_trig: float,
+        dec_thesh: float,
     ):
         time.sleep(5)
         return zeros(2, int)
@@ -240,7 +280,7 @@ class CommunicationInterface:
 
             case "ENCcan":
                 return IOronSTD1Frame.FromIntArrayWKey(
-                    CommunicationInterface.trimCan(value), b"sau6ctrobon"
+                    CommunicationInterface.trimCan(value), b"sau6ctrobon88130zer"
                 ).data_.data
             case _:
                 raise ValueError()

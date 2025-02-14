@@ -1,17 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 
-import numpy as np
-
-import threading
-
 from gui.communication_interface import CommunicationInterface
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 
-modes = ["BSPK   ", "CROSS."]
+modes = ["BSPK", "CROSS."]
 
 
 class AutoMode(tk.Frame):
@@ -30,6 +26,7 @@ class AutoMode(tk.Frame):
         f2 = tk.Frame(master=self)
         f2.grid(column=2, row=0, sticky="nsew")
         ttk.Separator(self, orient="vertical").grid(column=1, row=0, sticky="ns")
+        self.ar = False
 
         # ------------------- f1 -----------------------------
 
@@ -39,6 +36,7 @@ class AutoMode(tk.Frame):
         self.trigg_dd = tk.StringVar(self, value="0.2")
         self.threshold = tk.StringVar(self, "30")
         self.mode = tk.StringVar(self, "CROSS.")
+        self.refreshTime = tk.StringVar(self, "5")
 
         tk.Label(f1, text="Options").grid(column=1, row=0, columnspan=3, sticky="ew")
 
@@ -51,7 +49,7 @@ class AutoMode(tk.Frame):
             f1,
             from_=100,
             to=400,
-            increment=0.1,
+            increment=1.0,
             width=7,
             textvariable=self.freq,
         )
@@ -108,9 +106,7 @@ class AutoMode(tk.Frame):
 
         tk.Label(f1, text="%").grid(column=3, row=7, sticky="w")
 
-        self.optionButton = tk.Button(
-            f1, text="Apply Options", command=comm.changeParameter
-        )
+        self.optionButton = tk.Button(f1, text="Apply Options", command=self.applyParam)
         self.optionButton.grid(column=1, row=8, columnspan=3)
 
         f1.columnconfigure(0, weight=1)
@@ -121,34 +117,162 @@ class AutoMode(tk.Frame):
         # ------------------- f2 -----------------------------
         self.sp = fig.add_subplot(111)
         self.graph = FigureCanvasTkAgg(fig, master=f2)
-        colors = "Red", "Orange", "Yellow", "Green"
-        explode = (0.1, 0.0, 0.0, 0.1)
-        sizes = [5, 30, 10, 51]
-        self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
         self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        self.graph.draw()
-        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=5)
-        tk.Label(f2, text="Unknown errors", fg="red").grid(column=1, row=0, sticky="w")
-        tk.Label(f2, text="IOron frame error", fg="orange").grid(
-            column=1, row=1, sticky="w"
+        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=7)
+        self.tpl = tk.Label(
+            f2, text="True Positive : 0", fg="green", font=("Arial", 10)
         )
-        tk.Label(f2, text="Encapsulated Frame Error", fg="yellow").grid(
-            column=1, row=2, sticky="w"
+        self.tpl.grid(column=1, row=0, sticky="w")
+        self.tnl = tk.Label(
+            f2, text="True Negative : 0", fg="yellow", font=("Arial", 10)
         )
-        tk.Label(f2, text="Valid data", fg="green").grid(column=1, row=3, sticky="w")
+        self.tnl.grid(column=1, row=1, sticky="w")
+        self.fnl = tk.Label(
+            f2, text="False Negative : 0", fg="orange", font=("Arial", 10)
+        )
+        self.fnl.grid(column=1, row=2, sticky="w")
+        self.fpl = tk.Label(f2, text="False Positive : 0", fg="red", font=("Arial", 10))
+        self.fpl.grid(column=1, row=3, sticky="w")
+
+        self.bepdisplayer = tk.Label(f2, text="BEP\n\n--")
+        self.bepdisplayer.grid(column=2, row=0, rowspan=4)
+
+        f2_1 = tk.Frame(f2)
+        f2_1.grid(column=1, row=5, columnspan=2)
+        self.updateButton = tk.Button(
+            f2_1, text="Update data", command=self.updateData
+        ).grid(column=1, row=0)
+
+        self.playButton = tk.Button(
+            f2_1, text="Resume session", command=self.Play
+        ).grid(column=2, row=0)
+
+        self.pauseButton = tk.Button(
+            f2_1, text="Pause Session", command=self.Pause
+        ).grid(column=1, row=1)
+
+        self.resetButton = tk.Button(
+            f2_1, text="Reset session", command=self.Reset
+        ).grid(column=2, row=1)
 
         self.requestGraphButton = tk.Button(
-            f2, text="Request graph", command=self.rqGraph
-        ).grid(column=1, row=4)
-        f2.rowconfigure(4, weight=1)
+            f2_1, text="Request graph", command=self.rqGraph
+        ).grid(column=1, row=3, columnspan=2)
+
+        self.statusLabel = tk.Label(f2_1, text="Status : Unkown")
+        self.statusLabel.grid(column=1, row=5, columnspan=2)
+        f2_1_2 = tk.Frame(f2_1)
+        f2_1_2.grid(column=1, row=4, columnspan=2)
+
+        self.arButton = tk.Button(
+            f2_1_2, text="Auto refresh (disabled)", fg="red", command=self.toggleAr
+        )
+        self.arButton.grid(column=1, row=1)
+        occ_selector = tk.Spinbox(
+            f2_1_2,
+            from_=3,
+            to=120,
+            increment=1.0,
+            width=5,
+            textvariable=self.refreshTime,
+        )
+        occ_selector.grid(column=2, row=1)
+        tk.Label(f2_1_2, text="s").grid(column=3, row=1, sticky="w")
+
+        f2.rowconfigure(5, weight=1)
+        f2.columnconfigure(2, weight=1)
 
         # -----------------------------------------------------
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(2, weight=1)
 
+    def toggleAr(self):
+        if not self.comm.isConnected():
+            return
+        self.ar = not self.ar
+        if self.ar:
+            self.arButton.configure(text="Auto refresh (enabled)", fg="green")
+            self.Ar()
+        else:
+            self.arButton.configure(text="Auto refresh (disabled)", fg="red")
+
+    def Ar(self):
+        if not self.ar:
+            return
+        self.updateData()
+        self.rqGraph()
+        self.after(int(self.refreshTime.get()) * 1000, self.Ar)
+
     def rqGraph(self):
-        self.comm.requestGraph()
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
+        self.graphToUpdate = self.comm.requestGraph()
+        self.event_generate("<<ChangeGraph>>")
 
     def getMode(self) -> int:
         return modes.index(self.mode.get())
+
+    def applyParam(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
+        self.comm.changeParameter(
+            {
+                "mode": modes.index(self.mode.get()),
+                "freq": float(self.freq.get()) * 1000,
+                "cyc": self.cyc.get(),
+                "trig_lvl": self.trigger.get(),
+                "dec_trig": self.trigg_dd.get(),
+                "dec_thresh": float(self.threshold.get()) * 0.01,
+            }
+        )
+
+    def updateStatus(self) -> None:
+        if self.comm.isConnected():
+            status = self.comm.getDaemonStatus()
+            if status:
+                self.statusLabel.configure(text="Status : Started")
+            else:
+                self.statusLabel.configure(text="Status : Stopped")
+        else:
+            self.statusLabel.configure(text="Status : Not connected")
+
+    def updateData(self) -> None:
+        self.updateStatus()
+        if not self.comm.isConnected():
+            return
+        self.sp.clear()
+        try:
+            tp, tn, fp, fn, bep = self.comm.fetchNewComparedData()
+            colors = "Red", "Orange", "Yellow", "Green"
+            explode = (0.1, 0.1, 0.1, 0.1)
+            sizes = [fp, fn, tn, tp]
+            self.sp.pie(sizes, autopct="%1.1f%%", colors=colors, explode=explode)
+            self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
+            self.graph.draw()
+            self.tpl.configure(text=f"True Positive : {tp}")
+            self.tnl.configure(text=f"True Negative : {tn}")
+            self.fpl.configure(text=f"False Positive : {fp}")
+            self.fnl.configure(text=f"False Negative : {fn}")
+            self.bepdisplayer.config(text=f"BEP\n\n{bep}%")
+        except:
+            self.tpl.configure(text="True Positive : 0")
+            self.tnl.configure(text="True Negative : 0")
+            self.fpl.configure(text="False Positive : 0")
+            self.fnl.configure(text="False Negative : 0")
+            self.bepdisplayer.config(text="BEP\n\n--%")
+
+    def Play(self) -> None:
+        self.comm.play()
+        self.updateStatus()
+
+    def Pause(self) -> None:
+        self.comm.pause()
+        self.updateStatus()
+
+    def Reset(self) -> None:
+        self.comm.resetStat()
+        self.updateData()
+        # TODO set data to Blank
