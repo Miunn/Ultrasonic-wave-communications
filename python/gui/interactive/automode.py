@@ -26,6 +26,7 @@ class AutoMode(tk.Frame):
         f2 = tk.Frame(master=self)
         f2.grid(column=2, row=0, sticky="nsew")
         ttk.Separator(self, orient="vertical").grid(column=1, row=0, sticky="ns")
+        self.ar = False
 
         # ------------------- f1 -----------------------------
 
@@ -35,6 +36,7 @@ class AutoMode(tk.Frame):
         self.trigg_dd = tk.StringVar(self, value="0.2")
         self.threshold = tk.StringVar(self, "30")
         self.mode = tk.StringVar(self, "CROSS.")
+        self.refreshTime = tk.StringVar(self, "5")
 
         tk.Label(f1, text="Options").grid(column=1, row=0, columnspan=3, sticky="ew")
 
@@ -116,14 +118,20 @@ class AutoMode(tk.Frame):
         self.sp = fig.add_subplot(111)
         self.graph = FigureCanvasTkAgg(fig, master=f2)
         self.graph.figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=6)
-        self.tpl = tk.Label(f2, text="True Positive : 0", fg="green")
+        self.graph.get_tk_widget().grid(column=0, row=0, rowspan=7)
+        self.tpl = tk.Label(
+            f2, text="True Positive : 0", fg="green", font=("Arial", 10)
+        )
         self.tpl.grid(column=1, row=0, sticky="w")
-        self.tnl = tk.Label(f2, text="True Negative : 0", fg="yellow")
+        self.tnl = tk.Label(
+            f2, text="True Negative : 0", fg="yellow", font=("Arial", 10)
+        )
         self.tnl.grid(column=1, row=1, sticky="w")
-        self.fnl = tk.Label(f2, text="False Negative : 0", fg="orange")
+        self.fnl = tk.Label(
+            f2, text="False Negative : 0", fg="orange", font=("Arial", 10)
+        )
         self.fnl.grid(column=1, row=2, sticky="w")
-        self.fpl = tk.Label(f2, text="False Positive : 0", fg="red")
+        self.fpl = tk.Label(f2, text="False Positive : 0", fg="red", font=("Arial", 10))
         self.fpl.grid(column=1, row=3, sticky="w")
 
         self.bepdisplayer = tk.Label(f2, text="BEP\n\n--")
@@ -152,15 +160,49 @@ class AutoMode(tk.Frame):
         ).grid(column=1, row=3, columnspan=2)
 
         self.statusLabel = tk.Label(f2_1, text="Status : Unkown")
-        self.statusLabel.grid(column=1, row=4, columnspan=2)
+        self.statusLabel.grid(column=1, row=5, columnspan=2)
+        f2_1_2 = tk.Frame(f2_1)
+        f2_1_2.grid(column=1, row=4, columnspan=2)
 
-        f2.rowconfigure(4, weight=1)
+        self.arButton = tk.Button(
+            f2_1_2, text="Auto refresh (disabled)", fg="red", command=self.toggleAr
+        )
+        self.arButton.grid(column=1, row=1)
+        occ_selector = tk.Spinbox(
+            f2_1_2,
+            from_=3,
+            to=120,
+            increment=1.0,
+            width=5,
+            textvariable=self.refreshTime,
+        )
+        occ_selector.grid(column=2, row=1)
+        tk.Label(f2_1_2, text="s").grid(column=3, row=1, sticky="w")
+
+        f2.rowconfigure(5, weight=1)
         f2.columnconfigure(2, weight=1)
 
         # -----------------------------------------------------
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(2, weight=1)
+
+    def toggleAr(self):
+        if not self.comm.isConnected():
+            return
+        self.ar = not self.ar
+        if self.ar:
+            self.arButton.configure(text="Auto refresh (enabled)", fg="green")
+            self.Ar()
+        else:
+            self.arButton.configure(text="Auto refresh (disabled)", fg="red")
+
+    def Ar(self):
+        if not self.ar:
+            return
+        self.updateData()
+        self.rqGraph()
+        self.after(int(self.refreshTime.get()) * 1000, self.Ar)
 
     def rqGraph(self):
         self.updateStatus()
